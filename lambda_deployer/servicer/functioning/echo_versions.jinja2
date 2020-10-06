@@ -1,0 +1,11 @@
+---------------------------------------------------------------
+(F) {{ name }}
+{% for day, group in groups %}
+{{ day }}
+  {%- for item in group %}
+  {{ item.data.version }} ({{ item.time }}): {{ item.data.description }}
+    {%- for alias in item.data.aliases %}
+    - {{ alias.name }}
+    {%- endfor -%}
+  {%- endfor -%}
+{% endfor %}

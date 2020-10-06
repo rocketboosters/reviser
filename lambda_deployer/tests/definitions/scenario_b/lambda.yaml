@@ -1,0 +1,9 @@
+python: "3.8"
+bucket: upload-bucket
+
+targets:
+- kind: layer
+  name: foo-layer
+  dependencies:
+  - kind: pip
+  - kind: pipper

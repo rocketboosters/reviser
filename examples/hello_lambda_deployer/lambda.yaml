@@ -1,0 +1,34 @@
+buckets:
+  "123": bucket-123
+  "234": bucket-234
+
+targets:
+# A function with two names and pip dependencies with an exclusion
+- kind: function
+  names:
+  - foo-function
+  - bar-function
+  bundle:
+    handler: lambda_function.run
+    includes:
+    - "*.yaml"
+    - "*.txt"
+    excludes:
+    - requirements.txt
+    omit_packages: [ham]
+  dependencies:
+  - kind: pip
+    packages: [requests]
+
+# A layer with default values for everything.
+- kind: layer
+  name: foo-layer
+  dependencies:
+  - kind: pip
+  - kind: pipper
+    packages: [ham]
+    repository:
+      buckets:
+        "123": example-pipper-bucket-123
+        "234": example-pipper-bucket-234
+      prefix: pipper-custom-prefix

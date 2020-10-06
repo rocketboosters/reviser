@@ -1,0 +1,6 @@
+bucket: foo-bucket
+
+targets:
+- kind: function
+  names:
+  - foo-function
