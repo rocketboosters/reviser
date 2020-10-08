@@ -1,0 +1,9 @@
+bucket: foo-bucket
+
+targets:
+- kind: layer
+  names:
+  - foo-layer
+  dependencies:
+  - kind: pip
+  - kind: pipper

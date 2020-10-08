@@ -51,7 +51,7 @@ def deploy(
         selection: 'definitions.Selection',
         description: str = None,
         dry_run: bool = False,
-):
+) -> typing.List['definitions.Target']:
     """
     Executes the deploy operation on the context's configuration filtered
     by the specified selection.
@@ -76,3 +76,6 @@ def deploy(
             published_layers=published_layers,
             dry_run=dry_run,
         )
+
+    return selected.targets
+

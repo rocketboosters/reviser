@@ -26,7 +26,9 @@ def populate_subparser(parser: argparse.ArgumentParser):
     deployer.populate_subparser(parser)
 
 
-def run(ex: 'interactivity.Execution'):
+def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
     """Execute a bundle operation on the selected function/layer targets."""
-    bundler.run(ex)
-    deployer.run(ex)
+    out = bundler.run(ex)
+    if out.result.status != 'BUNDLED':
+        return out
+    return deployer.run(ex)

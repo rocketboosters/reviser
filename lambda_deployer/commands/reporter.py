@@ -119,7 +119,7 @@ def _display_layer_info(
     print(textwrap.indent(yaml.safe_dump(data), prefix='  '))
 
 
-def run(ex: 'interactivity.Execution'):
+def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
     """Displays the current configuration of the lambda target(s)."""
     selected = ex.shell.context.get_selected_targets(ex.shell.selection)
     qualifier = ex.args.get('qualifier')
@@ -132,3 +132,9 @@ def run(ex: 'interactivity.Execution'):
     items = [(t, n) for t in selected.layer_targets for n in t.names]
     for target, name in items:
         _display_layer_info(client, name, qualifier)
+
+    return ex.finalize(
+        status='SUCCESS',
+        message='Status reports have been display.',
+        echo=False,
+    )

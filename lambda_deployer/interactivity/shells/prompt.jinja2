@@ -1,0 +1,15 @@
+{% filter colorize(color='green') -%}
+{{ profile }}@{{ user_slug }}
+{%- endfilter -%}
+{%- if alias -%} {{ ' > ' + alias | colorize(color='magenta') }}{%- endif -%}
+{{ " ~" | colorize(color='green') }}
+{%- for target in selected.function_targets -%}
+{%- for name in target.names %}
+  (F) {{ name | colorize(color='cyan') }}
+{%- endfor -%}
+{%- endfor -%}
+{%- for target in selected.layer_targets -%}
+{%- for name in target.names %}
+  (L) {{ name | colorize(color='cyan') }}
+{%- endfor -%}
+{%- endfor -%}

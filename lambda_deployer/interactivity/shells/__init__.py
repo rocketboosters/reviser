@@ -3,7 +3,6 @@ import dataclasses
 import datetime
 import shlex
 import textwrap
-import traceback
 import typing
 
 import colorama
@@ -13,7 +12,18 @@ from prompt_toolkit.history import InMemoryHistory
 
 from lambda_deployer import commands
 from lambda_deployer import definitions
+from lambda_deployer import templating
 from lambda_deployer.interactivity import completions
+
+
+@dataclasses.dataclass(frozen=True)
+class ExecutionResult:
+    """Data structure for shell command execution responses."""
+
+    status: str
+    message: str
+    info: typing.Optional[dict] = None
+    data: typing.Optional[dict] = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -23,6 +33,7 @@ class Execution:
     action: str
     args: dict
     shell: 'Shell'
+    result: typing.Optional['ExecutionResult'] = None
 
     executed_at: datetime.datetime = dataclasses.field(
         init=False,
@@ -33,6 +44,37 @@ class Execution:
     def timestamp(self) -> str:
         """A string representation of the created at datetime."""
         return self.executed_at.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+
+    def finalize(
+            self,
+            status: str,
+            message: str = None,
+            info: dict = None,
+            data: dict = None,
+            echo: bool = False,
+    ) -> 'Execution':
+        """Copy this execution and populate it with the result."""
+        return dataclasses.replace(self, result=ExecutionResult(
+            status=(status or '???').upper(),
+            message=message,
+            info=info,
+            data=data,
+        )).echo_if(echo)
+
+    def echo(self) -> 'Execution':
+        """Echoes the result if set for display to the console."""
+        if self.result:
+            templating.printer(
+                'interactivity/shells/execution_result.jinja2',
+                result=self.result,
+            )
+        return self
+
+    def echo_if(self, condition) -> 'Execution':
+        """Echoes the result if set for display to the console."""
+        if bool(condition):
+            return self.echo()
+        return self
 
 
 class Shell:
@@ -47,7 +89,8 @@ class Shell:
             selection: 'definitions.Selection' = None,
     ):
         """Creates a new interactivity."""
-        self.command_history = []
+        self.command_history: typing.List[str] = []
+        self.execution_history: typing.List['Execution'] = []
         self._prompt_session: typing.Optional[PromptSession] = None
         self.context = context
         self.selection = selection or definitions.Selection()
@@ -66,6 +109,7 @@ class Shell:
 
         action_module = commands.COMMANDS.get(action, None)
 
+        print('\n')
         if action in ('?', 'help'):
             show_help()
             return False
@@ -73,7 +117,7 @@ class Shell:
             self.shutdown = True
             return True
         elif action_module is None:
-            print(f'\n[ABORTED]: Unknown command "{action}".')
+            templating.print_error(f'Unknown command "{action}".')
             return False
 
         try:
@@ -85,16 +129,17 @@ class Shell:
                 return False
 
             execution = Execution(action, args, self)
-            action_module.run(execution)
+            self.execution_history.append(action_module.run(execution))
             self.command_history.append(line)
         except Exception as error:
             self.error = error
-            red = colorama.Fore.RED
-            reset = colorama.Style.RESET_ALL
-            print(f'\n{red}[ERROR]: Command execution failed')
-            traceback.print_exception(type(error), error, error.__traceback__)
-            print(f'{reset}')
+            templating.print_error(
+                error=error,
+                message='An unexpected command error occurred.',
+            )
             return False
+        finally:
+            print('\n')
 
     def preloop(self, interactive: bool = True):
         """Initialization before entering the interactive command loop."""
@@ -132,8 +177,11 @@ class Shell:
         except KeyboardInterrupt:
             print('\n[INTERRUPTED]: Shutting down terminal.')
         except Exception as error:
-            print(f'\n[ERROR]: Uncaught Exception "{error}"')
-            traceback.print_exc()
+            self.error = error
+            templating.print_error(
+                error=error,
+                message='An unexpected command error occurred.',
+            )
             return_code = 1
 
         self.postloop()
@@ -157,8 +205,11 @@ class Shell:
                 if self.shutdown:
                     raise RuntimeError(f'[SHUTDOWN]: Caused by "{line}"')
         except Exception as error:
-            print(f'\n[ERROR]: "{error}"')
-            traceback.print_exc()
+            self.error = error
+            templating.print_error(
+                error=error,
+                message='An unexpected command error occurred.',
+            )
             self.postloop()
             raise
 
@@ -170,38 +221,13 @@ def generate_prompt(shell: 'Shell') -> str:
     Returns an ANSI-colored prompt for user input display based
     on the current shell state and local environment.
     """
-    green = colorama.Fore.GREEN
-    cyan = colorama.Fore.CYAN
-    magenta = colorama.Fore.MAGENTA
-    reset = colorama.Style.RESET_ALL
-    profile = shell.context.connection.session.profile_name or 'default'
-    name = shell.context.configuration.directory.name
-
-    selected = shell.context.get_selected_targets(shell.selection)
-    targets = [
-        f'\n  (F) {cyan}{name}{reset}'
-        for target in selected.function_targets
-        for name in target.names
-    ]
-
-    targets += [
-        f'\n  (L) {cyan}{name}{reset}'
-        for target in selected.layer_targets
-        for name in target.names
-    ]
-
-    user_info = shell.context.connection.user_slug
-    prompt = [
-        f'\n{green}{profile}@{reset}',
-        f'{green}{user_info}{reset}',
-    ]
-
-    if alias := shell.context.connection.aws_account_alias:
-        prompt.append(f'{green} > {reset}{magenta}({alias}){reset}')
-
-    prompt += [f' {green}~{reset}', *targets]
-    print(''.join(prompt))
-    return f'{green}>{reset} '
+    templating.printer(
+        'interactivity/shells/prompt.jinja2',
+        profile=shell.context.connection.session.profile_name or 'default',
+        user_slug=shell.context.connection.user_slug,
+        selected=shell.context.get_selected_targets(shell.selection),
+    )
+    return f'{colorama.Fore.GREEN}>{colorama.Style.RESET_ALL} '
 
 
 def show_help():

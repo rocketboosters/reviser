@@ -32,7 +32,7 @@ def populate_subparser(parser: argparse.ArgumentParser):
         '--end',
         type=int,
         default=None,
-        help='Do not prune versions higher than or equal to this value.',
+        help='Do not prune versions higher than this value.',
     )
 
     parser.add_argument(
@@ -81,7 +81,7 @@ def _prune_function(
         for v in versions
         if v.version != '$LATEST'
         and (start is None or start <= int(v.version))
-        and (end is None or int(v.version) < end)
+        and (end is None or int(v.version) <= end)
         and not v.aliases
     ]
 
@@ -166,7 +166,7 @@ def _prune_layer(
     return removal_arns
 
 
-def run(ex: 'interactivity.Execution'):
+def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
     """Runs the pruning operation on the targets."""
     selected = ex.shell.context.get_selected_targets(ex.shell.selection)
     targets = sorted(selected.targets, key=lambda t: t.kind.value)
@@ -190,5 +190,12 @@ def run(ex: 'interactivity.Execution'):
         for name in target.names
     }
 
-    for name, removed_arns in results.items():
-        print(f'{name}: Removed {len(removed_arns)} versions.')
+    return ex.finalize(
+        status='PRUNED',
+        message='Specified versions have been removed.',
+        info={
+            name: removed_arns
+            for name, removed_arns in results.items()
+        },
+        echo=True,
+    )

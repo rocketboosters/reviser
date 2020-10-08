@@ -108,9 +108,14 @@ class Bundle(abstracts.Specification):
         if isinstance(includes, str):
             includes = [includes]
 
-        if not includes:
+        add_default_package = (
+            not includes
+            and self.target.kind == enumerations.TargetType.FUNCTION
+        )
+        if add_default_package:
             # If the user hasn't specified any includes, look for python
-            # packages in the root directory and include those by default.
+            # packages in the root directory and include those by default
+            # for functions. By default, layers should include nothing.
             includes = [
                 pathlib.Path(item).parent.absolute()
                 for item in glob.iglob(

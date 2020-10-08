@@ -9,45 +9,6 @@ from lambda_deployer import definitions
 from lambda_deployer import templating
 
 
-def assign_alias(
-        lambda_client: BaseClient,
-        function_name: str,
-        alias: str,
-        version: str,
-        create: bool = False,
-):
-    """
-    Update an alias to point to the specified version. Creates the alias
-    if it does not exist is specified.
-
-    :param lambda_client:
-        Client to use for the update.
-    :param function_name:
-        Name of the target lambda function.
-    :param alias:
-        Name of the alias to update.
-    :param version:
-        Version of the function to be used by the alias.
-    :param create:
-        Whether or not to create the alias if doesn't exist.
-    """
-    try:
-        lambda_client.update_alias(
-            FunctionName=function_name,
-            Name=alias,
-            FunctionVersion=version
-        )
-    except lambda_client.error.ResourceNotFoundException:
-        if create:
-            lambda_client.create_alias(
-                FunctionName=function_name,
-                Name=alias,
-                FunctionVersion=version
-            )
-        else:
-            raise
-
-
 def get_function_versions(
         lambda_client: BaseClient,
         function_name: str,

@@ -74,10 +74,8 @@ def _merge_uuids(
             _merge_target_uuids(match, target)
 
 
-def run(ex: 'interactivity.Execution'):
+def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
     """Execute a bundle operation on the selected function/layer targets."""
-    print('\n\n')
-
     before = ex.shell.context
     directory = before.configuration.directory
     connection = before.connection
@@ -86,3 +84,9 @@ def run(ex: 'interactivity.Execution'):
     ex.shell.context = after
 
     print(yaml.safe_dump(ex.shell.context.configuration.serialize()))
+    return ex.finalize(
+        status='SUCCESS',
+        message='Configuration file has been reloaded from disk.',
+        echo=True,
+        data={'before': before, 'after': after},
+    )

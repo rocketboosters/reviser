@@ -1,4 +1,3 @@
-from .functioning import assign_alias  # noqa
 from .functioning import echo_function_versions  # noqa
 from .functioning import get_function_version  # noqa
 from .functioning import get_function_versions  # noqa

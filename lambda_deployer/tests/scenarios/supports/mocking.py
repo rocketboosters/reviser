@@ -1,4 +1,5 @@
 import contextlib
+import pathlib
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -18,14 +19,11 @@ class Patches:
     ):
         self.runner = runner
         self.stack = stack
-        self.boto3_session: MagicMock = self._add_boto_session()
-        self.time_sleep: MagicMock = self._patch('time.sleep')
-        self.install_pip_package: MagicMock = self._patch(
-            'lambda_deployer.bundling._installer._install_pipper_package'
-        )
-        self.install_pipper_package: MagicMock = self._patch(
-            'lambda_deployer.bundling._installer._install_pip_package'
-        )
+        self.time_sleep = self._patch('time.sleep')
+        self.boto3_session = self._patch_boto_session()
+        self.install_pip_package = self._patch_pip_install_package()
+        self.install_pipper_package = self._patch_pipper_install_package()
+        self.input = self._patch_input()
 
     def _add(self, context_manager):
         """
@@ -35,17 +33,72 @@ class Patches:
         """
         return self.stack.enter_context(context_manager)
 
-    def _patch(self, target, *args, **kwargs):
+    def _patch(self, target, *args, **kwargs) -> MagicMock:
         """Add a patch to the context manager stack."""
         return self._add(patch(target, *args, **kwargs))
 
-    def _add_boto_session(self) -> MagicMock:
+    def _patch_input(self) -> MagicMock:
+        """
+        Patches the builtin input() function so that it returns the value(s)
+        specified in the scenario.
+        """
+        mock = self._patch('builtins.input')
+        values = self.runner.scenario.get('inputs')
+        if isinstance(values, str):
+            mock.return_value = values
+        elif values:
+            mock.side_effect = values
+        return mock
+
+    def _patch_boto_session(self) -> MagicMock:
         """Creates a patch for boto3.Session() constructors."""
         aws = self.runner.scenario.get('aws') or {}
         session = MagicMock(region_name=aws.get('region_name', 'us-east-1'))
+
+        credentials = aws.get('credentials') or {}
+        session.get_credentials.return_value = MagicMock(
+            access_key=credentials.get('access_key', '123123'),
+            secret_key=credentials.get('secret_key', 'abcdefghijklmnop'),
+            token=credentials.get('token'),
+        )
+
         mock_client = AwsClient(self.runner.scenario)
         session.client = mock_client
         return self._patch('boto3.Session', return_value=session)
+
+    def _patch_pip_install_package(self) -> MagicMock:
+        """Creates a patch for installing pip packages."""
+        mock = self._patch(
+            'lambda_deployer.bundling._installer._install_pip_package'
+        )
+        mock.side_effect = self._mock_pip_install_package
+        return mock
+
+    def _patch_pipper_install_package(self) -> MagicMock:
+        """Creates a patch for installing pipper packages."""
+        mock = self._patch(
+            'lambda_deployer.bundling._installer._install_pipper_package'
+        )
+        mock.side_effect = self._mock_pipper_install_package
+        return mock
+
+    @classmethod
+    def _mock_pip_install_package(cls, name: str, site_packages: pathlib.Path):
+        """Mock function for pipper package installation."""
+        site_packages.joinpath(name).write_text('pip-installed-package')
+        print(f'[MOCK]: Installed pip package "{name}"')
+
+    @classmethod
+    def _mock_pipper_install_package(
+            cls,
+            name: str,
+            site_packages: pathlib.Path,
+            *args,
+            **kwargs,
+    ):
+        """Mock function for pipper package installation."""
+        site_packages.joinpath(name).write_text('pipper-installed-package')
+        print(f'[MOCK]: Installed pipper package "{name}"')
 
 
 class AwsClient:
@@ -59,23 +112,36 @@ class AwsClient:
         self._scenario = scenario
         self._identifier = None
         self._calls = []
+        self.exceptions = MagicMock()
+        self.exceptions.ResourceNotFoundException = ValueError
 
     def __call__(self, identifier: str, *args, **kwargs):
         """Simulates the creation of a boto3.client."""
         self._identifier = identifier
         return self
 
-    def __getattr__(self, item: str):
-        """
-        Retrieves response data for the given client call from the
-        scenario data that defines the execution.
-        """
+    def _get_response(self, item: str):
+        """Retrieves the response for the given object."""
         aws = self._scenario.get('aws') or {}
         client_data = aws.get(self._identifier) or {}
         response = client_data.get(item) or {}
         if isinstance(response, list):
             response = response.pop(0)
+        return response
+
+    def __getattr__(self, item: str):
+        """
+        Retrieves response data for the given client call from the
+        scenario data that defines the execution.
+        """
+        response = self._get_response(item)
         return lambda *args, **kwargs: response
+
+    def get_paginator(self, item: str):
+        """Mocks a single-page paginator response."""
+        paginator = MagicMock()
+        paginator.paginate.return_value = [self._get_response(item)]
+        return paginator
 
 
 def create_session(scenario: dict):

@@ -27,9 +27,19 @@ def populate_subparser(parser: argparse.ArgumentParser):
 def run(ex: 'interactivity.Execution'):
     """Execute a bundle operation on the selected function/layer targets."""
     print('\n\n')
-    deploying.deploy(
+    deployed_targets = deploying.deploy(
         context=ex.shell.context,
         selection=ex.shell.selection,
         description=ex.args.get('description', ''),
         dry_run=ex.args.get('dry_run'),
+    )
+    print('\n')
+    return ex.finalize(
+        status='DEPLOYED',
+        message='Selected items have been deployed.',
+        info={
+            'dry_run': ex.args.get('dry_run'),
+            'items': [n for t in deployed_targets for n in t.names]
+        },
+        echo=True,
     )

@@ -1,0 +1,21 @@
+commands:
+- push
+- push --force
+
+aws:
+  region_name: us-east-1
+  sts:
+    get_caller_identity:
+      UserId: SOMEUSERIDSTRING
+      Account: '123'
+      Arn: arn:aws:iam::us-east-1:123:user/foo.bar
+  iam:
+    list_account_aliases:
+      AccountAliases: []
+  s3:
+    upload_file: {}
+  lambda:
+    publish_layer_version:
+      Version: '1'
+      LayerArn: arn:aws:lambda:us-east-1:123:layer:foo-layer
+      LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:1

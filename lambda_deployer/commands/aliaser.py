@@ -3,17 +3,17 @@ Creates and assigns an alias to the specified version of the selected or
 specified lambda function, or reassigns an existing alias to a different
 version.
 """
+import typing
 from argparse import ArgumentParser
 
 from lambda_deployer import interactivity
-from lambda_deployer import servicer
-import typing
+
 
 def get_completions(
         completer: 'interactivity.ShellCompleter',
 ) -> typing.List[str]:
     """Shell auto-completes for this command."""
-    return ['--function', '--yes']
+    return ['--function', '--yes', '--create']
 
 
 def populate_subparser(parser: ArgumentParser):
@@ -21,33 +21,58 @@ def populate_subparser(parser: ArgumentParser):
     parser.add_argument('alias')
     parser.add_argument('version')
     parser.add_argument('--function')
-    parser.add_argument('--yes')
+    parser.add_argument('--yes', action='store_true')
+    parser.add_argument('--create', action='store_true')
 
 
-def run(ex: 'interactivity.Execution'):
+def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
     """Execute the command invocation."""
-    name = ex.args.get('function')
     selected = ex.shell.context.get_selected_targets(ex.shell.selection)
-    is_ambiguous = not name and (
+    is_ambiguous = not ex.args.get('function') and (
         0 < len(selected.targets) > 1
-        or len(selected.targets[0].names) > 0
+        or len(selected.targets[0].names) > 1
     )
     if is_ambiguous:
-        raise ValueError('Cannot assign with multiple function names.')
+        return ex.finalize(
+            status='ERROR',
+            message="""
+                Ambiguous alias assignment. Only one function can be assigned
+                at a time. Either modify the selection or use the --function
+                flag to specify the target function for the alias change.
+                """,
+            echo=True,
+        )
 
+    name = ex.args.get('function') or selected.targets[0].names[0]
     client = ex.shell.context.connection.session.client('lambda')
-    versions = servicer.get_function_versions(client, name)
-    aliases = [a.name for v in versions for a in v.aliases]
-
     alias = ex.args.get('alias')
     version = ex.args.get('version')
+    create = ex.args.get('create')
+    yes = ex.args.get('yes')
 
-    if alias in aliases:
-        message = f'\nAssign {alias} to {name}:{version} [y/N]? '
-    else:
-        message = f'\nCreate {alias} pointing to {name}:{version} [y/N]? '
+    request = dict(
+        FunctionName=name,
+        Name=alias,
+        FunctionVersion=version,
+    )
 
-    if ex.args.get('yes') or input(message).strip().lower().startswith('y'):
-        servicer.assign_alias(client, name, alias, version)
+    prefix = f'Create {alias} at' if create else f'Move {alias} to'
+    message = f'\n{prefix} {name}:{version} [y/N]? '
+    if not yes and not (input(message) or '').strip().lower().startswith('y'):
+        return ex.finalize(
+            status='ABORTED',
+            message='No alias changes made.',
+            echo=True,
+        )
+
+    if create:
+        client.create_alias(**request)
     else:
-        print(f'[ABORTED]: {alias} assignment')
+        client.update_alias(**request)
+
+    return ex.finalize(
+        status='SUCCESS',
+        message='Alias change has been applied.',
+        info={'function': name, 'alias': alias, 'version': version},
+        echo=True,
+    )

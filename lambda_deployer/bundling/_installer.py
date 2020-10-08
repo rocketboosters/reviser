@@ -24,6 +24,7 @@ def _install_pipper_package(
         env: dict,
         arguments: typing.List[str] = None,
 ):
+    """Installs the specified pipper package."""
     cmd = [
         'pipper', 'install', name, '--upgrade',
         '--target', f'"{site_packages}"',
@@ -91,7 +92,8 @@ def install_dependencies(target: 'definitions.Target'):
             str(target.site_packages_directory),
             ignore_errors=True,
         )
-        target.site_packages_directory.mkdir(exist_ok=True, parents=True)
+
+    target.site_packages_directory.mkdir(exist_ok=True, parents=True)
 
     callers = {
         definitions.DependencyType.PIPPER: _install_pipper,

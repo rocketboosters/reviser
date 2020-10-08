@@ -99,10 +99,23 @@ def run(ex: 'interactivity.Execution'):
             layer_needles=['*'],
             bundle_all=True,
         )
-        return
+        return ex.finalize(
+            status='ALL',
+            message='Selection has been cleared. All items are now selected.',
+            echo=True,
+        )
 
     if is_exact:
         ex.shell.selection = _update_exact_selection(kind, names, selection)
-        return
+        return ex.finalize(
+            status='EXACT',
+            message='Exact selection has been applied.',
+            echo=True,
+        )
 
     ex.shell.selection = _update_fuzzy_selection(kind, names, selection)
+    return ex.finalize(
+        status='MATCH',
+        message='Matching items have been selected.',
+        echo=True,
+    )

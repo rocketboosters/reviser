@@ -1,0 +1,10 @@
+{% filter colorize(color=result.status) -%}
+{%- filter indent(first=False) -%}
+{%- filter wordwrap -%}
+[{{ result.status | upper }}]: {{ result.message | single_line }}
+{%- endfilter -%}
+{%- endfilter -%}
+{%- if result.info %}
+{{ result.info | yaml(indent=4) }}
+{%- endif -%}
+{%- endfilter -%}

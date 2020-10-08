@@ -1,0 +1,10 @@
+{% filter colorize(color="error") -%}
+{%- filter indent(first=False) -%}
+{%- filter wordwrap -%}
+[ERROR]: {{ message | single_line }}
+{%- endfilter -%}
+{%- endfilter -%}
+{% if stack_trace %}
+{{ stack_trace | indent(first=True) }}
+{% endif %}
+{%- endfilter -%}

@@ -1,0 +1,13 @@
+commands:
+- reload
+
+aws:
+  region_name: us-east-1
+  sts:
+    get_caller_identity:
+      UserId: SOMEUSERIDSTRING
+      Account: '123'
+      Arn: arn:aws:iam::us-east-1:123:user/foo.bar
+  iam:
+    list_account_aliases:
+      AccountAliases: []

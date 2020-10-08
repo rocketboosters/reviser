@@ -1,8 +1,5 @@
 commands:
-- configs
-- select * foo
-- bundle
-- deploy
+- push
 
 aws:
   region_name: us-east-1
