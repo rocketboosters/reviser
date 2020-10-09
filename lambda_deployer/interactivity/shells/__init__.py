@@ -121,9 +121,17 @@ class Shell:
         if len(line.strip()) < 1:
             return False
 
-        raw_args = shlex.split(line)
-        action = raw_args[0]
-        raw_args = raw_args[1:]
+        try:
+            raw_args = shlex.split(line)
+            action = raw_args[0]
+            raw_args = raw_args[1:]
+        except Exception as error:
+            self.error = error
+            templating.print_error(
+                error=error,
+                message=f'An error occurred parsing "{line}".',
+            )
+            return False
 
         action_module = commands.COMMANDS.get(action, None)
 
@@ -214,8 +222,11 @@ class Shell:
         unless there is a queued command, in which case that is returned
         without a prompt instead.
         """
+        prompt = f'{colorama.Fore.GREEN}>{colorama.Style.RESET_ALL} '
+
         if self.command_queue:
             line = self.command_queue.pop(0)
+            print(f'{prompt}{line}')
         else:
             context = self.context
             templating.printer(
@@ -225,7 +236,6 @@ class Shell:
                 selected=context.get_selected_targets(self.selection),
             )
 
-            prompt = f'{colorama.Fore.GREEN}>{colorama.Style.RESET_ALL} '
             # noinspection PyTypeChecker
             line = self._prompt_session.prompt(
                 message=ANSI(prompt),

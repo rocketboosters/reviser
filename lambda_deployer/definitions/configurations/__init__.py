@@ -82,6 +82,7 @@ class Configuration(abstracts.Specification):
         """Serializes the object for output representation."""
         return {
             'bucket': self.bucket,
+            'run': self.get('run'),
             'region': self.aws_region,
             'function_targets': [t.serialize() for t in self.function_targets],
             'layer_targets': [t.serialize() for t in self.layer_targets],

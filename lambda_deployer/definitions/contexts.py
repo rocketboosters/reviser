@@ -56,6 +56,7 @@ class Context:
         specifies the command group definition to execute. Otherwise,
         this will be None.
         """
+
         name = self.arguments.command_group_name
         return self.configuration.get_as_list('run', name) or None
 

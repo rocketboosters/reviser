@@ -43,9 +43,14 @@ class ShellCompleter(completion.Completer):
         and complete event are used to determine the applicable completions
         for the current shell input state.
         """
-        self.args = shlex.split(document.text.strip())
+        try:
+            self.args = shlex.split(document.text.strip())
+        except ValueError:
+            return
+
         self.document = document
         self.event = complete_event
+
         for c in _get_completions(self):
             yield c
 
