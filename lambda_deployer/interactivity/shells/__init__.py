@@ -1,12 +1,13 @@
 import argparse
 import dataclasses
 import datetime
+import io
 import shlex
 import textwrap
 import typing
 
 import colorama
-from prompt_toolkit import PromptSession
+import prompt_toolkit
 from prompt_toolkit.formatted_text import ANSI
 from prompt_toolkit.history import InMemoryHistory
 
@@ -91,12 +92,29 @@ class Shell:
         """Creates a new interactivity."""
         self.command_history: typing.List[str] = []
         self.execution_history: typing.List['Execution'] = []
-        self._prompt_session: typing.Optional[PromptSession] = None
+        self._prompt_session: typing.Optional[prompt_toolkit.PromptSession] \
+            = None
         self.context = context
         self.selection = selection or definitions.Selection()
         self.shutdown = False
         #: Stores uncaught exceptions for reference when a command fails.
         self.error: typing.Optional[Exception] = None
+        self._shell_completer = completions.ShellCompleter(self)
+        self.command_queue: typing.List[str] = []
+        #: Explicitly specifies if the command
+        self._is_interactive: typing.Optional[bool] = None
+
+    @property
+    def is_active(self) -> bool:
+        """
+        Whether or not the shell should continue running or not as
+        determined by whether or not it is running interactively or
+        there are queued commands to still process.
+        """
+        return not self.shutdown and (
+            bool(self.command_queue)
+            or self._is_interactive
+        )
 
     def execute(self, line: str):
         """Executes the specified input command."""
@@ -116,6 +134,9 @@ class Shell:
         elif action == 'exit':
             self.shutdown = True
             return True
+        elif action == 'shell':
+            self._is_interactive = True
+            return False
         elif action_module is None:
             templating.print_error(f'Unknown command "{action}".')
             return False
@@ -141,38 +162,40 @@ class Shell:
         finally:
             print('\n')
 
-    def preloop(self, interactive: bool = True):
-        """Initialization before entering the interactive command loop."""
-        print('\n\nLambda Deployer Interactive Shell\n')
+    def preloop(self):
+        """Initialization before entering the command loop."""
+        print('\n\nLambda Deployer Shell\n')
         colorama.init()
 
-        if interactive:
-            history = InMemoryHistory()
-            for line in self.command_history:
-                history.append_string(line)
+        history = InMemoryHistory()
+        for line in self.command_history:
+            history.append_string(line)
 
-            self._prompt_session = PromptSession(history=history)
+        try:
+            self._prompt_session = prompt_toolkit.PromptSession(history=history)
+        except io.UnsupportedOperation:
+            self._is_interactive = False
+
+        # If no queued commands have been specified at the start of the
+        # loop, consider the loop to be running in interactive mode.
+        self._is_interactive = not bool(self.command_queue)
 
     def postloop(self):
         """Teardown after exiting the command loop."""
         print('\n\n')
         colorama.deinit()
         self.shutdown = True
+        self.command_queue = []
+        self._is_interactive = False
+        self._prompt_session = None
 
-    def loop(self):
-        """Launches the interactive loop."""
-        return_code = 0
+    def loop(self) -> typing.NoReturn:
+        """Launches the command execution loop."""
         self.preloop()
-        shell_completer = completions.ShellCompleter(self)
+
         try:
-            while not self.shutdown:
-                # noinspection PyTypeChecker
-                line: str = self._prompt_session.prompt(
-                    message=ANSI(generate_prompt(self)),
-                    completer=shell_completer,
-                    complete_while_typing=True
-                )
-                if line.strip():
+            while not self.shutdown and self.is_active:
+                if line := self.get_next_command():
                     self.execute(line)
         except KeyboardInterrupt:
             print('\n[INTERRUPTED]: Shutting down terminal.')
@@ -182,52 +205,35 @@ class Shell:
                 error=error,
                 message='An unexpected command error occurred.',
             )
-            return_code = 1
 
         self.postloop()
-        return return_code
 
-    def process(self, command_queue: typing.List[str]) -> typing.NoReturn:
+    def get_next_command(self) -> str:
         """
-        Emulates the command loop, except that instead of relying on user
-        input, the commands are supplied as the `command_queue` argument. If
-        a command fails critically for any reason, the exception will be
-        raised to be handled outside of this loop.
-
-        :param command_queue:
-            A list of one or more commands to execute.
+        Prompts user for input and returns that for command execution
+        unless there is a queued command, in which case that is returned
+        without a prompt instead.
         """
-        self.preloop(interactive=False)
-
-        try:
-            for line in command_queue:
-                self.execute(line.strip())
-                if self.shutdown:
-                    raise RuntimeError(f'[SHUTDOWN]: Caused by "{line}"')
-        except Exception as error:
-            self.error = error
-            templating.print_error(
-                error=error,
-                message='An unexpected command error occurred.',
+        if self.command_queue:
+            line = self.command_queue.pop(0)
+        else:
+            context = self.context
+            templating.printer(
+                'interactivity/shells/prompt.jinja2',
+                profile=context.connection.session.profile_name or 'default',
+                user_slug=context.connection.user_slug,
+                selected=context.get_selected_targets(self.selection),
             )
-            self.postloop()
-            raise
 
-        self.postloop()
+            prompt = f'{colorama.Fore.GREEN}>{colorama.Style.RESET_ALL} '
+            # noinspection PyTypeChecker
+            line = self._prompt_session.prompt(
+                message=ANSI(prompt),
+                completer=self._shell_completer,
+                complete_while_typing=True
+            )
 
-
-def generate_prompt(shell: 'Shell') -> str:
-    """
-    Returns an ANSI-colored prompt for user input display based
-    on the current shell state and local environment.
-    """
-    templating.printer(
-        'interactivity/shells/prompt.jinja2',
-        profile=shell.context.connection.session.profile_name or 'default',
-        user_slug=shell.context.connection.user_slug,
-        selected=shell.context.get_selected_targets(shell.selection),
-    )
-    return f'{colorama.Fore.GREEN}>{colorama.Style.RESET_ALL} '
+        return line.strip()
 
 
 def show_help():

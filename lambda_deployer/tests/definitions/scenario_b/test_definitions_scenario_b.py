@@ -1,3 +1,4 @@
+import argparse
 import pathlib
 from unittest.mock import MagicMock
 
@@ -8,6 +9,7 @@ def test_scenario_b():
     """Should load the configuration into a context."""
     directory = pathlib.Path(__file__).parent.absolute()
     context = definitions.Context.load_from_file(
+        arguments=argparse.Namespace(),
         path=str(directory),
         connection=MagicMock(),
     )

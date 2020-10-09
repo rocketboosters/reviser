@@ -79,7 +79,11 @@ def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
     before = ex.shell.context
     directory = before.configuration.directory
     connection = before.connection
-    after = definitions.Context.load_from_file(str(directory), connection)
+    after = definitions.Context.load_from_file(
+        arguments=before.arguments,
+        path=str(directory),
+        connection=connection,
+    )
     _merge_uuids(before.configuration, after.configuration)
     ex.shell.context = after
 

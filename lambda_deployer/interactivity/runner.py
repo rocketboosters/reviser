@@ -74,8 +74,10 @@ def run_shell(
     directory determined by the command line arguments.
     """
     shell = create_shell(arguments)
-    if process := (command_queue or shell.context.command_queue):
-        shell.process(process)
-    else:
-        shell.loop()
+    shell.command_queue += (
+        command_queue
+        or shell.context.command_queue
+        or []
+    )
+    shell.loop()
     return shell

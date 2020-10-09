@@ -1,3 +1,4 @@
+import argparse
 import pathlib
 from unittest.mock import MagicMock
 
@@ -9,6 +10,7 @@ def test_scenario_a():
     directory = pathlib.Path(__file__).parent.absolute()
     connection = MagicMock(aws_account_id='123')
     context = definitions.Context.load_from_file(
+        arguments=argparse.Namespace(),
         path=str(directory),
         connection=connection,
     )

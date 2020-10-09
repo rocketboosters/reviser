@@ -29,6 +29,9 @@ def upload(
     :param target:
         The lambda function(s)/layer(s) target that will be uploaded
         for all selected names in the target.
+    :param dry_run:
+        If true, the upload process will be exercised without actually
+        uploading the data.
     """
     try:
         size = os.path.getsize(target.bundle_zip_path)

@@ -84,7 +84,9 @@ class ScenarioRunner:
                 # Process the shell commands specified in the scenario
                 # in a non-interactive fashion.
                 self.shell = interactivity.create_shell(arguments)
-                self.shell.process([c.get('command') for c in self.commands])
+                commands = [c.get('command') for c in self.commands]
+                self.shell.command_queue = commands
+                self.shell.loop()
         except Exception as error:
             self.error = error
         finally:
