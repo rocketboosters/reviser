@@ -16,7 +16,7 @@ def get_completions(
         completer: 'interactivity.ShellCompleter',
 ) -> typing.List[str]:
     """Shell auto-completes for this command."""
-    return ['--function', '--start', '--end', '--dry-run']
+    return ['--start', '--end', '--dry-run']
 
 
 def populate_subparser(parser: argparse.ArgumentParser):
@@ -140,7 +140,7 @@ def _prune_layer(
         version.arn
         for version in versions[:-1]
         if (start is None or start <= int(version.version))
-        and (end is None or int(version.version) < end)
+        and (end is None or int(version.version) <= end)
     ]
 
     print('\nARN Versions to be removed:')

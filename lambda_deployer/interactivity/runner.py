@@ -29,7 +29,20 @@ def _parse(arguments: typing.List[str] = None) -> argparse.Namespace:
             The profile name for the AWS session that will be used to
             interact with lambda during the deployment process. If not
             set the default profile will be used if environment variables
-            are not set as an alternative.
+            are not set as an overriding alternative.
+            """
+    )
+    parser.add_argument(
+        '--run',
+        dest='command_group_name',
+        help="""
+            Specifies a run command group to execute in a new shell
+            session that exits after the commands have been executed.
+            These command groups are useful for defining common operations
+            to execute in a single command without opening a persistent
+            shell. They are also useful for CI purposes. The value here
+            must be specified in the lambda.yaml file under the top-level
+            run key and must be a list of shell commands to execute.
             """
     )
     return parser.parse_args(args=arguments)
@@ -45,23 +58,24 @@ def create_shell(arguments: typing.List[str] = None) -> 'interactivity.Shell':
     directory = pathlib.Path(args.root_directory).absolute()
     session = boto3.Session(profile_name=args.aws_profile_name)
     context = definitions.Context.load_from_file(
+        arguments=args,
         path=directory,
-        connection=definitions.AwsConnection(session)
+        connection=definitions.AwsConnection(session),
     )
     return interactivity.Shell(context)
 
 
 def run_shell(
         arguments: typing.List[str] = None,
-        command_queue: typing.List[str] = None
+        command_queue: typing.List[str] = None,
 ) -> 'interactivity.Shell':
     """
     Start the shell process after loading configuration from the target
     directory determined by the command line arguments.
     """
     shell = create_shell(arguments)
-    if command_queue:
-        shell.process(command_queue)
+    if process := (command_queue or shell.context.command_queue):
+        shell.process(process)
     else:
         shell.loop()
     return shell

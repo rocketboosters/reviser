@@ -1,5 +1,6 @@
 commands:
-- list
+- command: list
+  status: LISTED
 
 aws:
   region_name: us-east-1

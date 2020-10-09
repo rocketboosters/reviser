@@ -8,20 +8,6 @@ from lambda_deployer import definitions
 from lambda_deployer.servicer import functioning
 
 
-def _to_name(layer_name_or_arn: typing.Optional[str]) -> typing.Optional[str]:
-    """Converts the layer name/arn to a name."""
-    return layer_name_or_arn
-
-    # if not layer_name_or_arn:
-    #     return None
-    #
-    # return (
-    #     layer_name_or_arn.rsplit(':', 2)[-2]
-    #     if layer_name_or_arn.startswith('arn:')
-    #     else layer_name_or_arn
-    # )
-
-
 def get_layer_versions(
         lambda_client: BaseClient,
         layer_name: str,
@@ -37,7 +23,7 @@ def get_layer_versions(
     """
     try:
         paginator = lambda_client.get_paginator('list_layer_versions')
-        request = {'LayerName': _to_name(layer_name)}
+        request = {'LayerName': layer_name}
         layers = [
             definitions.LambdaLayer(layer)
             for page in paginator.paginate(**request)
@@ -52,7 +38,7 @@ def remove_layer_version(lambda_client: BaseClient, layer_arn: str):
     """Removes the specified lambda layer."""
     try:
         lambda_client.delete_layer_version(
-            LayerName=_to_name(layer_arn),
+            LayerName=layer_arn,
             VersionNumber=int(layer_arn.rsplit(':', 1)[-1])
         )
         print(f'[PRUNED]: {layer_arn}')
@@ -67,7 +53,7 @@ def get_layer_version(
 ) -> 'definitions.LambdaLayer':
     """Retrieves the configuration for the specified lambda layer."""
     return definitions.LambdaLayer(lambda_client.get_layer_version(
-        LayerName=_to_name(layer_name),
+        LayerName=layer_name,
         VersionNumber=version,
     ))
 

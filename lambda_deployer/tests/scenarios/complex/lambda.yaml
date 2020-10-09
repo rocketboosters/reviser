@@ -7,18 +7,33 @@ targets:
 - kind: function
   names:
   - foo-function
+  - food-function
   - bar-function
+  - bard-function
+  variables:
+  - name: environment
+    preserve: true
+  - name: status
+    value: running
+  layers:
+  - name: foo-layer
+    only: foo*
+    except: food-*
   bundle:
     handler: lambda_function.run
     includes:
-    - "*.yaml"
     - "*.txt"
+    - complex_package
     excludes:
     - requirements.txt
+    - "**/ignores"
     omit_packages: [ham]
   dependencies:
   - kind: pip
-    packages: [requests]
+    packages: [spam, ham]
+  - kind: pipper
+    bucket: some-pipper-bucket
+    packages: [baz, qux]
 
 # A layer with default values for everything.
 - kind: layer
@@ -27,8 +42,7 @@ targets:
   - kind: pip
   - kind: pipper
     packages: [ham]
-    repository:
-      buckets:
-        "123": example-pipper-bucket-123
-        "234": example-pipper-bucket-234
-      prefix: pipper-custom-prefix
+    buckets:
+      "123": example-pipper-bucket-123
+      "234": example-pipper-bucket-234
+    prefix: pipper-custom-prefix

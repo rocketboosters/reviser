@@ -3,35 +3,36 @@ commands:
   expected:
     status: MATCH
     info:
-      functions: [ foo-function ]
-      layers: None
+      functions: None
+      layers: [foo-layer]
 
 - command: select *
   expected:
     status: ALL
     info:
-      functions: [ foo-function ]
-      layers: None
+      functions: None
+      layers: [foo-layer]
 
-- command: select function foo
+- command: select layer foo
   expected:
     status: MATCH
     info:
-      functions: [ foo-function ]
-      layers: None
+      functions: None
+      layers: [foo-layer]
 
-- command: select function foo-function --exact
-  expected:
-    status: EXACT
-    info:
-      functions: [ foo-function ]
-      layers: None
-
-- command: select function foo --exact
+- command: select layer foo-layer --exact
   expected:
     status: EXACT
     info:
       functions: None
+      layers: [foo-layer]
+
+- command: select layer foo --exact
+  expected:
+    status: EXACT
+    info:
+      functions: None
+      layers: None
 
 - command: select layer bar
   expected:

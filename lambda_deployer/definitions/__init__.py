@@ -1,3 +1,6 @@
+from .abstracts import DataWrapper  # noqa
+from .abstracts import Specification  # noqa
+from .abstracts import Specification  # noqa
 from .aws import AwsConnection  # noqa
 from .configurations import Bundle  # noqa
 from .configurations import Configuration  # noqa

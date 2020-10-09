@@ -1,3 +1,4 @@
+import argparse
 import dataclasses
 import pathlib
 import typing
@@ -5,9 +6,9 @@ import typing
 import yaml
 
 from lambda_deployer.definitions import aws
-from lambda_deployer.definitions import selections
 from lambda_deployer.definitions import configurations
 from lambda_deployer.definitions import enumerations
+from lambda_deployer.definitions import selections
 
 
 @dataclasses.dataclass(frozen=True)
@@ -41,8 +42,22 @@ class SelectedTargets:
 class Context:
     """Execution context for the current invocation."""
 
+    arguments: argparse.Namespace
     configuration: 'configurations.Configuration'
     connection: 'aws.AwsConnection'
+
+    @property
+    def command_queue(self) -> typing.Optional[typing.List[str]]:
+        """
+        A list of commands to process within the execution shell
+        and then exit instead of running interactively. These are
+        loaded from `run:` configuration command group definitions
+        in the loaded configuration object if a `--run` argument
+        specifies the command group definition to execute. Otherwise,
+        this will be None.
+        """
+        name = self.arguments.command_group_name
+        return self.configuration.get_as_list('run', name) or None
 
     def get_selected_targets(
             self,
@@ -61,6 +76,7 @@ class Context:
     @classmethod
     def load_from_file(
             cls,
+            arguments: argparse.Namespace,
             path: str = None,
             connection: 'aws.AwsConnection' = None,
     ) -> 'Context':
@@ -76,6 +92,7 @@ class Context:
         aws_connection = connection or aws.AwsConnection()
         contents = target.read_text()
         return cls(
+            arguments=arguments,
             configuration=configurations.Configuration(
                 directory=target.parent,
                 data=yaml.safe_load(contents),

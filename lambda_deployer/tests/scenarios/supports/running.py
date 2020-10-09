@@ -7,8 +7,10 @@ import typing
 import yaml
 
 from lambda_deployer import definitions
+from lambda_deployer.definitions import abstracts
 from lambda_deployer import interactivity
 from lambda_deployer.tests.scenarios.supports import mocking
+from ..supports import validating
 
 
 class ScenarioRunner:
@@ -20,7 +22,9 @@ class ScenarioRunner:
 
     def __init__(self, slug: str):
         self.slug: str = slug
-        self.scenario = yaml.safe_load(self.path.read_text())
+        self.scenario = abstracts.DataWrapper(
+            yaml.safe_load(self.path.read_text())
+        )
         self.shell: typing.Optional['interactivity.Shell'] = None
         self.error: typing.Optional[Exception] = None
         self.patches: typing.Optional[mocking.Patches] = None
@@ -50,6 +54,18 @@ class ScenarioRunner:
         """Returns the directory in which the scenario definition resides."""
         return self.path.parent.absolute()
 
+    @property
+    def commands(self) -> typing.List['abstracts.DataWrapper']:
+        """Commands loaded from the scenario to execute."""
+        raw = self.scenario.get_as_list(
+            'commands',
+            default=self.scenario.get_as_list('command'),
+        )
+        return [
+            abstracts.DataWrapper({'command': c} if isinstance(c, str) else c)
+            for c in raw
+        ]
+
     def run(self) -> 'ScenarioRunner':
         """
         Executes the scenario, loading it if it has not already been loaded
@@ -57,7 +73,7 @@ class ScenarioRunner:
         """
         start_directory = pathlib.Path()
         os.chdir(self.directory)
-        arguments = self.scenario.get('arguments') or []
+        arguments = self.scenario.get_as_list('arguments') or []
 
         try:
             with contextlib.ExitStack() as stack:
@@ -68,7 +84,7 @@ class ScenarioRunner:
                 # Process the shell commands specified in the scenario
                 # in a non-interactive fashion.
                 self.shell = interactivity.create_shell(arguments)
-                self.shell.process(self.scenario['commands'])
+                self.shell.process([c.get('command') for c in self.commands])
         except Exception as error:
             self.error = error
         finally:
@@ -92,6 +108,18 @@ class ScenarioRunner:
         error = self.error or getattr(self.shell, 'error', None)
         if error is not None:
             raise AssertionError('Command execution failed') from error
+
+    def check_commands(self):
+        """
+        Iterates over scenario commands and validates the execution results
+        for any that have defined expected result values within the command
+        scenario.
+        """
+        commands = self.commands
+        history = self.shell.execution_history
+        for command, execution in zip(commands, history):
+            if command.has('expected'):
+                validating.assert_command_result(command, execution.result)
 
     def __enter__(self) -> 'ScenarioRunner':
         return self.run()

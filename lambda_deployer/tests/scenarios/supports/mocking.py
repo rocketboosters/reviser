@@ -43,7 +43,7 @@ class Patches:
         specified in the scenario.
         """
         mock = self._patch('builtins.input')
-        values = self.runner.scenario.get('inputs')
+        values = self.runner.scenario.get_first(['inputs'], ['input'])
         if isinstance(values, str):
             mock.return_value = values
         elif values:
@@ -142,15 +142,3 @@ class AwsClient:
         paginator = MagicMock()
         paginator.paginate.return_value = [self._get_response(item)]
         return paginator
-
-
-def create_session(scenario: dict):
-    """
-    Creates a mock boto3 session that will use scenario data to
-    respond to client requests.
-    """
-    aws = scenario.get('aws') or {}
-    session = MagicMock(region_name=aws.get('region_name', 'us-east-1'))
-    mock_client = AwsClient(scenario)
-    session.client = mock_client
-    return session

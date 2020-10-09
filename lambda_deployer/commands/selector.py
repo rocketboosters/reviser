@@ -92,30 +92,33 @@ def run(ex: 'interactivity.Execution'):
     else:
         names = list(names)
 
-    if kind == '*' and not names:
+    if kind == '*' and names == ['*']:
+        status = 'ALL'
+        message = 'Selection has been cleared. All items are now selected.'
         ex.shell.selection = dataclasses.replace(
             selection,
             function_needles=['*'],
             layer_needles=['*'],
             bundle_all=True,
         )
-        return ex.finalize(
-            status='ALL',
-            message='Selection has been cleared. All items are now selected.',
-            echo=True,
-        )
-
-    if is_exact:
+    elif is_exact:
+        status = 'EXACT'
+        message = 'Exact selection has been applied.'
         ex.shell.selection = _update_exact_selection(kind, names, selection)
-        return ex.finalize(
-            status='EXACT',
-            message='Exact selection has been applied.',
-            echo=True,
-        )
+    else:
+        status = 'MATCH'
+        message = 'Matching items have been selected.'
+        ex.shell.selection = _update_fuzzy_selection(kind, names, selection)
 
-    ex.shell.selection = _update_fuzzy_selection(kind, names, selection)
+    targets = ex.shell.context.get_selected_targets(ex.shell.selection)
+    functions = [n for t in targets.function_targets for n in t.names]
+    layers = [n for t in targets.layer_targets for n in t.names]
     return ex.finalize(
-        status='MATCH',
-        message='Matching items have been selected.',
+        status=status,
+        message=message,
         echo=True,
+        info={
+            'functions': functions or 'None',
+            'layers': layers or 'None',
+        }
     )
