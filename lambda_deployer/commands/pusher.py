@@ -1,6 +1,5 @@
 """
-Allows for selecting subsets of the targets within the loaded configuration.
-The subsets are fuzzy-matched unless the --exact flag is used.
+Combined single command for bundling and deploying the selected targets.
 """
 import argparse
 import typing

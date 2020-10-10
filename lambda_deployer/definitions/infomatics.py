@@ -36,6 +36,14 @@ class LambdaLayerReference:
         return self.get('Arn')
 
     @property
+    def unversioned_arn(self) -> typing.Optional[str]:
+        """Returns the layer's unversioned ARN."""
+        if not self.arn:
+            return None
+        parts = self.arn.split(':')
+        return ':'.join(parts[:7])
+
+    @property
     def name(self) -> str:
         """The name of the layer extracted from its ARN."""
         return (self.arn or 'arn:???:?').rsplit(':', 2)[-2]
@@ -63,6 +71,15 @@ class LambdaLayer:
     @property
     def arn(self) -> typing.Optional[str]:
         return self.get('LayerVersionArn')
+
+    @property
+    def unversioned_arn(self) -> typing.Optional[str]:
+        if unversioned := self.get('LayerArn'):
+            return unversioned
+        if not self.arn:
+            return None
+        parts = self.arn.split(':')
+        return ':'.join(parts[:7])
 
     @property
     def name(self) -> str:

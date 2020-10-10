@@ -136,16 +136,17 @@ def _prune_layer(
         Whether or not to ask before proceeding with the prune operation.
     """
     versions = servicer.get_layer_versions(lambda_client, layer_name)
-    removal_arns = [
-        version.arn
+    removals = [
+        version
         for version in versions[:-1]
         if (start is None or start <= int(version.version))
         and (end is None or int(version.version) <= end)
     ]
+    arns = [r.arn for r in removals]
 
     print('\nARN Versions to be removed:')
     print(textwrap.indent(
-        '\n'.join(removal_arns),
+        '\n'.join(arns),
         prefix='  - ',
     ))
 
@@ -160,10 +161,11 @@ def _prune_layer(
         print('\n[ABORTED]: Skipped removal process.')
         return
 
-    for arn in removal_arns:
+    for arn in arns:
+        print(f'[PRUNING]: {arn}')
         servicer.remove_layer_version(lambda_client, arn)
 
-    return removal_arns
+    return arns
 
 
 def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':

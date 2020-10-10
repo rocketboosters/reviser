@@ -1,6 +1,7 @@
 """
-Allows for selecting subsets of the targets within the loaded configuration.
-The subsets are fuzzy-matched unless the --exact flag is used.
+Installs dependencies and copies includes into a zipped file that
+is structured correctly to be deployed to the lambda function/layer
+target.
 """
 import argparse
 import typing

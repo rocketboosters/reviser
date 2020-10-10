@@ -8,6 +8,7 @@ import typing
 import yaml
 from botocore.client import BaseClient
 
+from lambda_deployer import definitions
 from lambda_deployer import interactivity
 from lambda_deployer import servicer
 
@@ -26,11 +27,14 @@ def populate_subparser(parser: argparse.ArgumentParser):
 
 def _get_layer_version_info(
         client: BaseClient,
-        layer_arn: str,
+        layer_reference: 'definitions.LambdaLayerReference',
 ) -> dict:
     """Fetches layer information for display."""
-    versions = servicer.get_layer_versions(client, layer_arn)
-    current = next((v for v in versions if v.arn == layer_arn))
+    versions = servicer.get_layer_versions(
+        client,
+        layer_reference.unversioned_arn,
+    )
+    current = next((v for v in versions if v.arn == layer_reference.arn), None)
     latest = versions[-1]
 
     out = {
@@ -38,6 +42,7 @@ def _get_layer_version_info(
         'version': current.version,
         'created': current.created.isoformat('T'),
         'runtimes': ', '.join(current.runtimes),
+        'arn': layer_reference.arn,
     }
 
     if latest != current:
@@ -74,7 +79,7 @@ def _display_function_info(
         'revision_id': lambda_function.revision_id,
         'layers': [
             {
-                **_get_layer_version_info(client, item.arn),
+                **_get_layer_version_info(client, item),
                 'size': item.size,
             }
             for item in lambda_function.layers
@@ -82,7 +87,8 @@ def _display_function_info(
         'status': lambda_function.status.to_dict(),
         'update_status': lambda_function.status.to_dict(),
     }
-    print(f'\n--- {lambda_function.name}:{qualifier} ---')
+    suffix = qualifier or '$LATEST'
+    print(f'\n--- {lambda_function.name}:{suffix} ---')
     print(textwrap.indent(yaml.safe_dump(data), prefix='  '))
     print('\n')
 
@@ -107,7 +113,7 @@ def _display_layer_info(
         version=version,
     )
 
-    print(f'\n--- {layer.name}:{qualifier} ---')
+    print(f'\n--- {layer.name}:{version} ---')
     data = {
         'arn': layer.arn,
         'version': layer.version,

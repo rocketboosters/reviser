@@ -86,7 +86,7 @@ class ScenarioRunner:
                 self.shell = interactivity.create_shell(arguments)
                 commands = [c.get('command') for c in self.commands]
                 self.shell.command_queue = commands
-                self.shell.loop()
+                self.shell.run()
         except Exception as error:
             self.error = error
         finally:

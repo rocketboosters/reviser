@@ -79,5 +79,5 @@ def run_shell(
         or shell.context.command_queue
         or []
     )
-    shell.loop()
+    shell.run()
     return shell

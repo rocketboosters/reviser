@@ -16,5 +16,6 @@ from .enumerations import RUNTIME_VERSION  # noqa
 from .enumerations import TargetType  # noqa
 from .infomatics import LambdaFunction  # noqa
 from .infomatics import LambdaLayer  # noqa
+from .infomatics import LambdaLayerReference  # noqa
 from .infomatics import PublishedLayer  # noqa
 from .selections import Selection  # noqa

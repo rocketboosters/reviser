@@ -1,0 +1,7 @@
+{% for name, doc in commands %}
+{%- filter indent(first=False) %}
+{%- filter wordwrap -%}
+{{ name | colorize(color="cyan") }}: {{ doc | single_line }}
+{%- endfilter -%}
+{% endfilter %}
+{% endfor %}

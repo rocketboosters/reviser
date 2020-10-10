@@ -5,6 +5,7 @@ from collections import defaultdict
 from botocore.client import BaseClient
 
 from lambda_deployer import definitions
+from lambda_deployer import templating
 from lambda_deployer.servicer import functioning
 
 
@@ -34,16 +35,24 @@ def get_layer_versions(
         return []
 
 
-def remove_layer_version(lambda_client: BaseClient, layer_arn: str):
+def remove_layer_version(lambda_client: BaseClient, layer_arn: str) -> bool:
     """Removes the specified lambda layer."""
+    parts = layer_arn.rsplit(':', 1)
+    request = dict(
+        LayerName=parts[0],
+        VersionNumber=int(parts[1]),
+
+    )
     try:
-        lambda_client.delete_layer_version(
-            LayerName=layer_arn,
-            VersionNumber=int(layer_arn.rsplit(':', 1)[-1])
-        )
-        print(f'[PRUNED]: {layer_arn}')
+        lambda_client.delete_layer_version(**request)
+        return True
     except Exception as error:
-        print(f'[FAILED]: Version {layer_arn} could not be deleted "{error}"')
+        print('REQUEST:', request)
+        templating.print_error(
+            f'[FAILED]: Version {layer_arn} could not be deleted "{error}"',
+            error
+        )
+        return False
 
 
 def get_layer_version(
