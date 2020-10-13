@@ -39,7 +39,7 @@ class Dependency(abstracts.Specification):
     @property
     def packages(self) -> typing.List[str]:
         """Explicitly defined packages."""
-        return self.get('packages', default=[]) or []
+        return self.get_first_as_list(['packages'], ['package'], default=[])
 
     def get_package_names(self) -> typing.List[str]:
         """

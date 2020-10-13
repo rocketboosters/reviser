@@ -129,15 +129,14 @@ def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
     """Displays the current configuration of the lambda target(s)."""
     selected = ex.shell.context.get_selected_targets(ex.shell.selection)
     qualifier = ex.args.get('qualifier')
-    client = ex.shell.context.connection.session.client('lambda')
 
     items = [(t, n) for t in selected.function_targets for n in t.names]
     for target, name in items:
-        _display_function_info(client, name, qualifier)
+        _display_function_info(target.client('lambda'), name, qualifier)
 
     items = [(t, n) for t in selected.layer_targets for n in t.names]
     for target, name in items:
-        _display_layer_info(client, name, qualifier)
+        _display_layer_info(target.client('lambda'), name, qualifier)
 
     return ex.finalize(
         status='SUCCESS',

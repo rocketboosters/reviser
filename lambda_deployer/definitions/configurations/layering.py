@@ -59,18 +59,12 @@ class AttachedLayer(abstracts.Specification):
     @property
     def restrictions(self) -> typing.List[str]:
         """Only attach to functions matching values in this list."""
-        value = self.get('only', default=[])
-        if isinstance(value, str):
-            return [value]
-        return value
+        return self.get_as_list('only', default=[]) or []
 
     @property
     def exclusions(self) -> typing.List[str]:
         """Don't attach to functions matching values in this list."""
-        value = self.get('except', default=[])
-        if isinstance(value, str):
-            return [value]
-        return value
+        return self.get_as_list('except', default=[]) or []
 
     def is_attachable(self, function_name: str) -> bool:
         """

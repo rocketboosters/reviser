@@ -5,6 +5,8 @@ import re
 import tempfile
 import typing
 
+from botocore.client import BaseClient
+
 from lambda_deployer.definitions import abstracts
 from lambda_deployer.definitions import configurations
 from lambda_deployer.definitions import enumerations
@@ -64,6 +66,22 @@ class Target(abstracts.Specification):
         return self.get('region', default=self.configuration.aws_region)
 
     @property
+    def bucket(self) -> typing.Optional[str]:
+        """Retrieves the bucket to use for uploading to S3."""
+        buckets = self.get_first(
+            ['buckets'], ['bucket'],
+            default=self.configuration.bucket,
+        )
+
+        if not buckets:
+            return None
+
+        if isinstance(buckets, str):
+            return buckets
+
+        return buckets[self.connection.aws_account_id]
+
+    @property
     def bundle(self) -> 'configurations.Bundle':
         """Bundle object associated with this target configuration."""
         return configurations.Bundle(
@@ -81,9 +99,7 @@ class Target(abstracts.Specification):
         """
         if self.kind == enumerations.TargetType.LAYER:
             return []
-        values = self.get('layers', default=[])
-        if isinstance(values, str):
-            values = [values]
+        values = self.get_first_as_list(['layers'], ['layer'], default=[])
         values = [{'name': v} if isinstance(v, str) else v for v in values]
         return [
             configurations.AttachedLayer(
@@ -105,9 +121,7 @@ class Target(abstracts.Specification):
         """
         if self.kind == enumerations.TargetType.LAYER:
             return []
-        values = self.get('variables', default=[])
-        if isinstance(values, str):
-            values = [values]
+        values = self.get_first_as_list(['variables'], ['variable'], default=[])
         values = [{'arg': v} if isinstance(v, str) else v for v in values]
         return [
             configurations.EnvironmentVariable(
@@ -125,9 +139,7 @@ class Target(abstracts.Specification):
         Items that should be skipped when modifying function configurations
         during the deployment process.
         """
-        ignores = self.get('ignores', default=[])
-        if isinstance(ignores, str):
-            return [ignores]
+        ignores = self.get_first_as_list(['ignores'], ['ignore'], default=[])
         return [i.lower() for i in ignores]
 
     @property
@@ -159,8 +171,7 @@ class Target(abstracts.Specification):
     @property
     def names(self) -> typing.List[str]:
         """Names of the targets associated with this definition."""
-        names = self.get('names', default=self.get('name', default=[]))
-        names = [names] if isinstance(names, str) else names
+        names = self.get_first_as_list(['names'], ['name'], default=[])
         return [str(n) for n in names if n and _is_selected_match(self, n)]
 
     @property
@@ -225,6 +236,13 @@ class Target(abstracts.Specification):
         finder = (True for a in args if a in ignores)
         return next(finder, False)
 
+    def client(self, service_name: str) -> BaseClient:
+        """
+        Creates a boto3 client for the given service configured for use
+        when acting on this target.
+        """
+        return self.connection.client(service_name, region_name=self.aws_region)
+
     def serialize(self) -> dict:
         """Serializes the object for output representation."""
         if self.kind == enumerations.TargetType.FUNCTION:
@@ -233,6 +251,7 @@ class Target(abstracts.Specification):
                 'variables': [v.serialize() for v in self.variables],
                 'memory': self.memory,
                 'timeout': self.timeout,
+                'ignores': self.ignores,
             }
         else:
             values = {}
@@ -246,6 +265,5 @@ class Target(abstracts.Specification):
             'site_packages_directory': str(self.site_packages_directory),
             'bundle': self.bundle.serialize(),
             'dependencies': [d.serialize() for d in self.dependencies],
-            'ignores': self.ignores,
             **values,
         }

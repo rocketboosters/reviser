@@ -117,7 +117,7 @@ def update_function_configuration(
         dry_run: bool = False,
 ):
     """Updates the function configuration as part of a deployment process."""
-    client = target.connection.session.client('lambda')
+    client = target.client('lambda')
     current = client.get_function_configuration(FunctionName=function_name)
 
     changes = dict(

@@ -6,7 +6,9 @@ version.
 import typing
 from argparse import ArgumentParser
 
+from lambda_deployer import definitions
 from lambda_deployer import interactivity
+from lambda_deployer import servicer
 
 
 def get_completions(
@@ -25,12 +27,29 @@ def populate_subparser(parser: ArgumentParser):
     parser.add_argument('--create', action='store_true')
 
 
+def _get_version(target: 'definitions.Target', version: str) -> str:
+    """
+    Converts the version value into an absolute function version.
+    """
+    try:
+        number = int(version)
+    except ValueError:
+        return version
+
+    if number > 0:
+        return version
+
+    client = target.client('lambda')
+    versions = servicer.get_function_versions(client, target.names[0])
+    return versions[number - 1].version
+
+
 def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
     """Execute the command invocation."""
     selected = ex.shell.context.get_selected_targets(ex.shell.selection)
     is_ambiguous = not ex.args.get('function') and (
-        0 < len(selected.targets) > 1
-        or len(selected.targets[0].names) > 1
+        0 < len(selected.function_targets) > 1
+        or len(selected.function_targets[0].names) > 1
     )
     if is_ambiguous:
         return ex.finalize(
@@ -43,10 +62,11 @@ def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
             echo=True,
         )
 
-    name = ex.args.get('function') or selected.targets[0].names[0]
-    client = ex.shell.context.connection.session.client('lambda')
+    target = selected.function_targets[0]
+    name = ex.args.get('function') or target.names[0]
+    client = target.client('lambda')
     alias = ex.args.get('alias')
-    version = ex.args.get('version')
+    version = _get_version(target, ex.args.get('version'))
     create = ex.args.get('create')
     yes = ex.args.get('yes')
 

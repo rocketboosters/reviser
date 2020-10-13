@@ -56,12 +56,12 @@ def upload(
     size = utils.to_human_readable_size(upload_status['total_bytes'])
     print(f'[UPLOADING]: {s3_keys[0]} (size: {size})')
 
-    client = target.connection.session.client('s3')
+    client = target.client('s3')
 
     if not dry_run:
         client.upload_file(
             Filename=str(target.bundle_zip_path),
-            Bucket=target.configuration.bucket,
+            Bucket=target.bucket,
             Key=s3_keys[0],
             Callback=functools.partial(upload_callback, status=upload_status)
         )
@@ -70,10 +70,10 @@ def upload(
         print(f'[COPYING]: {s3_keys[0]} -> {key}')
         if not dry_run:
             client.copy_object(
-                Bucket=target.configuration.bucket,
+                Bucket=target.bucket,
                 Key=key,
                 CopySource={
-                    'Bucket': target.configuration.bucket,
+                    'Bucket': target.bucket,
                     'Key': s3_keys[0],
                 },
             )

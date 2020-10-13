@@ -1,11 +1,19 @@
 commands:
-- alias a 2
-- alias b 2 --create --yes
-- alias c 2
+- command: alias a 2
+  status: SUCCESS
+- command: alias b 2 --create --yes
+  status: SUCCESS
+- command: alias c 2
+  status: ABORTED
+- command: alias c -1
+  status: SUCCESS
+  info:
+    version: '3'
 
 inputs:
 - y
 - n
+- y
 
 aws:
   region_name: us-east-1
@@ -17,3 +25,20 @@ aws:
   iam:
     list_account_aliases:
       AccountAliases: []
+  lambda:
+    list_versions_by_function:
+      Versions:
+      - Version: '1'
+        LastModified: '2020-01-01T12:23:34'
+      - Version: '2'
+        LastModified: '2020-01-01T12:24:00'
+      - Version: '3'
+        LastModified: '2020-01-01T12:25:00'
+      - Version: '$LATEST'
+        LastModified: '2020-01-01T12:25:00'
+    list_aliases:
+      Aliases:
+      - FunctionVersion: '1'
+        Name: 'a'
+      - FunctionVersion: '$LATEST'
+        Name: 'c'

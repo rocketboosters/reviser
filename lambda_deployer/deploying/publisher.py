@@ -12,7 +12,7 @@ def publish_function(
         dry_run: bool = False,
 ):
     """Publish updated versions of the functions after upload."""
-    client = target.connection.session.client('lambda')
+    client = target.client('lambda')
     for name, key in zip(target.names, s3_keys):
         print(f'[PUBLISHING]: Deploying code bundle to {name} $LATEST')
         response = None
@@ -20,7 +20,7 @@ def publish_function(
         if not dry_run:
             response = client.update_function_code(
                 FunctionName=name,
-                S3Bucket=target.configuration.bucket,
+                S3Bucket=target.bucket,
                 S3Key=key,
                 Publish=False,
             )
@@ -60,7 +60,7 @@ def publish_layer(
     to S3 and is available to source as the new lambda layer code.
     """
     published_layers = []
-    client = target.connection.session.client('lambda')
+    client = target.client('lambda')
 
     for name, key in zip(target.names, s3_keys):
         print(f'[PUBLISHING]: Publishing code bundle to {name} layer')
@@ -71,7 +71,7 @@ def publish_layer(
             LayerName=name,
             Description=description or '',
             Content={
-                'S3Bucket': target.configuration.bucket,
+                'S3Bucket': target.bucket,
                 'S3Key': key,
             },
             CompatibleRuntimes=[f'python{definitions.RUNTIME_VERSION}'],

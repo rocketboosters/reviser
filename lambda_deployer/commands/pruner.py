@@ -172,7 +172,6 @@ def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
     """Runs the pruning operation on the targets."""
     selected = ex.shell.context.get_selected_targets(ex.shell.selection)
     targets = sorted(selected.targets, key=lambda t: t.kind.value)
-    client = ex.shell.context.connection.session.client('lambda')
 
     kwargs = {
         'start': ex.args.get('start'),
@@ -187,7 +186,7 @@ def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
     }
 
     results = {
-        name: caller[target.kind](client, name, **kwargs)
+        name: caller[target.kind](target.client('lambda'), name, **kwargs)
         for target in targets
         for name in target.names
     }

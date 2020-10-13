@@ -56,7 +56,7 @@ def create_shell(arguments: typing.List[str] = None) -> 'interactivity.Shell':
     """
     args = _parse(arguments)
     directory = pathlib.Path(args.root_directory).absolute()
-    session = boto3.Session(profile_name=args.aws_profile_name)
+    session = boto3.Session()
     context = definitions.Context.load_from_file(
         arguments=args,
         path=directory,

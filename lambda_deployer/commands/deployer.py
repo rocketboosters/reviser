@@ -5,6 +5,8 @@ any modified settings between the current configuration and that target's
 existing configuration.
 """
 import argparse
+import os
+import string
 import typing
 
 from lambda_deployer import deploying
@@ -26,11 +28,15 @@ def populate_subparser(parser: argparse.ArgumentParser):
 
 def run(ex: 'interactivity.Execution'):
     """Execute a bundle operation on the selected function/layer targets."""
+    description = (
+        string.Template(ex.args.get('description') or '')
+        .substitute(os.environ)
+    )
     print('\n\n')
     deployed_targets = deploying.deploy(
         context=ex.shell.context,
         selection=ex.shell.selection,
-        description=ex.args.get('description', ''),
+        description=description,
         dry_run=ex.args.get('dry_run'),
     )
     print('\n')
@@ -39,7 +45,8 @@ def run(ex: 'interactivity.Execution'):
         message='Selected items have been deployed.',
         info={
             'dry_run': ex.args.get('dry_run'),
-            'items': [n for t in deployed_targets for n in t.names]
+            'items': [n for t in deployed_targets for n in t.names],
+            'description': description,
         },
         echo=True,
     )

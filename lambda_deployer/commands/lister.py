@@ -24,28 +24,20 @@ def populate_subparser(parser: ArgumentParser):
 def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
     """Execute the listing command."""
     selected = ex.shell.context.get_selected_targets(ex.shell.selection)
-    client = ex.shell.context.connection.session.client('lambda')
 
-    function_names = [
-        name
-        for target in selected.function_targets
-        for name in target.names
-    ]
-    servicer.echo_function_versions(client, function_names)
+    for target in selected.function_targets:
+        client = target.client('lambda')
+        servicer.echo_function_versions(client, target.names)
 
-    if not selected.layer_targets:
-        return ex.finalize(
-            status='LISTED',
-            message='Functions have been listed.',
-            echo=True,
-        )
-
-    layer_names = [
-        name
-        for target in selected.layer_targets
-        for name in target.names
-    ]
-    servicer.echo_layer_versions(client, layer_names, function_names)
+    for target in selected.layer_targets:
+        client = target.client('lambda')
+        function_names = [
+            name
+            for t in selected.function_targets
+            for name in t.names
+            if t.aws_region == target.aws_region
+        ]
+        servicer.echo_layer_versions(client, target.names, function_names)
 
     return ex.finalize(
         status='LISTED',
