@@ -1,0 +1,11 @@
+## {{ header }}
+
+{{ summary | wordwrap }}
+{% if usage %}
+```
+{{ usage }}
+```
+{% endif %}
+{%- if details %}
+{{ details }}
+{%- endif -%}

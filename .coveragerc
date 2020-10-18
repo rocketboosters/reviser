@@ -2,4 +2,7 @@
 source = *.py
 omit =
     main.py
+    docs_builder.py
+    image_builder.py
     **/scenarios/**/*.py
+    **/docs/*.py
