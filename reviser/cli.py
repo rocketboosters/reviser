@@ -13,11 +13,7 @@ def main(arguments: typing.List[str] = None):
     print(f'\n[DIRECTORY]: {os.path.realpath(os.curdir)}')
     args = parsing.create_parser(False).parse_args(args=arguments)
 
-    credentials_directory = (
-        pathlib.Path(args.aws_directory or '~/.aws')
-        .expanduser()
-        .absolute()
-    )
+    credentials_directory = pathlib.Path(args.aws_directory).absolute()
     deploy_directory = pathlib.Path(args.root_directory).absolute()
     folder_name = deploy_directory.name
 

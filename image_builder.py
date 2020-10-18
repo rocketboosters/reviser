@@ -30,14 +30,17 @@ def build(python_version: str, spec: dict, args: argparse.Namespace) -> dict:
     if not args.pre:
         tags.append('{}:current-{}'.format(HUB_PREFIX, python_version))
 
-    command = 'docker build --pull --file "{}" {} {} .'.format(
-        path,
-        ' '.join([
-            '--build-arg {}={}'.format(key, value)
-            for key, value in spec['build_args'].items()
-        ]),
-        ' '.join(['-t {}'.format(t) for t in tags])
-    )
+    parts = ['docker', 'build', '--pull', f'--file="{path}"']
+    if not args.cache:
+        parts.append('--no-cache')
+
+    for key, value in spec['build_args'].items():
+        parts.append(f'--build-arg {key}={value}')
+
+    for tag in tags:
+        parts.append(f'--tag={tag}')
+
+    command = ' '.join(parts + ['.'])
 
     print('[BUILDING]:', python_version)
     if args.dry_run:
@@ -72,7 +75,12 @@ def parse() -> argparse.Namespace:
     parser.add_argument(
         '-p', '--publish',
         action='store_true',
-        help='Whether or not to publish images after building them.'
+        help='Whether or not to publish images after building them.',
+    )
+    parser.add_argument(
+        '--cache',
+        action='store_true',
+        help='Allows the docker build to use existing cache.',
     )
     parser.add_argument(
         '-i', '--id',
@@ -83,8 +91,8 @@ def parse() -> argparse.Namespace:
             One or more build identifiers to build. If not specified
             all images will be built. This flag can be specified multiple
             times in a single command.
-            """
-        )
+            """,
+        ),
     )
     parser.add_argument(
         '--pre',
@@ -95,8 +103,8 @@ def parse() -> argparse.Namespace:
             identifier and "current" images will be skipped. This is
             used to publish images for pre-releases to the hub prior
             to the official release.
-            """
-        )
+            """,
+        ),
     )
     parser.add_argument(
         '--dry-run',
@@ -106,8 +114,8 @@ def parse() -> argparse.Namespace:
             When set, the actual build process is skipped and instead
             the build command is printed showing what would have been
             executed.
-            """
-        )
+            """,
+        ),
     )
     return parser.parse_args()
 

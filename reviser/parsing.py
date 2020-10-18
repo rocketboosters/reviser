@@ -1,5 +1,6 @@
 import argparse
 import os
+import pathlib
 
 import reviser
 
@@ -9,6 +10,17 @@ def _suppress(condition: bool, help_doc: str) -> str:
     if condition:
         return argparse.SUPPRESS
     return help_doc
+
+
+def _get_auth_directory() -> pathlib.Path:
+    """Finds the first valid and specified AWS credentials directory."""
+    if creds_path := os.environ.get('AWS_SHARED_CREDENTIALS_FILE'):
+        return pathlib.Path(creds_path).expanduser().parent.absolute()
+
+    if config_path := os.environ.get('AWS_CONFIG_FILE'):
+        return pathlib.Path(config_path).expanduser().parent.absolute()
+
+    return pathlib.Path('~/.aws').expanduser().absolute()
 
 
 def create_parser(internal_parser: bool) -> argparse.ArgumentParser:
@@ -31,8 +43,10 @@ def create_parser(internal_parser: bool) -> argparse.ArgumentParser:
             that will be deployed to from this shell.
             """),
     )
+
     parser.add_argument(
         '--aws-directory',
+        default=str(_get_auth_directory()),
         help=_suppress(internal_parser, """
             Specifies the directory where AWS credentials are stored.
             This directory will be mounted as a volume into the shell
