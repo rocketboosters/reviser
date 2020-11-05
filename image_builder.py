@@ -7,8 +7,8 @@ import toml
 
 HUB_PREFIX = "swernst/reviser"
 MY_DIRECTORY = pathlib.Path(__file__).parent.absolute()
-PROJECT_DATA = toml.loads(MY_DIRECTORY.joinpath('pyproject.toml').read_text())
-VERSION = PROJECT_DATA['tool']['poetry']['version']
+PROJECT_DATA = toml.loads(MY_DIRECTORY.joinpath("pyproject.toml").read_text())
+VERSION = PROJECT_DATA["tool"]["poetry"]["version"]
 BUILDS = {
     "3.8": {"build_args": {"PYTHON_VERSION": "3.8"}},
 }

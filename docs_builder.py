@@ -11,8 +11,8 @@ from reviser import commands
 from reviser import templating
 
 MY_DIRECTORY = pathlib.Path(__file__).parent.absolute()
-PROJECT_DATA = toml.loads(MY_DIRECTORY.joinpath('pyproject.toml').read_text())
-VERSION = PROJECT_DATA['tool']['poetry']['version']
+PROJECT_DATA = toml.loads(MY_DIRECTORY.joinpath("pyproject.toml").read_text())
+VERSION = PROJECT_DATA["tool"]["poetry"]["version"]
 
 
 def _explode_docs(docs: str) -> typing.Tuple[str, str]:
@@ -105,7 +105,7 @@ def main():
     shell_commands, shell_commands_toc = _create_commands_docs()
     configuration, configuration_toc = _create_configuration_docs()
 
-    print(f'Rendering documentation for v{VERSION}')
+    print(f"Rendering documentation for v{VERSION}")
     output = templating.render(
         "../docs/README.template.md",
         configuration=configuration,
