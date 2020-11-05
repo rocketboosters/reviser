@@ -56,7 +56,7 @@ def build(python_version: str, spec: dict, args: argparse.Namespace) -> dict:
 def publish(build_entry: dict, args: argparse.Namespace):
     """Publishes the specified build entry to docker hub"""
     for tag in build_entry["tags"]:
-        if args["dry_run"]:
+        if args.dry_run:
             print("[DRY-RUN]: Skipped pushing {}".format(tag))
         else:
             print("[PUSHING]:", tag)
