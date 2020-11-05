@@ -37,7 +37,7 @@ def create_parser(internal_parser: bool) -> argparse.ArgumentParser:
     info = sys.version_info
     parser.add_argument(
         "--runtime",
-        default=f'{info.major}.{info.minor}',
+        default=f"{info.major}.{info.minor}",
         help=_suppress(
             internal_parser,
             """

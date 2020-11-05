@@ -12,7 +12,6 @@ except ImportError as error:
         raise error
 
 
-
 try:
     __version__ = _metadata.version(__package__)
 except _metadata.PackageNotFoundError:  # pragma: no-cover
