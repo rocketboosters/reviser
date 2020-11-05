@@ -1,4 +1,4 @@
-# Reviser (v0.1.1)
+# Reviser (v0.1.2)
 
 Reviser is a tool for AWS Lambda function and layer version deployment and
 alias management specifically for Python runtimes where the actual

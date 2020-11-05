@@ -2,12 +2,17 @@ import argparse
 import io
 import os
 import pathlib
-import typing
 import re
+import typing
 
-import reviser
+import toml
+
 from reviser import commands
 from reviser import templating
+
+MY_DIRECTORY = pathlib.Path(__file__).parent.absolute()
+PROJECT_DATA = toml.loads(MY_DIRECTORY.joinpath('pyproject.toml').read_text())
+VERSION = PROJECT_DATA['tool']['poetry']['version']
 
 
 def _explode_docs(docs: str) -> typing.Tuple[str, str]:
@@ -17,7 +22,7 @@ def _explode_docs(docs: str) -> typing.Tuple[str, str]:
 
     try:
         end_index = lines.index("", start_index) + 1
-        return (" ".join(lines[start_index:end_index]), "\n".join(lines[end_index:]))
+        return " ".join(lines[start_index:end_index]), "\n".join(lines[end_index:])
     except ValueError:
         return " ".join(lines[start_index:]), ""
 
@@ -100,13 +105,14 @@ def main():
     shell_commands, shell_commands_toc = _create_commands_docs()
     configuration, configuration_toc = _create_configuration_docs()
 
+    print(f'Rendering documentation for v{VERSION}')
     output = templating.render(
         "../docs/README.template.md",
         configuration=configuration,
         configuration_toc=configuration_toc,
         shell_commands=shell_commands,
         shell_commands_toc=shell_commands_toc,
-        version=reviser.__version__,
+        version=VERSION,
     ).replace("\r", "")
     pathlib.Path(__file__).parent.joinpath("README.md").write_text(output)
 
