@@ -17,7 +17,7 @@ from reviser import interactivity
 
 
 def get_completions(
-        completer: 'interactivity.ShellCompleter',
+    completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
     """Shell auto-completes for this command."""
     return []
@@ -28,11 +28,11 @@ def populate_subparser(parser: argparse.ArgumentParser):
     pass
 
 
-def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
+def run(ex: "interactivity.Execution") -> "interactivity.Execution":
     """Exits the shell."""
     ex.shell.is_interactive = True
     return ex.finalize(
-        status='SHELL',
-        message='Switching to interactive shell execution.',
+        status="SHELL",
+        message="Switching to interactive shell execution.",
         echo=True,
     )

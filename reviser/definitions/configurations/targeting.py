@@ -14,8 +14,8 @@ from reviser.definitions import selections
 
 
 def _is_selected_match(
-        target: 'Target',
-        name: str,
+    target: "Target",
+    name: str,
 ):
     """
     Determines whether or not the target name is a match for the
@@ -24,13 +24,12 @@ def _is_selected_match(
     if not target.selection:
         return True
 
-    if exacts := getattr(target.selection, f'{target.kind.value}_names'):
+    if exacts := getattr(target.selection, f"{target.kind.value}_names"):
         return name in exacts
 
-    needles = getattr(target.selection, f'{target.kind.value}_needles')
-    any_needles = (
-        bool(target.selection.function_needles)
-        or bool(target.selection.layer_needles)
+    needles = getattr(target.selection, f"{target.kind.value}_needles")
+    any_needles = bool(target.selection.function_needles) or bool(
+        target.selection.layer_needles
     )
 
     return (
@@ -57,19 +56,20 @@ class Target(abstracts.Specification):
     be a function or layer.
     """
 
-    configuration: 'configurations.Configuration'
-    selection: 'selections.Selection' = None
+    configuration: "configurations.Configuration"
+    selection: "selections.Selection" = None
 
     @property
     def aws_region(self) -> str:
         """AWS region name where this target resides."""
-        return self.get('region', default=self.configuration.aws_region)
+        return self.get("region", default=self.configuration.aws_region)
 
     @property
     def bucket(self) -> typing.Optional[str]:
         """Retrieves the bucket to use for uploading to S3."""
         buckets = self.get_first(
-            ['buckets'], ['bucket'],
+            ["buckets"],
+            ["bucket"],
             default=self.configuration.bucket,
         )
 
@@ -82,25 +82,25 @@ class Target(abstracts.Specification):
         return buckets[self.connection.aws_account_id]
 
     @property
-    def bundle(self) -> 'configurations.Bundle':
+    def bundle(self) -> "configurations.Bundle":
         """Bundle object associated with this target configuration."""
         return configurations.Bundle(
             directory=self.directory,
-            data=self.get('bundle', default={}),
+            data=self.get("bundle", default={}),
             connection=self.connection,
             target=self,
         )
 
     @property
-    def layer_attachments(self) -> typing.List['configurations.AttachedLayer']:
+    def layer_attachments(self) -> typing.List["configurations.AttachedLayer"]:
         """
         List of layers that should be attached to functions in this target.
         This will always be an empty list for layer targets.
         """
         if self.kind == enumerations.TargetType.LAYER:
             return []
-        values = self.get_first_as_list(['layers'], ['layer'], default=[])
-        values = [{'name': v} if isinstance(v, str) else v for v in values]
+        values = self.get_first_as_list(["layers"], ["layer"], default=[])
+        values = [{"name": v} if isinstance(v, str) else v for v in values]
         return [
             configurations.AttachedLayer(
                 directory=self.directory,
@@ -112,7 +112,7 @@ class Target(abstracts.Specification):
         ]
 
     @property
-    def variables(self) -> typing.List['configurations.EnvironmentVariable']:
+    def variables(self) -> typing.List["configurations.EnvironmentVariable"]:
         """
         List of environment variables that will be applied during
         function configuration updates within the deploy action. This
@@ -121,8 +121,8 @@ class Target(abstracts.Specification):
         """
         if self.kind == enumerations.TargetType.LAYER:
             return []
-        values = self.get_first_as_list(['variables'], ['variable'], default=[])
-        values = [{'arg': v} if isinstance(v, str) else v for v in values]
+        values = self.get_first_as_list(["variables"], ["variable"], default=[])
+        values = [{"arg": v} if isinstance(v, str) else v for v in values]
         return [
             configurations.EnvironmentVariable(
                 directory=self.directory,
@@ -139,7 +139,7 @@ class Target(abstracts.Specification):
         Items that should be skipped when modifying function configurations
         during the deployment process.
         """
-        ignores = self.get_first_as_list(['ignores'], ['ignore'], default=[])
+        ignores = self.get_first_as_list(["ignores"], ["ignore"], default=[])
         return [i.lower() for i in ignores]
 
     @property
@@ -150,28 +150,30 @@ class Target(abstracts.Specification):
     @property
     def bundle_zip_path(self) -> pathlib.Path:
         """Temporary location where the target zip bundle will be saved."""
-        return pathlib.Path(tempfile.gettempdir()).joinpath(f'{self.uuid}.zip')
+        return pathlib.Path(tempfile.gettempdir()).joinpath(f"{self.uuid}.zip")
 
     @property
     def site_packages_directory(self) -> pathlib.Path:
         """Temporary location where site packages will be installed."""
         if self.kind == enumerations.TargetType.LAYER:
-            return self.bundle_directory.joinpath('python')
-        return self.bundle_directory.joinpath('site_packages')
+            return self.bundle_directory.joinpath("python")
+        return self.bundle_directory.joinpath("site_packages")
 
     @property
-    def kind(self) -> 'enumerations.TargetType':
+    def kind(self) -> "enumerations.TargetType":
         """Target type as one of 'function' or 'layer'."""
         # noinspection PyArgumentList
-        return enumerations.TargetType(value=self.get(
-            'kind',
-            default=enumerations.TargetType.FUNCTION.value,
-        ))
+        return enumerations.TargetType(
+            value=self.get(
+                "kind",
+                default=enumerations.TargetType.FUNCTION.value,
+            )
+        )
 
     @property
     def names(self) -> typing.List[str]:
         """Names of the targets associated with this definition."""
-        names = self.get_first_as_list(['names'], ['name'], default=[])
+        names = self.get_first_as_list(["names"], ["name"], default=[])
         return [str(n) for n in names if n and _is_selected_match(self, n)]
 
     @property
@@ -180,15 +182,15 @@ class Target(abstracts.Specification):
         Timeout, in seconds, after which the function stops executing. This
         will always be None for layers.
         """
-        value = self.get('timeout')
+        value = self.get("timeout")
         if not value or self.kind == enumerations.TargetType.LAYER:
             return None
 
         try:
             return int(value)
         except ValueError:
-            regex = re.compile(r'^(?P<value>\d+).*')
-            return int(regex.match(value).groupdict()['value'])
+            regex = re.compile(r"^(?P<value>\d+).*")
+            return int(regex.match(value).groupdict()["value"])
 
     @property
     def memory(self) -> typing.Optional[int]:
@@ -196,23 +198,23 @@ class Target(abstracts.Specification):
         Memory, in MB, available to the function when executing. This
         will always be None for layers.
         """
-        value = self.get('memory')
+        value = self.get("memory")
         if not value or self.kind == enumerations.TargetType.LAYER:
             return None
 
         try:
             return int(value)
         except ValueError:
-            regex = re.compile(r'^(?P<value>\d+).*')
-            return int(regex.match(value).groupdict()['value'])
+            regex = re.compile(r"^(?P<value>\d+).*")
+            return int(regex.match(value).groupdict()["value"])
 
     @property
-    def dependencies(self) -> typing.List['configurations.Dependency']:
+    def dependencies(self) -> typing.List["configurations.Dependency"]:
         """Dependencies for this function definition."""
         output = []
 
-        for data in self.get('dependencies', default=[]):
-            if data.get('kind') == enumerations.DependencyType.PIPPER.value:
+        for data in self.get("dependencies", default=[]):
+            if data.get("kind") == enumerations.DependencyType.PIPPER.value:
                 dependency = configurations.PipperDependency(
                     directory=self.directory,
                     data=data,
@@ -247,23 +249,23 @@ class Target(abstracts.Specification):
         """Serializes the object for output representation."""
         if self.kind == enumerations.TargetType.FUNCTION:
             values = {
-                'layers': [a.serialize() for a in self.layer_attachments],
-                'variables': [v.serialize() for v in self.variables],
-                'memory': self.memory,
-                'timeout': self.timeout,
-                'ignores': self.ignores,
+                "layers": [a.serialize() for a in self.layer_attachments],
+                "variables": [v.serialize() for v in self.variables],
+                "memory": self.memory,
+                "timeout": self.timeout,
+                "ignores": self.ignores,
             }
         else:
             values = {}
 
         return {
-            'kind': self.kind.value,
-            'names': self.names,
-            'region': self.aws_region,
-            'bundle_directory': str(self.bundle_directory),
-            'bundle_zip_path': str(self.bundle_zip_path),
-            'site_packages_directory': str(self.site_packages_directory),
-            'bundle': self.bundle.serialize(),
-            'dependencies': [d.serialize() for d in self.dependencies],
+            "kind": self.kind.value,
+            "names": self.names,
+            "region": self.aws_region,
+            "bundle_directory": str(self.bundle_directory),
+            "bundle_zip_path": str(self.bundle_zip_path),
+            "site_packages_directory": str(self.site_packages_directory),
+            "bundle": self.bundle.serialize(),
+            "dependencies": [d.serialize() for d in self.dependencies],
             **values,
         }

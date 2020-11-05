@@ -19,8 +19,8 @@ def test_bundle_file_matching():
     bundle = configurations.Bundle(
         directory=directory,
         data={
-            'includes': ['commands', 'definitions/aws.py'],
-            'excludes': ['**/__init__.py'],
+            "includes": ["commands", "definitions/aws.py"],
+            "excludes": ["**/__init__.py"],
         },
         connection=MagicMock(),
         target=target,
@@ -30,14 +30,14 @@ def test_bundle_file_matching():
     excludes = bundle.get_exclude_paths()
     paths = bundle.get_paths()
 
-    assert all([p.is_file() or p.suffix == '.py' for p in paths])
+    assert all([p.is_file() or p.suffix == ".py" for p in paths])
     assert paths <= includes
     assert excludes == (excludes - paths)
 
     filenames = [p.name for p in paths]
-    assert '__init__.py' not in filenames
-    assert 'aws.py' in filenames
-    assert 'selector.py' in filenames
+    assert "__init__.py" not in filenames
+    assert "aws.py" in filenames
+    assert "selector.py" in filenames
 
 
 def test_bundle_default_file_matching():
@@ -50,7 +50,9 @@ def test_bundle_default_file_matching():
     )
 
     paths = bundle.get_paths()
-    assert directory.joinpath('__init__.py') in paths, """
+    assert (
+        directory.joinpath("__init__.py") in paths
+    ), """
         Expected the reviser package directory to be
         included by default.
         """

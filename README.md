@@ -1,5 +1,10 @@
 # Reviser (v0.1.0)
 
+[![PyPI version](https://badge.fury.io/py/reviser.svg)](https://badge.fury.io/py/reviser)
+[![build status](https://gitlab.com/rocket-boosters/reviser/badges/main/pipeline.svg)](https://gitlab.com/rocket-boosters/reviser/commits/main)
+[![coverage report](https://gitlab.com/rocket-boosters/reviser/badges/main/coverage.svg)](https://gitlab.com/rocket-boosters/reviser/commits/main)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 Reviser is a tool for AWS Lambda function and layer version deployment and
 alias management specifically for Python runtimes where the actual
 infrastructure is managed separately, mostly likely by CloudFormation or

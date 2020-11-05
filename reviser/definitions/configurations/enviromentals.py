@@ -10,16 +10,16 @@ from reviser.definitions import configurations
 class EnvironmentVariable(abstracts.Specification):
     """Data structure for function environment variables."""
 
-    target: 'configurations.Target'
+    target: "configurations.Target"
 
     @property
     def name(self) -> str:
         """Name for the environment variable."""
-        if (name := self.get('name')) is not None:
+        if (name := self.get("name")) is not None:
             return name
 
-        if (arg := self.get('arg')) is not None:
-            return arg.split('=')[0]
+        if (arg := self.get("arg")) is not None:
+            return arg.split("=")[0]
 
     @property
     def preserve(self) -> bool:
@@ -29,12 +29,12 @@ class EnvironmentVariable(abstracts.Specification):
         updated. Useful for variables that are managed or assigned by
         other systems.
         """
-        return self.get('preserve', default=False)
+        return self.get("preserve", default=False)
 
     @property
     def restrictions(self) -> typing.List[str]:
         """Only attach to functions matching values in this list."""
-        value = self.get('only', default=[])
+        value = self.get("only", default=[])
         if isinstance(value, str):
             return [value]
         return value
@@ -42,7 +42,7 @@ class EnvironmentVariable(abstracts.Specification):
     @property
     def exclusions(self) -> typing.List[str]:
         """Don't attach to functions matching values in this list."""
-        value = self.get('except', default=[])
+        value = self.get("except", default=[])
         if isinstance(value, str):
             return [value]
         return value
@@ -52,29 +52,28 @@ class EnvironmentVariable(abstracts.Specification):
         Retrieves the value of the environment variable for the given
         function name.
         """
-        if not self.has('value') and (arg := self.get('arg')):
-            value = arg.split('=', 1)[1]
+        if not self.has("value") and (arg := self.get("arg")):
+            value = arg.split("=", 1)[1]
         else:
-            value = self.get('value')
+            value = self.get("value")
 
         if isinstance(value, dict):
             selector = (
-                v for pattern, v in value.items()
+                v
+                for pattern, v in value.items()
                 if fnmatch.fnmatch(function_name, pattern)
             )
             value = next(selector, None)
 
         includer = (
-            True for pattern in self.restrictions
+            True
+            for pattern in self.restrictions
             if fnmatch.fnmatch(function_name, pattern)
         )
         if not next(includer, not self.restrictions):
             return None
 
-        excluder = (
-            value for e in self.exclusions
-            if fnmatch.fnmatch(function_name, e)
-        )
+        excluder = (value for e in self.exclusions if fnmatch.fnmatch(function_name, e))
         return next(excluder, value)
 
     def serialize(self) -> dict:
@@ -82,7 +81,7 @@ class EnvironmentVariable(abstracts.Specification):
             kwargs = {}
         else:
             kwargs = {
-                'values': {
+                "values": {
                     n: v
                     for n in self.target.names
                     if (v := self.get_value(n)) is not None
@@ -90,9 +89,9 @@ class EnvironmentVariable(abstracts.Specification):
             }
 
         return {
-            'name': self.name,
-            'only': self.restrictions,
-            'except': self.exclusions,
-            'preserve': self.preserve,
+            "name": self.name,
+            "only": self.restrictions,
+            "except": self.exclusions,
+            "preserve": self.preserve,
             **kwargs,
         }

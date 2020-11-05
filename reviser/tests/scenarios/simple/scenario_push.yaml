@@ -1,25 +1,27 @@
 commands:
 - push
 
-aws:
-  region_name: us-east-1
-  sts:
-    get_caller_identity:
-      UserId: SOMEUSERIDSTRING
-      Account: '123'
-      Arn: arn:aws:iam::us-east-1:123:user/foo.bar
-  iam:
-    list_account_aliases:
-      AccountAliases: []
-  s3:
-    upload_file: {}
-  lambda:
-    update_function_code:
-      FunctionName: foo-function
-      CodeSha256: abcdefgh
-    get_function_configuration: {}
-    update_function_configuration: {}
-    publish_version:
-      Version: 1
-      FunctionArn: 'arn:aws:lambda:us-east-1:123:function:foo-function:1'
-      Runtime: 'python3.8'
+lobotomy:
+  session:
+    region_name: us-east-1
+  clients:
+    sts:
+      get_caller_identity:
+        UserId: SOMEUSERIDSTRING
+        Account: '123'
+        Arn: arn:aws:iam::us-east-1:123:user/foo.bar
+    iam:
+      list_account_aliases:
+        AccountAliases: []
+    s3:
+      upload_file: {}
+    lambda:
+      update_function_code:
+        FunctionName: foo-function
+        CodeSha256: abcdefgh
+      get_function_configuration: {}
+      update_function_configuration: {}
+      publish_version:
+        Version: 1
+        FunctionArn: 'arn:aws:lambda:us-east-1:123:function:foo-function:1'
+        Runtime: 'python3.8'

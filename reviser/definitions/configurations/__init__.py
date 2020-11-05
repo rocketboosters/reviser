@@ -17,7 +17,7 @@ class Configuration(abstracts.Specification):
     """Configuration Settings data structure."""
 
     @property
-    def targets(self) -> typing.List['Target']:
+    def targets(self) -> typing.List["Target"]:
         """Build and deploy targets."""
         return [
             Target(
@@ -26,31 +26,25 @@ class Configuration(abstracts.Specification):
                 connection=self.connection,
                 configuration=self,
             )
-            for item in self.get('targets', default=[])
+            for item in self.get("targets", default=[])
         ]
 
     @property
-    def function_targets(self) -> typing.List['Target']:
+    def function_targets(self) -> typing.List["Target"]:
         """Build and deploy function targets."""
-        return [
-            t for t in self.targets
-            if t.kind == enumerations.TargetType.FUNCTION
-        ]
+        return [t for t in self.targets if t.kind == enumerations.TargetType.FUNCTION]
 
     @property
-    def layer_targets(self) -> typing.List['Target']:
+    def layer_targets(self) -> typing.List["Target"]:
         """Build and deploy layer targets."""
-        return [
-            t for t in self.targets
-            if t.kind == enumerations.TargetType.LAYER
-        ]
+        return [t for t in self.targets if t.kind == enumerations.TargetType.LAYER]
 
     @property
     def bucket(self) -> typing.Optional[str]:
         """Retrieves the bucket to use for uploading to S3."""
         buckets = self.get(
-            'buckets',
-            default=self.get('bucket', default=None),
+            "buckets",
+            default=self.get("bucket", default=None),
         )
 
         if not buckets:
@@ -64,26 +58,22 @@ class Configuration(abstracts.Specification):
     @property
     def aws_region(self) -> str:
         """Name of the region that this configuration is targeting."""
-        return (
-            self.get('region')
-            or self.connection.session.region_name
-            or 'us-east-1'
-        )
+        return self.get("region") or self.connection.session.region_name or "us-east-1"
 
-    def get_function(self, name: str) -> typing.Optional['Target']:
+    def get_function(self, name: str) -> typing.Optional["Target"]:
         """Retrieves the target with the matching name."""
         return next((t for t in self.function_targets if name in t.names), None)
 
-    def get_layer(self, name: str) -> typing.Optional['Target']:
+    def get_layer(self, name: str) -> typing.Optional["Target"]:
         """Retrieves the target with the matching name."""
         return next((t for t in self.layer_targets if name in t.names), None)
 
     def serialize(self) -> dict:
         """Serializes the object for output representation."""
         return {
-            'bucket': self.bucket,
-            'run': self.get('run'),
-            'region': self.aws_region,
-            'function_targets': [t.serialize() for t in self.function_targets],
-            'layer_targets': [t.serialize() for t in self.layer_targets],
+            "bucket": self.bucket,
+            "run": self.get("run"),
+            "region": self.aws_region,
+            "function_targets": [t.serialize() for t in self.function_targets],
+            "layer_targets": [t.serialize() for t in self.layer_targets],
         }

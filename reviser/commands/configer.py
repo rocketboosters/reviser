@@ -13,7 +13,7 @@ from reviser import interactivity
 
 
 def get_completions(
-        completer: 'interactivity.ShellCompleter',
+    completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
     """Shell auto-completes for this command."""
     return []
@@ -24,10 +24,7 @@ def populate_subparser(parser: argparse.ArgumentParser):
     pass
 
 
-def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
+def run(ex: "interactivity.Execution") -> "interactivity.Execution":
     """Execute a bundle operation on the selected function/layer targets."""
     print(yaml.safe_dump(ex.shell.context.configuration.serialize()))
-    return ex.finalize(
-        status='SUCCESS',
-        message='Configuration displayed.'
-    )
+    return ex.finalize(status="SUCCESS", message="Configuration displayed.")

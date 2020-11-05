@@ -5,7 +5,7 @@ from reviser import definitions
 from reviser.bundling import _installer
 
 
-def _create_zip(target: 'definitions.Target'):
+def _create_zip(target: "definitions.Target"):
     """
     Bundle together all of the source files into a single zip file that can
     be uploaded as an AWS Lambda function
@@ -15,7 +15,7 @@ def _create_zip(target: 'definitions.Target'):
     """
     zip_bundle = zipfile.ZipFile(
         target.bundle_zip_path,
-        mode='w',
+        mode="w",
         compression=zipfile.ZIP_DEFLATED,
         compresslevel=9,
     )
@@ -41,13 +41,13 @@ def _create_zip(target: 'definitions.Target'):
         zip_bundle.write(str(copy_path.destination), arcname=name)
 
     zip_bundle.close()
-    print(f'[ARCHIVED]: {target.bundle_zip_path}')
+    print(f"[ARCHIVED]: {target.bundle_zip_path}")
 
 
 def create(
-        context: 'definitions.Context',
-        selection: 'definitions.Selection',
-        reinstall: bool = False,
+    context: "definitions.Context",
+    selection: "definitions.Selection",
+    reinstall: bool = False,
 ):
     """
     Copies the entire contents of the project folder to a temporary location
@@ -75,11 +75,11 @@ def create(
         if not skip_installs:
             _installer.install_dependencies(target)
         else:
-            print('[DEPENDENCIES]: Using existing installation cache.')
+            print("[DEPENDENCIES]: Using existing installation cache.")
 
         for copy_path in target.bundle.get_copy_paths():
             copy_path.copy()
-            print(f'[COPIED]: {copy_path.source.relative_to(target.directory)}')
+            print(f"[COPIED]: {copy_path.source.relative_to(target.directory)}")
 
         _create_zip(target)
 

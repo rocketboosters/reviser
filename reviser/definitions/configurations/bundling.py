@@ -23,9 +23,8 @@ def _get_paths(patterns: typing.Set[pathlib.Path]) -> typing.Set[pathlib.Path]:
     output = files + [
         child
         for p in raw
-        for item in glob.iglob(f'{p}/**/*', recursive=True)
-        if p.is_dir()
-        and not (child := pathlib.Path(item)).is_dir()
+        for item in glob.iglob(f"{p}/**/*", recursive=True)
+        if p.is_dir() and not (child := pathlib.Path(item)).is_dir()
     ]
     return set(output)
 
@@ -55,7 +54,7 @@ class Bundle(abstracts.Specification):
     and deployed as a zipped artifact to the lambda function or layer target.
     """
 
-    target: 'configurations.Target'
+    target: "configurations.Target"
 
     @property
     def handler(self) -> typing.Optional[str]:
@@ -66,19 +65,19 @@ class Bundle(abstracts.Specification):
         """
         if self.target.kind == enumerations.TargetType.LAYER:
             return None
-        return self.get('handler', default='lambda_function.lambda_handler')
+        return self.get("handler", default="lambda_function.lambda_handler")
 
     @property
     def handler_filename(self) -> typing.Optional[str]:
         """Python filename associated with the specified handler."""
         if handler := self.handler:
-            return '{}.py'.format(handler.rsplit('.', 1)[0])
+            return "{}.py".format(handler.rsplit(".", 1)[0])
 
     @property
     def handler_function(self) -> typing.Optional[str]:
         """Python entrypoint function name for the specified handler."""
         if handler := self.handler:
-            return handler.rsplit('.', 1)[-1]
+            return handler.rsplit(".", 1)[-1]
 
     @property
     def omitted_packages(self) -> typing.List[str]:
@@ -89,7 +88,7 @@ class Bundle(abstracts.Specification):
         one such that they are not duplicated in the final lambda function
         environment.
         """
-        omissions = self.get('omit_packages', default=self.get('omit_package'))
+        omissions = self.get("omit_packages", default=self.get("omit_package"))
         if isinstance(omissions, str):
             return [omissions]
 
@@ -104,13 +103,12 @@ class Bundle(abstracts.Specification):
         defined by the location of the configuration file and stored in
         the directory value of this object.
         """
-        includes = self.get('includes', default=self.get('include')) or []
+        includes = self.get("includes", default=self.get("include")) or []
         if isinstance(includes, str):
             includes = [includes]
 
         add_default_package = (
-            not includes
-            and self.target.kind == enumerations.TargetType.FUNCTION
+            not includes and self.target.kind == enumerations.TargetType.FUNCTION
         )
         if add_default_package:
             # If the user hasn't specified any includes, look for python
@@ -119,7 +117,7 @@ class Bundle(abstracts.Specification):
             includes = [
                 pathlib.Path(item).parent.absolute()
                 for item in glob.iglob(
-                    str(self.directory.joinpath('*/__init__.py')),
+                    str(self.directory.joinpath("*/__init__.py")),
                     recursive=True,
                 )
             ]
@@ -128,10 +126,7 @@ class Bundle(abstracts.Specification):
             # The handler file should always be included if set.
             includes.append(self.directory.joinpath(filename))
 
-        return set([
-            self.directory.joinpath(item).absolute()
-            for item in includes
-        ])
+        return set([self.directory.joinpath(item).absolute() for item in includes])
 
     @property
     def file_exclude_patterns(self) -> typing.Set[pathlib.Path]:
@@ -144,21 +139,18 @@ class Bundle(abstracts.Specification):
         are applied to the inclusion results after so only need to specify
         things to remove from the inclusion list, e.g. a `tests` folder.
         """
-        excludes = self.get('excludes', default=self.get('exclude')) or []
+        excludes = self.get("excludes", default=self.get("exclude")) or []
         if isinstance(excludes, str):
             excludes = [excludes]
 
         # Exclude Python and OS cache files by default.
-        excludes += ['**/__pycache__', '**/*.pyc', '**/.DS_Store']
+        excludes += ["**/__pycache__", "**/*.pyc", "**/.DS_Store"]
 
-        return set([
-            self.directory.joinpath(item).absolute()
-            for item in excludes
-        ])
+        return set([self.directory.joinpath(item).absolute() for item in excludes])
 
     def get_include_paths(
-            self,
-            relative: bool = False,
+        self,
+        relative: bool = False,
     ) -> typing.Set[pathlib.Path]:
         """Generates a list of file paths matching the bundle includes."""
         items = _get_paths(self.file_include_patterns)
@@ -169,8 +161,8 @@ class Bundle(abstracts.Specification):
         return items
 
     def get_exclude_paths(
-            self,
-            relative: bool = False,
+        self,
+        relative: bool = False,
     ) -> typing.Set[pathlib.Path]:
         """Generates a list of file paths matching the bundle excludes."""
         items = _get_paths(self.file_exclude_patterns)
@@ -179,16 +171,15 @@ class Bundle(abstracts.Specification):
         return items
 
     def get_paths(
-            self,
-            relative: bool = False,
+        self,
+        relative: bool = False,
     ) -> typing.Set[pathlib.Path]:
         """Generates a list of file paths matching the bundle excludes."""
-        return (
-            self.get_include_paths(relative=relative)
-            - self.get_exclude_paths(relative=relative)
+        return self.get_include_paths(relative=relative) - self.get_exclude_paths(
+            relative=relative
         )
 
-    def get_copy_paths(self) -> typing.List['CopyPath']:
+    def get_copy_paths(self) -> typing.List["CopyPath"]:
         """
         A list of copy paths that map included (and not excluded) source
         paths to their respective destination path in the bundle directory.
@@ -196,7 +187,7 @@ class Bundle(abstracts.Specification):
         return [
             CopyPath(
                 source=self.directory.joinpath(p),
-                destination=self.target.bundle_directory.joinpath(p)
+                destination=self.target.bundle_directory.joinpath(p),
             )
             for p in self.get_paths(relative=True)
         ]
@@ -212,27 +203,23 @@ class Bundle(abstracts.Specification):
         exclusions = []
         for package in self.omitted_packages:
             exclusions += [
-                directory.joinpath(package, '**', '*'),
-                directory.joinpath(f'{package}.*'),
-                directory.joinpath(f'{package}-*'),
-                directory.joinpath(f'{package}-*', '**', '*'),
+                directory.joinpath(package, "**", "*"),
+                directory.joinpath(f"{package}.*"),
+                directory.joinpath(f"{package}-*"),
+                directory.joinpath(f"{package}-*", "**", "*"),
             ]
         omitted_paths = _get_paths(set(exclusions))
 
-        paths = _get_paths({directory.joinpath('**', '*')})
+        paths = _get_paths({directory.joinpath("**", "*")})
         return paths - omitted_paths
 
     def serialize(self) -> dict:
         """Serializes the object for output representation."""
         return {
-            'handler': self.handler,
-            'handler_filename': self.handler_filename,
-            'handler_function': self.handler_function,
-            'omitted_packages': self.omitted_packages,
-            'file_include_patterns': [
-                str(p) for p in self.file_include_patterns
-            ],
-            'file_exclude_patterns': [
-                str(p) for p in self.file_exclude_patterns
-            ],
+            "handler": self.handler,
+            "handler_filename": self.handler_filename,
+            "handler_function": self.handler_function,
+            "omitted_packages": self.omitted_packages,
+            "file_include_patterns": [str(p) for p in self.file_include_patterns],
+            "file_exclude_patterns": [str(p) for p in self.file_exclude_patterns],
         }

@@ -16,24 +16,24 @@ from ..commands import sheller
 
 #: Commands available to the shell.
 COMMANDS = {
-    'alias': aliaser,
-    'bundle': bundler,
-    'configs': configer,
-    'deploy': deployer,
-    'exit': exiter,
-    'help': helper,
-    'list': lister,
-    'prune': pruner,
-    'push': pusher,
-    'reload': reloader,
-    'select': selector,
-    'shell': sheller,
-    'status': reporter,
+    "alias": aliaser,
+    "bundle": bundler,
+    "configs": configer,
+    "deploy": deployer,
+    "exit": exiter,
+    "help": helper,
+    "list": lister,
+    "prune": pruner,
+    "push": pusher,
+    "reload": reloader,
+    "select": selector,
+    "shell": sheller,
+    "status": reporter,
 }
 
 #: Aliases of commands to make available to the shell.
 ALIASES = {
-    '?': 'help',
+    "?": "help",
 }
 
 

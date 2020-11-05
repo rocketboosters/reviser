@@ -11,11 +11,11 @@ from reviser import commands
 from reviser import interactivity
 from reviser import templating
 
-HEADER_REGEX = re.compile(r'#+\s+')
+HEADER_REGEX = re.compile(r"#+\s+")
 
 
 def get_completions(
-        completer: 'interactivity.ShellCompleter',
+    completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
     """Shell auto-completes for this command."""
     return []
@@ -29,27 +29,25 @@ def populate_subparser(parser: argparse.ArgumentParser):
 def _get_command_header_doc(name: str, docs: str) -> str:
     """Returns the first paragraph of the command documentation."""
     lines = [
-        line.rstrip() for line in (docs or '').split('\n')
+        line.rstrip()
+        for line in (docs or "").split("\n")
         if not HEADER_REGEX.match(line)
     ]
-    start_index = next((line for line in lines if line), 0)
+    start_index = next((i for i, line in enumerate(lines) if line), 0)
 
     try:
-        end_index = lines.index('', start_index) + 1
+        end_index = lines.index("", start_index) + 1
     except ValueError:
         end_index = len(lines) + 1
 
-    aliases = ''
+    aliases = ""
     if items := commands.REVERSED_ALIASES.get(name):
-        aliases = '({}) '.format(', '.join(sorted(items)))
+        aliases = "({}) ".format(", ".join(sorted(items)))
 
-    return '{}{}'.format(
-        aliases,
-        ' '.join(lines[start_index:end_index])
-    )
+    return "{}{}".format(aliases, " ".join(lines[start_index:end_index]))
 
 
-def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
+def run(ex: "interactivity.Execution") -> "interactivity.Execution":
     """Displays basic command help for the available shell commands."""
     command_docs = {
         name: _get_command_header_doc(name, docs)
@@ -57,10 +55,7 @@ def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
         if (docs := command_module.__doc__)
     }
     templating.printer(
-        'commands/helper/help.jinja2',
+        "commands/helper/help.jinja2",
         commands=list(sorted(command_docs.items(), key=lambda x: x[0])),
     )
-    return ex.finalize(
-        status='HELPED',
-        message='Help displayed.'
-    )
+    return ex.finalize(status="HELPED", message="Help displayed.")

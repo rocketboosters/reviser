@@ -3,21 +3,25 @@ from reviser import definitions
 
 
 def assert_command_result(
-        command: 'definitions.DataWrapper',
-        result: 'interactivity.ExecutionResult',
+    command: "definitions.DataWrapper",
+    result: "interactivity.ExecutionResult",
 ):
     """Validate that the execution result meets expectations."""
-    value = command.get('command')
-    expected = command.get('expected')
+    value = command.get("command")
+    expected = command.get("expected")
 
-    if status := expected.get('status'):
-        assert result.status == status, f"""
+    if status := expected.get("status"):
+        assert (
+            result.status == status
+        ), f"""
             Expected command "{value}" to return a status "{status}",
             but instead the status was "{result.status}".
             """
 
-    if info := expected.get('info'):
-        assert info.items() <= result.info.items(), f"""
+    if info := expected.get("info"):
+        assert (
+            info.items() <= result.info.items()
+        ), f"""
             Expected command "{value}" to return a subset of info matching:
             
             {info}

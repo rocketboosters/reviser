@@ -7,11 +7,11 @@ from ..deploying import uploader
 
 
 def deploy_target(
-        target: 'definitions.Target',
-        description: str = None,
-        published_layers: typing.List['definitions.PublishedLayer'] = None,
-        dry_run: bool = False,
-) -> typing.List['definitions.PublishedLayer']:
+    target: "definitions.Target",
+    description: str = None,
+    published_layers: typing.List["definitions.PublishedLayer"] = None,
+    dry_run: bool = False,
+) -> typing.List["definitions.PublishedLayer"]:
     """
     Deploy the bundled ZIP file to S3 for access by Lambda functions. The
     file is uploaded to the specified storage bucket with a timestamped key
@@ -25,7 +25,7 @@ def deploy_target(
     # Sleep for a few seconds to make sure the S3 upload has finished
     # processing to prevent race conditions during deployment
     if not dry_run:
-        print('[SYNC]: Synchronization block between S3 and lambda')
+        print("[SYNC]: Synchronization block between S3 and lambda")
         time.sleep(2)
 
     if target.kind == definitions.TargetType.LAYER:
@@ -47,11 +47,11 @@ def deploy_target(
 
 
 def deploy(
-        context: 'definitions.Context',
-        selection: 'definitions.Selection',
-        description: str = None,
-        dry_run: bool = False,
-) -> typing.List['definitions.Target']:
+    context: "definitions.Context",
+    selection: "definitions.Selection",
+    description: str = None,
+    dry_run: bool = False,
+) -> typing.List["definitions.Target"]:
     """
     Executes the deploy operation on the context's configuration filtered
     by the specified selection.
@@ -78,4 +78,3 @@ def deploy(
         )
 
     return selected.targets
-

@@ -12,23 +12,25 @@ from reviser.definitions import enumerations
 class Dependency(abstracts.Specification):
     """Package dependency data structure."""
 
-    target: 'configurations.Target'
+    target: "configurations.Target"
 
     @property
-    def kind(self) -> 'enumerations.DependencyType':
+    def kind(self) -> "enumerations.DependencyType":
         """Kind of dependency"""
-        return enumerations.DependencyType(value=self.get(
-            'kind',
-            default=enumerations.DependencyType.PIP.value,
-        ))
+        return enumerations.DependencyType(
+            value=self.get(
+                "kind",
+                default=enumerations.DependencyType.PIP.value,
+            )
+        )
 
     @property
     def file(self) -> typing.Optional[pathlib.Path]:
         """Optionally specified path used to load dependencies."""
-        if value := self.get('file'):
+        if value := self.get("file"):
             return self.directory.joinpath(value).absolute()
 
-        if self.get('packages') is not None:
+        if self.get("packages") is not None:
             return None
 
         default = self.directory.joinpath(
@@ -39,7 +41,7 @@ class Dependency(abstracts.Specification):
     @property
     def packages(self) -> typing.List[str]:
         """Explicitly defined packages."""
-        return self.get_first_as_list(['packages'], ['package'], default=[])
+        return self.get_first_as_list(["packages"], ["package"], default=[])
 
     def get_package_names(self) -> typing.List[str]:
         """
@@ -62,7 +64,7 @@ class PipDependency(Dependency):
         if self.file and self.file.exists():
             packages += [
                 item
-                for line in (self.file.read_text() or '').split('\n')
+                for line in (self.file.read_text() or "").split("\n")
                 if (item := line.strip())
             ]
         return packages
@@ -70,8 +72,8 @@ class PipDependency(Dependency):
     def serialize(self) -> dict:
         """Serializes the object for output representation."""
         return {
-            'kind': self.kind.value,
-            'packages': self.get_package_names(),
+            "kind": self.kind.value,
+            "packages": self.get_package_names(),
         }
 
 
@@ -82,15 +84,15 @@ class PipperDependency(Dependency):
     @property
     def prefix(self) -> typing.Optional[str]:
         """Custom S3 key prefix in the bucket where the repository resides."""
-        return self.get('prefix')
+        return self.get("prefix")
 
     @property
     def bucket(self) -> typing.Optional[str]:
         """S3 bucket where the pipper repository resides."""
-        buckets = self.get('buckets', default=self.get('bucket', default=None))
+        buckets = self.get("buckets", default=self.get("bucket", default=None))
 
         if not buckets and self.file:
-            return self.get_package_data().get('bucket') or None
+            return self.get_package_data().get("bucket") or None
 
         if isinstance(buckets, str):
             return buckets
@@ -110,14 +112,14 @@ class PipperDependency(Dependency):
         """
         packages = self.packages.copy()
         if data := self.get_package_data():
-            packages += data.get('dependencies') or []
+            packages += data.get("dependencies") or []
         return packages
 
     def serialize(self) -> dict:
         """Serializes the object for output representation."""
         return {
-            'kind': self.kind.value,
-            'prefix': self.prefix,
-            'bucket': self.bucket,
-            'packages': self.get_package_names(),
+            "kind": self.kind.value,
+            "prefix": self.prefix,
+            "bucket": self.bucket,
+            "packages": self.get_package_names(),
         }

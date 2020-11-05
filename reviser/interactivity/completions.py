@@ -15,7 +15,7 @@ class ShellCompleter(completion.Completer):
     behaviors of the lambda deployer interactive shell.
     """
 
-    def __init__(self, shell: 'shells.Shell'):
+    def __init__(self, shell: "shells.Shell"):
         """Initializes the prompt toolkit custom auto-completer."""
         super(ShellCompleter, self).__init__()
         self.shell = shell
@@ -26,17 +26,15 @@ class ShellCompleter(completion.Completer):
     @property
     def action(self) -> str:
         """Currently specified root shell command action."""
-        return self.args[0] if self.args else ''
+        return self.args[0] if self.args else ""
 
     @property
     def last(self) -> str:
         """The last argument in the current line."""
-        return self.args[-1] if self.args else ''
+        return self.args[-1] if self.args else ""
 
     def get_completions(
-            self,
-            document: Document,
-            complete_event: completion.CompleteEvent
+        self, document: Document, complete_event: completion.CompleteEvent
     ) -> typing.Generator[completion.Completion, None, None]:
         """
         Implements the completion process where the Prompt Toolkit document
@@ -56,19 +54,16 @@ class ShellCompleter(completion.Completer):
 
 
 def _get_completions(
-        completer: ShellCompleter,
+    completer: ShellCompleter,
 ) -> typing.List[completion.Completion]:
     """
     Creates a list of completions that should be returned by the
     ShellCompleter.get_completions function.
     """
-    if completer.document.text.lstrip().find(' ') == -1:
+    if completer.document.text.lstrip().find(" ") == -1:
         return _get_action_completions(completer)
 
-    return (
-        _get_command_completions(completer)
-        + _get_state_completions(completer)
-    )
+    return _get_command_completions(completer) + _get_state_completions(completer)
 
 
 def _get_action_completions(completer: ShellCompleter):
@@ -86,7 +81,7 @@ def _get_command_completions(completer: ShellCompleter):
     completer.configs module in the configs.COMMAND_COMPLETES dictionary.
     """
     command_module = commands.get_module(completer.action)
-    get_completions = getattr(command_module, 'get_completions', lambda x: [])
+    get_completions = getattr(command_module, "get_completions", lambda x: [])
     options = get_completions(completer)
     index = len(completer.last)
     return [
@@ -108,13 +103,15 @@ def _get_state_completions(completer: ShellCompleter):
     ]
     names = [n for t in targets for n in t.names]
 
-    pattern = re.compile(r'[\s_]+')
-    names += list({
-        word
-        for name in names
-        for word in pattern.sub('-', name).split('-')
-        if len(word) > 2
-    })
+    pattern = re.compile(r"[\s_]+")
+    names += list(
+        {
+            word
+            for name in names
+            for word in pattern.sub("-", name).split("-")
+            if len(word) > 2
+        }
+    )
 
     return [
         completion.Completion(n, start_position=-index)

@@ -39,8 +39,9 @@ class DataWrapper:
         return self.get(*found_args, default=default)
 
     def get_as_list(
-            self, *args: str,
-            default: typing.Any = None,
+        self,
+        *args: str,
+        default: typing.Any = None,
     ) -> typing.List[typing.Any]:
         """
         Fetches the value from the data dictionary as a list.
@@ -110,20 +111,20 @@ class Specification(DataWrapper):
     data: dict
     #: Connection object that represents the AWS session and account data
     #: associated with the context in which this configuration resides.
-    connection: 'aws.AwsConnection'
+    connection: "aws.AwsConnection"
 
     def __post_init__(self):
         """
         Add an internal uuid to the object's data dictionary after creation
         if it has not already been set.
         """
-        if not self.has('_uuid'):
-            self.update('_uuid', value=str(uuid.uuid4()), overwrite=False)
+        if not self.has("_uuid"):
+            self.update("_uuid", value=str(uuid.uuid4()), overwrite=False)
 
     @property
     def uuid(self) -> str:
         """An internal unique identifier for the configuration object."""
-        return self.get('_uuid')
+        return self.get("_uuid")
 
     def serialize(self) -> dict:
         """Serializes the object for output representation."""

@@ -10,15 +10,7 @@ class Selection:
     """
 
     bundle_all: bool = True
-    function_needles: typing.List[str] = dataclasses.field(
-        default_factory=lambda: []
-    )
-    function_names: typing.List[str] = dataclasses.field(
-        default_factory=lambda: []
-    )
-    layer_needles: typing.List[str] = dataclasses.field(
-        default_factory=lambda: []
-    )
-    layer_names: typing.List[str] = dataclasses.field(
-        default_factory=lambda: []
-    )
+    function_needles: typing.List[str] = dataclasses.field(default_factory=lambda: [])
+    function_names: typing.List[str] = dataclasses.field(default_factory=lambda: [])
+    layer_needles: typing.List[str] = dataclasses.field(default_factory=lambda: [])
+    layer_names: typing.List[str] = dataclasses.field(default_factory=lambda: [])

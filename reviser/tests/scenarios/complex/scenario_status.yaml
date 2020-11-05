@@ -2,36 +2,39 @@ commands:
 - command: status
   status: SUCCESS
 
-aws:
-  region_name: us-east-1
-  sts:
-    get_caller_identity:
-      UserId: SOMEUSERIDSTRING
-      Account: '123'
-      Arn: arn:aws:iam::us-east-1:123:user/foo.bar
-  iam:
-    list_account_aliases:
-      AccountAliases: []
-  lambda:
-    list_layer_versions:
-      LayerVersions:
-      - LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:1
-        CreatedDate: '2020-01-01T12:24:00'
-        Version: 1
-      - LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:2
-        CreatedDate: '2020-01-01T12:24:00'
-        Version: 2
-      - LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:3
+lobotomy:
+  session:
+    region_name: us-east-1
+  clients:
+    sts:
+      get_caller_identity:
+        UserId: SOMEUSERIDSTRING
+        Account: '123'
+        Arn: arn:aws:iam::us-east-1:123:user/foo.bar
+    iam:
+      list_account_aliases:
+        AccountAliases: []
+    lambda:
+      list_aliases: {}
+      list_layer_versions:
+        LayerVersions:
+        - LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:1
+          CreatedDate: '2020-01-01T12:24:00'
+          Version: 1
+        - LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:2
+          CreatedDate: '2020-01-01T12:24:00'
+          Version: 2
+        - LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:3
+          CreatedDate: '2020-01-01T12:24:00'
+          Version: 3
+      get_layer_version:
+        LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:3
         CreatedDate: '2020-01-01T12:24:00'
         Version: 3
-    get_layer_version:
-      LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:3
-      CreatedDate: '2020-01-01T12:24:00'
-      Version: 3
-    get_function_configuration:
-      LastModified: '2020-01-01T12:24:00'
-      Version: 3
-      Layers:
-      - Arn: arn:aws:lambda:us-east-1:123:layer:foo-layer:3
-        CreatedDate: '2020-01-01T12:24:00+00:00'
+      get_function_configuration:
+        LastModified: '2020-01-01T12:24:00'
         Version: 3
+        Layers:
+        - Arn: arn:aws:lambda:us-east-1:123:layer:foo-layer:3
+          CreatedDate: '2020-01-01T12:24:00+00:00'
+          Version: 3

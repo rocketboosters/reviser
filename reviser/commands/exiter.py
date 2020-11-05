@@ -8,7 +8,7 @@ from reviser import interactivity
 
 
 def get_completions(
-        completer: 'interactivity.ShellCompleter',
+    completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
     """Shell auto-completes for this command."""
     return []
@@ -19,11 +19,11 @@ def populate_subparser(parser: argparse.ArgumentParser):
     pass
 
 
-def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
+def run(ex: "interactivity.Execution") -> "interactivity.Execution":
     """Exits the shell."""
     ex.shell.shutdown = True
     return ex.finalize(
-        status='EXIT',
-        message='Shutting down the shell.',
+        status="EXIT",
+        message="Shutting down the shell.",
         echo=True,
     )

@@ -33,8 +33,8 @@ class Execution:
 
     action: str
     args: dict
-    shell: 'Shell'
-    result: typing.Optional['ExecutionResult'] = None
+    shell: "Shell"
+    result: typing.Optional["ExecutionResult"] = None
 
     executed_at: datetime.datetime = dataclasses.field(
         init=False,
@@ -44,34 +44,37 @@ class Execution:
     @property
     def timestamp(self) -> str:
         """A string representation of the created at datetime."""
-        return self.executed_at.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+        return self.executed_at.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
     def finalize(
-            self,
-            status: str,
-            message: str = None,
-            info: dict = None,
-            data: dict = None,
-            echo: bool = False,
-    ) -> 'Execution':
+        self,
+        status: str,
+        message: str = None,
+        info: dict = None,
+        data: dict = None,
+        echo: bool = False,
+    ) -> "Execution":
         """Copy this execution and populate it with the result."""
-        return dataclasses.replace(self, result=ExecutionResult(
-            status=(status or '???').upper(),
-            message=message,
-            info=info,
-            data=data,
-        )).echo_if(echo)
+        return dataclasses.replace(
+            self,
+            result=ExecutionResult(
+                status=(status or "???").upper(),
+                message=message,
+                info=info,
+                data=data,
+            ),
+        ).echo_if(echo)
 
-    def echo(self) -> 'Execution':
+    def echo(self) -> "Execution":
         """Echoes the result if set for display to the console."""
         if self.result:
             templating.printer(
-                'interactivity/shells/execution_result.jinja2',
+                "interactivity/shells/execution_result.jinja2",
                 result=self.result,
             )
         return self
 
-    def echo_if(self, condition) -> 'Execution':
+    def echo_if(self, condition) -> "Execution":
         """Echoes the result if set for display to the console."""
         if bool(condition):
             return self.echo()
@@ -85,15 +88,14 @@ class Shell:
     """
 
     def __init__(
-            self,
-            context: 'definitions.Context',
-            selection: 'definitions.Selection' = None,
+        self,
+        context: "definitions.Context",
+        selection: "definitions.Selection" = None,
     ):
         """Creates a new shell for queued and/or interactive execution."""
         self.command_history: typing.List[str] = []
-        self.execution_history: typing.List['Execution'] = []
-        self._prompt_session: typing.Optional[prompt_toolkit.PromptSession] \
-            = None
+        self.execution_history: typing.List["Execution"] = []
+        self._prompt_session: typing.Optional[prompt_toolkit.PromptSession] = None
         self.context = context
         self.selection = selection or definitions.Selection()
         self.shutdown = False
@@ -119,7 +121,7 @@ class Shell:
         """Sets the is_interactive property."""
         if value and self._prompt_session is None:
             if not self._create_prompt_session():
-                raise RuntimeError('Terminal connectivity not supported.')
+                raise RuntimeError("Terminal connectivity not supported.")
 
         self._is_interactive = value
 
@@ -130,10 +132,7 @@ class Shell:
         determined by whether or not it is running interactively or
         there are queued commands to still process.
         """
-        return not self.shutdown and (
-            bool(self.command_queue)
-            or self.is_interactive
-        )
+        return not self.shutdown and (bool(self.command_queue) or self.is_interactive)
 
     def _create_prompt_session(self) -> bool:
         """
@@ -157,10 +156,10 @@ class Shell:
     def _setup(self):
         """Initialization before entering the command loop."""
         templating.printer(
-            'interactivity/shells/splash.jinja2',
+            "interactivity/shells/splash.jinja2",
             version=reviser.__version__,
         )
-        print('\n\n')
+        print("\n\n")
         colorama.init()
 
         # If no queued commands have been specified at the start of the
@@ -176,19 +175,19 @@ class Shell:
                 if line := self._get_next_command():
                     execute(self, line)
         except KeyboardInterrupt:
-            print('\n[INTERRUPTED]: Shutting down terminal.')
+            print("\n[INTERRUPTED]: Shutting down terminal.")
         except Exception as error:
             self.error = error
             templating.print_error(
                 error=error,
-                message='An unexpected command error occurred.',
+                message="An unexpected command error occurred.",
             )
 
         self._teardown()
 
     def _teardown(self):
         """Teardown after exiting the command loop."""
-        print('\n\n')
+        print("\n\n")
         colorama.deinit()
         self.shutdown = True
         self.command_queue = []
@@ -203,28 +202,28 @@ class Shell:
         """
         context = self.context
         templating.printer(
-            'interactivity/shells/prompt.jinja2',
-            profile=context.connection.session.profile_name or 'default',
+            "interactivity/shells/prompt.jinja2",
+            profile=context.connection.session.profile_name or "default",
             user_slug=context.connection.user_slug,
             selected=context.get_selected_targets(self.selection),
         )
-        prompt = f'{colorama.Fore.GREEN}>{colorama.Style.RESET_ALL} '
+        prompt = f"{colorama.Fore.GREEN}>{colorama.Style.RESET_ALL} "
 
         if self.command_queue:
             line = self.command_queue.pop(0)
-            print(f'{prompt}{line}')
+            print(f"{prompt}{line}")
         else:
             # noinspection PyTypeChecker
             line = self._prompt_session.prompt(
                 message=ANSI(prompt),
                 completer=self._shell_completer,
-                complete_while_typing=True
+                complete_while_typing=True,
             )
 
         return line.strip()
 
 
-def execute(shell: 'Shell', line: str) -> typing.NoReturn:
+def execute(shell: "Shell", line: str) -> typing.NoReturn:
     """
     Executes the specified input command within the given shell
     environment.
@@ -246,7 +245,7 @@ def execute(shell: 'Shell', line: str) -> typing.NoReturn:
 
     action_module = commands.get_module(action)
 
-    print('\n')
+    print("\n")
     if action_module is None:
         templating.print_error(f'Unknown command "{action}".')
         return
@@ -266,7 +265,7 @@ def execute(shell: 'Shell', line: str) -> typing.NoReturn:
         shell.error = error
         templating.print_error(
             error=error,
-            message='An unexpected command error occurred.',
+            message="An unexpected command error occurred.",
         )
     finally:
-        print('\n')
+        print("\n")

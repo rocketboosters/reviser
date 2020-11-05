@@ -19,22 +19,22 @@ class SelectedTargets:
     configuration.
     """
 
-    targets: typing.List['configurations.Target']
+    targets: typing.List["configurations.Target"]
 
     @property
-    def function_targets(self) -> typing.List['configurations.Target']:
+    def function_targets(self) -> typing.List["configurations.Target"]:
         """List of function targets in the selection."""
         return [
-            t for t in (self.targets or [])
+            t
+            for t in (self.targets or [])
             if t.kind == enumerations.TargetType.FUNCTION
         ]
 
     @property
-    def layer_targets(self) -> typing.List['configurations.Target']:
+    def layer_targets(self) -> typing.List["configurations.Target"]:
         """List of layer targets in the selection."""
         return [
-            t for t in (self.targets or [])
-            if t.kind == enumerations.TargetType.LAYER
+            t for t in (self.targets or []) if t.kind == enumerations.TargetType.LAYER
         ]
 
 
@@ -43,8 +43,8 @@ class Context:
     """Execution context for the current invocation."""
 
     arguments: argparse.Namespace
-    configuration: 'configurations.Configuration'
-    connection: 'aws.AwsConnection'
+    configuration: "configurations.Configuration"
+    connection: "aws.AwsConnection"
 
     @property
     def command_queue(self) -> typing.Optional[typing.List[str]]:
@@ -58,37 +58,38 @@ class Context:
         """
 
         name = self.arguments.command_group_name
-        return self.configuration.get_as_list('run', name) or None
+        return self.configuration.get_as_list("run", name) or None
 
     def get_selected_targets(
-            self,
-            selection: 'selections.Selection'
-    ) -> 'SelectedTargets':
+        self, selection: "selections.Selection"
+    ) -> "SelectedTargets":
         """
         Creates a modified configuration filtered down to the specified
         selection criteria.
         """
-        return SelectedTargets(targets=[
-            ts
-            for t in self.configuration.targets
-            if (ts := dataclasses.replace(t, selection=selection)).names
-        ])
+        return SelectedTargets(
+            targets=[
+                ts
+                for t in self.configuration.targets
+                if (ts := dataclasses.replace(t, selection=selection)).names
+            ]
+        )
 
     @classmethod
     def load_from_file(
-            cls,
-            arguments: argparse.Namespace,
-            path: str = None,
-            connection: 'aws.AwsConnection' = None,
-    ) -> 'Context':
+        cls,
+        arguments: argparse.Namespace,
+        path: str = None,
+        connection: "aws.AwsConnection" = None,
+    ) -> "Context":
         """
         Loads a context from a configuration path target. Loads files
         using the `lambda.yaml` file by default as this is the preferred
         extension: https://yaml.org/faq.html
         """
-        target = pathlib.Path(path or './lambda.yaml').absolute()
+        target = pathlib.Path(path or "./lambda.yaml").absolute()
         if target.is_dir():
-            target = target.joinpath('lambda.yaml')
+            target = target.joinpath("lambda.yaml")
 
         aws_connection = connection or aws.AwsConnection()
         contents = target.read_text()

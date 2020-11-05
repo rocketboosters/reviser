@@ -13,48 +13,49 @@ from reviser import servicer
 
 
 def get_completions(
-        completer: 'interactivity.ShellCompleter',
+    completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
     """Shell auto-completes for this command."""
-    return ['--start', '--end', '--dry-run']
+    return ["--start", "--end", "--dry-run"]
 
 
 def populate_subparser(parser: argparse.ArgumentParser):
     """Add subcommand options for this command."""
     parser.add_argument(
-        '--start',
+        "--start",
         type=int,
         default=None,
-        help='Keep versions lower (earlier/before) this one.',
+        help="Keep versions lower (earlier/before) this one.",
     )
 
     parser.add_argument(
-        '--end',
+        "--end",
         type=int,
         default=None,
-        help='Do not prune versions higher than this value.',
+        help="Do not prune versions higher than this value.",
     )
 
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Echo pruning operation without actually executing it.',
+        "--dry-run",
+        action="store_true",
+        help="Echo pruning operation without actually executing it.",
     )
 
     parser.add_argument(
-        '-y', '--yes',
-        action='store_true',
-        help='Run the prune process without reviewing first.',
+        "-y",
+        "--yes",
+        action="store_true",
+        help="Run the prune process without reviewing first.",
     )
 
 
 def _prune_function(
-        lambda_client: BaseClient,
-        function_name: str,
-        start: int = None,
-        end: int = None,
-        dry_run: bool = False,
-        confirm: bool = True,
+    lambda_client: BaseClient,
+    function_name: str,
+    start: int = None,
+    end: int = None,
+    dry_run: bool = False,
+    confirm: bool = True,
 ):
     """
     Executes a pruning operation on the given lambda functions.
@@ -79,27 +80,29 @@ def _prune_function(
     removal_arns = [
         v.arn
         for v in versions
-        if v.version != '$LATEST'
+        if v.version != "$LATEST"
         and (start is None or start <= int(v.version))
         and (end is None or int(v.version) <= end)
         and not v.aliases
     ]
 
-    print('\nARN Versions to be removed:')
-    print(textwrap.indent(
-        '\n'.join(removal_arns),
-        prefix='  - ',
-    ))
+    print("\nARN Versions to be removed:")
+    print(
+        textwrap.indent(
+            "\n".join(removal_arns),
+            prefix="  - ",
+        )
+    )
 
     if dry_run:
-        print('\n[DRY RUN]: Skipped removal process.')
+        print("\n[DRY RUN]: Skipped removal process.")
         return
 
     abort = confirm and not (
-        input('\nExecute prune action [y/N]? ') or ''
-    ).lower().startswith('y')
+        input("\nExecute prune action [y/N]? ") or ""
+    ).lower().startswith("y")
     if abort:
-        print('\n[ABORTED]: Skipped removal process.')
+        print("\n[ABORTED]: Skipped removal process.")
         return
 
     for arn in removal_arns:
@@ -109,12 +112,12 @@ def _prune_function(
 
 
 def _prune_layer(
-        lambda_client: BaseClient,
-        layer_name: str,
-        start: int = None,
-        end: int = None,
-        dry_run: bool = False,
-        confirm: bool = True,
+    lambda_client: BaseClient,
+    layer_name: str,
+    start: int = None,
+    end: int = None,
+    dry_run: bool = False,
+    confirm: bool = True,
 ):
     """
     Executes a pruning operation on the given lambda layers.
@@ -144,40 +147,42 @@ def _prune_layer(
     ]
     arns = [r.arn for r in removals]
 
-    print('\nARN Versions to be removed:')
-    print(textwrap.indent(
-        '\n'.join(arns),
-        prefix='  - ',
-    ))
+    print("\nARN Versions to be removed:")
+    print(
+        textwrap.indent(
+            "\n".join(arns),
+            prefix="  - ",
+        )
+    )
 
     if dry_run:
-        print('\n[DRY RUN]: Skipped removal process.')
+        print("\n[DRY RUN]: Skipped removal process.")
         return
 
     abort = confirm and not (
-        input('\nExecute prune action [y/N]? ') or ''
-    ).lower().startswith('y')
+        input("\nExecute prune action [y/N]? ") or ""
+    ).lower().startswith("y")
     if abort:
-        print('\n[ABORTED]: Skipped removal process.')
+        print("\n[ABORTED]: Skipped removal process.")
         return
 
     for arn in arns:
-        print(f'[PRUNING]: {arn}')
+        print(f"[PRUNING]: {arn}")
         servicer.remove_layer_version(lambda_client, arn)
 
     return arns
 
 
-def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
+def run(ex: "interactivity.Execution") -> "interactivity.Execution":
     """Runs the pruning operation on the targets."""
     selected = ex.shell.context.get_selected_targets(ex.shell.selection)
     targets = sorted(selected.targets, key=lambda t: t.kind.value)
 
     kwargs = {
-        'start': ex.args.get('start'),
-        'end': ex.args.get('end'),
-        'dry_run': ex.args.get('dry_run', False),
-        'confirm': not ex.args.get('yes', False),
+        "start": ex.args.get("start"),
+        "end": ex.args.get("end"),
+        "dry_run": ex.args.get("dry_run", False),
+        "confirm": not ex.args.get("yes", False),
     }
 
     caller = {
@@ -186,17 +191,14 @@ def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
     }
 
     results = {
-        name: caller[target.kind](target.client('lambda'), name, **kwargs)
+        name: caller[target.kind](target.client("lambda"), name, **kwargs)
         for target in targets
         for name in target.names
     }
 
     return ex.finalize(
-        status='PRUNED',
-        message='Specified versions have been removed.',
-        info={
-            name: removed_arns
-            for name, removed_arns in results.items()
-        },
+        status="PRUNED",
+        message="Specified versions have been removed.",
+        info={name: removed_arns for name, removed_arns in results.items()},
         echo=True,
     )

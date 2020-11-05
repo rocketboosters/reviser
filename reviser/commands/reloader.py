@@ -11,7 +11,7 @@ from reviser import interactivity
 
 
 def get_completions(
-        completer: 'interactivity.ShellCompleter',
+    completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
     """Shell auto-completes for this command."""
     return []
@@ -23,47 +23,37 @@ def populate_subparser(parser: argparse.ArgumentParser):
 
 
 def _merge_target_uuids(
-        before: 'definitions.Target',
-        after: 'definitions.Target',
+    before: "definitions.Target",
+    after: "definitions.Target",
 ):
     """
     Adds matching UUIDs from the before to the after targets and children
     for continuity.
     """
-    after.data['_uuid'] = before.uuid
-    after.bundle.data['_uuid'] = before.bundle.uuid
+    after.data["_uuid"] = before.uuid
+    after.bundle.data["_uuid"] = before.bundle.uuid
 
     mapping = {
-        f'{d.kind}:{p}': d
-        for d in before.dependencies
-        for p in d.get_package_names()
+        f"{d.kind}:{p}": d for d in before.dependencies for p in d.get_package_names()
     }
 
     for dependency in after.dependencies:
-        keys = [
-            f'{dependency.kind}:{p}'
-            for p in dependency.get_package_names()
-        ]
+        keys = [f"{dependency.kind}:{p}" for p in dependency.get_package_names()]
         match: typing.Optional[definitions.Dependency] = next(
-            (d for k, d in mapping.items() if k in keys),
-            None
+            (d for k, d in mapping.items() if k in keys), None
         )
         if match:
-            dependency.data['_uuid'] = match.uuid
+            dependency.data["_uuid"] = match.uuid
 
 
 def _merge_uuids(
-        before: 'definitions.Configuration',
-        after: 'definitions.Configuration',
+    before: "definitions.Configuration",
+    after: "definitions.Configuration",
 ):
     """Adds matching UUIDs from before to the after for continuity."""
-    after.data['_uuid'] = before.uuid
+    after.data["_uuid"] = before.uuid
 
-    mapping = {
-        name: target
-        for target in before.targets
-        for name in target.names
-    }
+    mapping = {name: target for target in before.targets for name in target.names}
 
     for target in after.targets:
         match: typing.Optional[definitions.Target] = next(
@@ -74,7 +64,7 @@ def _merge_uuids(
             _merge_target_uuids(match, target)
 
 
-def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
+def run(ex: "interactivity.Execution") -> "interactivity.Execution":
     """Execute a bundle operation on the selected function/layer targets."""
     before = ex.shell.context
     directory = before.configuration.directory
@@ -89,8 +79,8 @@ def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
 
     print(yaml.safe_dump(ex.shell.context.configuration.serialize()))
     return ex.finalize(
-        status='SUCCESS',
-        message='Configuration file has been reloaded from disk.',
+        status="SUCCESS",
+        message="Configuration file has been reloaded from disk.",
         echo=True,
-        data={'before': before, 'after': after},
+        data={"before": before, "after": after},
     )

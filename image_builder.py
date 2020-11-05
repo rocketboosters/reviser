@@ -5,87 +5,83 @@ import textwrap
 
 import reviser
 
-HUB_PREFIX = 'swernst/reviser'
+HUB_PREFIX = "swernst/reviser"
 MY_DIRECTORY = pathlib.Path(__file__).parent.absolute()
 VERSION = reviser.__version__
 BUILDS = {
-    '3.8': {'build_args': {'PYTHON_VERSION': '3.8'}},
+    "3.8": {"build_args": {"PYTHON_VERSION": "3.8"}},
 }
 
 
 def build(python_version: str, spec: dict, args: argparse.Namespace) -> dict:
     """Builds the container from the specified docker file path"""
-    path = MY_DIRECTORY.joinpath('Dockerfile')
+    path = MY_DIRECTORY.joinpath("Dockerfile")
 
-    version = '{}{}'.format(
-        'pre-' if args.pre else '',
+    version = "{}{}".format(
+        "pre-" if args.pre else "",
         VERSION,
     )
-    generic = 'pre' if args.pre else 'latest'
+    generic = "pre" if args.pre else "latest"
 
     tags = [
-        '{}:{}-{}'.format(HUB_PREFIX, version, python_version),
-        '{}:{}-{}'.format(HUB_PREFIX, generic, python_version),
+        "{}:{}-{}".format(HUB_PREFIX, version, python_version),
+        "{}:{}-{}".format(HUB_PREFIX, generic, python_version),
     ]
     if not args.pre:
-        tags.append('{}:current-{}'.format(HUB_PREFIX, python_version))
+        tags.append("{}:current-{}".format(HUB_PREFIX, python_version))
 
-    parts = ['docker', 'build', '--pull', f'--file="{path}"']
+    parts = ["docker", "build", "--pull", f'--file="{path}"']
     if not args.cache:
-        parts.append('--no-cache')
+        parts.append("--no-cache")
 
-    for key, value in spec['build_args'].items():
-        parts.append(f'--build-arg {key}={value}')
+    for key, value in spec["build_args"].items():
+        parts.append(f"--build-arg {key}={value}")
 
     for tag in tags:
-        parts.append(f'--tag={tag}')
+        parts.append(f"--tag={tag}")
 
-    command = ' '.join(parts + ['.'])
+    command = " ".join(parts + ["."])
 
-    print('[BUILDING]:', python_version)
+    print("[BUILDING]:", python_version)
     if args.dry_run:
-        print('[DRY-RUN]: Skipped building command')
-        print(textwrap.indent(command.replace(' -', '\n   -'), '   '))
+        print("[DRY-RUN]: Skipped building command")
+        print(textwrap.indent(command.replace(" -", "\n   -"), "   "))
     else:
-        os.environ['DOCKER_BUILDKIT'] = '1'
+        os.environ["DOCKER_BUILDKIT"] = "1"
         os.system(command)
 
-    return dict(
-        spec=spec,
-        id=python_version,
-        path=path,
-        command=command,
-        tags=tags
-    )
+    return dict(spec=spec, id=python_version, path=path, command=command, tags=tags)
 
 
 def publish(build_entry: dict, args: argparse.Namespace):
     """Publishes the specified build entry to docker hub"""
-    for tag in build_entry['tags']:
-        if args['dry_run']:
-            print('[DRY-RUN]: Skipped pushing {}'.format(tag))
+    for tag in build_entry["tags"]:
+        if args["dry_run"]:
+            print("[DRY-RUN]: Skipped pushing {}".format(tag))
         else:
-            print('[PUSHING]:', tag)
-            os.system('docker push {}'.format(tag))
+            print("[PUSHING]:", tag)
+            os.system("docker push {}".format(tag))
 
 
 def parse() -> argparse.Namespace:
     """Parse command line arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-p', '--publish',
-        action='store_true',
-        help='Whether or not to publish images after building them.',
+        "-p",
+        "--publish",
+        action="store_true",
+        help="Whether or not to publish images after building them.",
     )
     parser.add_argument(
-        '--cache',
-        action='store_true',
-        help='Allows the docker build to use existing cache.',
+        "--cache",
+        action="store_true",
+        help="Allows the docker build to use existing cache.",
     )
     parser.add_argument(
-        '-i', '--id',
-        dest='ids',
-        action='append',
+        "-i",
+        "--id",
+        dest="ids",
+        action="append",
         help=textwrap.dedent(
             """
             One or more build identifiers to build. If not specified
@@ -95,8 +91,8 @@ def parse() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
-        '--pre',
-        action='store_true',
+        "--pre",
+        action="store_true",
         help=textwrap.dedent(
             """
             If true images will be built with a "pre" in the version
@@ -107,8 +103,8 @@ def parse() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
-        '--dry-run',
-        action='store_true',
+        "--dry-run",
+        action="store_true",
         help=textwrap.dedent(
             """
             When set, the actual build process is skipped and instead
@@ -137,5 +133,5 @@ def run():
         publish(entry, args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

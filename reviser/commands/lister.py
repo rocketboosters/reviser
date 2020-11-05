@@ -10,7 +10,7 @@ from reviser import servicer
 
 
 def get_completions(
-        completer: 'interactivity.ShellCompleter',
+    completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
     """Shell auto-completes for this command."""
     return []
@@ -21,16 +21,16 @@ def populate_subparser(parser: ArgumentParser):
     pass
 
 
-def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
+def run(ex: "interactivity.Execution") -> "interactivity.Execution":
     """Execute the listing command."""
     selected = ex.shell.context.get_selected_targets(ex.shell.selection)
 
     for target in selected.function_targets:
-        client = target.client('lambda')
+        client = target.client("lambda")
         servicer.echo_function_versions(client, target.names)
 
     for target in selected.layer_targets:
-        client = target.client('lambda')
+        client = target.client("lambda")
         function_names = [
             name
             for t in selected.function_targets
@@ -40,7 +40,7 @@ def run(ex: 'interactivity.Execution') -> 'interactivity.Execution':
         servicer.echo_layer_versions(client, target.names, function_names)
 
     return ex.finalize(
-        status='LISTED',
-        message='Items have been listed.',
+        status="LISTED",
+        message="Items have been listed.",
         echo=False,
     )
