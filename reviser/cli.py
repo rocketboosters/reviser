@@ -4,7 +4,6 @@ import subprocess
 import sys
 import typing
 
-import reviser
 from reviser import parsing
 
 
@@ -16,6 +15,7 @@ def main(arguments: typing.List[str] = None):
     credentials_directory = pathlib.Path(args.aws_directory).absolute()
     deploy_directory = pathlib.Path(args.root_directory).absolute()
     folder_name = deploy_directory.name
+    version = args.image_tag_version
 
     command = [
         "docker",
@@ -23,12 +23,12 @@ def main(arguments: typing.List[str] = None):
         "-it",
         "--rm",
         "-v",
-        "{}:/root/.aws".format(credentials_directory),
+        "{}:/root/.aws".format(str(credentials_directory).replace("\\", "/")),
         "-v",
-        "{}:/project/{}".format(deploy_directory, folder_name),
+        "{}:/project/{}".format(str(deploy_directory), folder_name),
         "--workdir=/project/{}".format(folder_name),
-        f"swernst/reviser:{reviser.__version__}-{args.runtime}",
-        *(arguments or sys.argv)[1:],
+        f"swernst/reviser:{version}-{args.runtime}",
+        *[a.replace("\\", "/") for a in (arguments or sys.argv)[1:]],
     ]
 
     display = " ".join(command).replace(" -", "\n        -")

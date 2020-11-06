@@ -3,6 +3,8 @@ import os
 import pathlib
 import sys
 
+import reviser
+
 
 def _suppress(condition: bool, help_doc: str) -> str:
     """Returns the help status based on the suppression condition."""
@@ -43,6 +45,19 @@ def create_parser(internal_parser: bool) -> argparse.ArgumentParser:
             """
             Python runtime version of the lambda function(s)/layer(s)
             that will be deployed to from this shell.
+            """,
+        ),
+    )
+
+    parser.add_argument(
+        "--tag-version",
+        dest="image_tag_version",
+        default=reviser.__version__,
+        help=_suppress(
+            internal_parser,
+            """
+            Image tag version prefix to use to launch the container. Defsults
+            to the version of reviser used to launch the container.
             """,
         ),
     )
