@@ -8,6 +8,7 @@ from .configurations import Dependency  # noqa
 from .configurations import EnvironmentVariable  # noqa
 from .configurations import PipDependency  # noqa
 from .configurations import PipperDependency  # noqa
+from .configurations import PoetryDependency  # noqa
 from .configurations import Target  # noqa
 from .contexts import Context  # noqa
 from .enumerations import DefaultFile  # noqa

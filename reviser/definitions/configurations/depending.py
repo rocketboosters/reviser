@@ -1,7 +1,8 @@
 import dataclasses
-import pathlib
-import typing
 import json
+import pathlib
+import subprocess
+import typing
 
 from reviser.definitions import abstracts
 from reviser.definitions import configurations
@@ -121,5 +122,46 @@ class PipperDependency(Dependency):
             "kind": self.kind.value,
             "prefix": self.prefix,
             "bucket": self.bucket,
+            "packages": self.get_package_names(),
+        }
+
+
+@dataclasses.dataclass(frozen=True)
+class PoetryDependency(Dependency):
+    """Poetry package dependency data structure."""
+
+    @property
+    def extras(self) -> typing.List[str]:
+        """List of extra packages to install."""
+        return self.get_as_list("extras", default=self.get_as_list("extra")) or []
+
+    def get_package_names(self) -> typing.List[str]:
+        """
+        Returns a list of package names to install collected from
+        the various ways packages can be specified.
+        """
+        packages = self.packages.copy()
+        if not self.file or not self.file.exists():
+            return packages
+
+        command = ["poetry", "export", "--format=requirements.txt", "--without-hashes"]
+
+        for group in self.extras:
+            command.append(f"--extras={group}")
+
+        result = subprocess.run(command, stdout=subprocess.PIPE, check=True)
+
+        packages += [
+            item
+            for line in result.stdout.decode().strip().split("\n")
+            if (item := line.split(";")[0].strip())
+        ]
+
+        return packages
+
+    def serialize(self) -> dict:
+        """Serializes the object for output representation."""
+        return {
+            "kind": self.kind.value,
             "packages": self.get_package_names(),
         }

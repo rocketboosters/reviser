@@ -1,4 +1,4 @@
-# Reviser (v0.1.3)
+# Reviser (v0.1.4)
 
 Reviser is a tool for AWS Lambda function and layer version deployment and
 alias management specifically for Python runtimes where the actual
@@ -38,6 +38,7 @@ or scripted shell of commands.
       - [targets[N].region](#targetsnregion)
       - [targets[N].dependencies](#targetsndependencies)
       - [targets[N].dependencies(kind="pipper")](#targetsndependencieskindpipper)
+      - [targets[N].dependencies(kind="poetry")](#targetsndependencieskindpoetry)
       - [targets[N].bundle](#targetsnbundle)
          - [targets[N].bundle.include(s)](#targetsnbundleincludes)
          - [targets[N].bundle.exclude(s)](#targetsnbundleexcludes)
@@ -435,10 +436,11 @@ targets:
   dependencies:
   - kind: pip
   - kind: pipper
+  - kind: poetry
 ```
 
-Currently `pip` and `pipper` package managers are supported. For either
-package manager, the dependencies can be specified explicitly with the 
+Currently `pip`, `pipper` and `poetry` package managers are supported. For any of the
+package managers, the dependencies can be specified explicitly with the 
 `package(s)` key.
 
 ```yaml
@@ -469,8 +471,8 @@ targets:
 ```
 
 If no packages or file is specified, the default file for the given package
-manager will be used by default (e.g. `requirements.txt` for pip 
-and `pipper.json` for pipper).
+manager will be used by default (e.g. `requirements.txt` for pip,
+ `pipper.json` for pipper, and `pyproject.toml` for poetry).
 
 It is also possible to specify the same kind of package manager multiple
 times in this list to aggregate dependencies from multiple locations.
@@ -497,6 +499,22 @@ targets:
     file: pipper.layer.json
     bucket: bucket-name-where-pipper-package-resides
     prefix: a/prefix/that/is/not/just/pipper
+```
+
+### targets[N].dependencies(kind="poetry")
+
+Poetry repositories have additional `extras` configuration that can be used to
+specify optional dependency groups to install in the lambda. This can be useful
+to separate dependencies by function.
+
+```yaml
+targets:
+- kind: layer
+  name: foo
+  dependencies:
+  - kind: poetry
+    extras:
+    - group
 ```
 
 ### targets[N].bundle

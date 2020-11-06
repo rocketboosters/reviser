@@ -34,6 +34,10 @@ targets:
   - kind: pipper
     bucket: some-pipper-bucket
     packages: [baz, qux]
+  - kind: poetry
+    packages:
+    - foo==1.1.1
+    - bar==0.12.3
 
 # A layer with default values for everything.
 - kind: layer

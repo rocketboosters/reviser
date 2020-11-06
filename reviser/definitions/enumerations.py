@@ -18,6 +18,7 @@ class DependencyType(enum.Enum):
 
     PIP = "pip"
     PIPPER = "pipper"
+    POETRY = "poetry"
 
 
 class DefaultFile(enum.Enum):
@@ -25,6 +26,7 @@ class DefaultFile(enum.Enum):
 
     PIP = "requirements.txt"
     PIPPER = "pipper.json"
+    POETRY = "pyproject.toml"
 
     @classmethod
     def from_dependency_type(
@@ -36,4 +38,5 @@ class DefaultFile(enum.Enum):
         return {
             DependencyType.PIP.value: DefaultFile.PIP,
             DependencyType.PIPPER.value: DefaultFile.PIPPER,
+            DependencyType.POETRY.value: DefaultFile.POETRY,
         }.get(key, None)

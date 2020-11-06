@@ -7,6 +7,7 @@ from .bundling import Bundle
 from .depending import Dependency
 from .depending import PipDependency
 from .depending import PipperDependency
+from .depending import PoetryDependency
 from .enviromentals import EnvironmentVariable
 from .layering import AttachedLayer
 from .targeting import Target

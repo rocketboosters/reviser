@@ -44,8 +44,19 @@ def _install_pipper_package(
     subprocess.run(cmd, env=env, check=True)
 
 
+def _install_poetry(dependency: "definitions.PoetryDependency"):
+    """Installs poetry dependencies in the target's site packages."""
+    for package in dependency.get_package_names() or []:
+        print(f'\n[INSTALLING]: "{package}" poetry package')
+        _install_pip_package(
+            package,
+            dependency.target.site_packages_directory,
+        )
+        print(f'\n[INSTALLED]: "{package}" poetry package')
+
+
 def _install_pip(dependency: "definitions.PipDependency"):
-    """Installs pip dependencies in the target's site packages."""
+    """Installs poetry dependencies in the target's site packages."""
     for package in dependency.get_package_names() or []:
         print(f'\n[INSTALLING]: "{package}" pip package')
         _install_pip_package(
@@ -104,6 +115,7 @@ def install_dependencies(target: "definitions.Target"):
     callers = {
         definitions.DependencyType.PIPPER: _install_pipper,
         definitions.DependencyType.PIP: _install_pip,
+        definitions.DependencyType.POETRY: _install_poetry,
     }
 
     for dependency in target.dependencies:
