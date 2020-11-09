@@ -32,11 +32,11 @@ class DefaultFile(enum.Enum):
     def from_dependency_type(
         cls,
         dependency_type: typing.Union["DependencyType", str],
-    ) -> typing.Optional["DefaultFile"]:
+    ) -> "DefaultFile":
         """Lookup default file from a dependency type."""
         key = getattr(dependency_type, "value", dependency_type)
         return {
             DependencyType.PIP.value: DefaultFile.PIP,
             DependencyType.PIPPER.value: DefaultFile.PIPPER,
             DependencyType.POETRY.value: DefaultFile.POETRY,
-        }.get(key, None)
+        }.get(key, DefaultFile.PIP)

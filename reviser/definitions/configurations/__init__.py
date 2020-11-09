@@ -3,14 +3,14 @@ import typing
 
 from reviser.definitions import abstracts
 from reviser.definitions import enumerations
-from .bundling import Bundle
-from .depending import Dependency
-from .depending import PipDependency
-from .depending import PipperDependency
-from .depending import PoetryDependency
-from .enviromentals import EnvironmentVariable
-from .layering import AttachedLayer
-from .targeting import Target
+from .bundling import Bundle  # noqa
+from .depending import Dependency  # noqa
+from .depending import PipDependency  # noqa
+from .depending import PipperDependency  # noqa
+from .depending import PoetryDependency  # noqa
+from .enviromentals import EnvironmentVariable  # noqa
+from .layering import AttachedLayer  # noqa
+from .targeting import Target  # noqa
 
 
 @dataclasses.dataclass(frozen=True)

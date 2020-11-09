@@ -1,2 +1,2 @@
-from .running import ScenarioRunner
-from .mocking import Patches
+from .running import ScenarioRunner  # noqa
+from .mocking import Patches  # noqa

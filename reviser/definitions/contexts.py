@@ -79,7 +79,7 @@ class Context:
     def load_from_file(
         cls,
         arguments: argparse.Namespace,
-        path: str = None,
+        path: typing.Union[str, pathlib.Path] = None,
         connection: "aws.AwsConnection" = None,
     ) -> "Context":
         """

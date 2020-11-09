@@ -19,11 +19,11 @@ def assert_command_result(
             """
 
     if info := expected.get("info"):
-        assert (
+        assert result.info is not None and (
             info.items() <= result.info.items()
         ), f"""
             Expected command "{value}" to return a subset of info matching:
-            
+
             {info}
 
             but instead it was:

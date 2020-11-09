@@ -10,22 +10,26 @@ def to_human_readable_size(
 
     step_to_greater_unit = 1024
     unit = "bytes"
+    value = float(number_of_bytes)
 
-    if (number_of_bytes / step_to_greater_unit) >= 1:
-        number_of_bytes /= step_to_greater_unit
+    if value < 1024:
+        return f"{int(value)} {unit}"
+
+    if (value / step_to_greater_unit) >= 1:
+        value /= step_to_greater_unit
         unit = "KB"
 
-    if (number_of_bytes / step_to_greater_unit) >= 1:
-        number_of_bytes /= step_to_greater_unit
+    if (value / step_to_greater_unit) >= 1:
+        value /= step_to_greater_unit
         unit = "MB"
 
-    if (number_of_bytes / step_to_greater_unit) >= 1:
-        number_of_bytes /= step_to_greater_unit
+    if (value / step_to_greater_unit) >= 1:
+        value /= step_to_greater_unit
         unit = "GB"
 
-    if (number_of_bytes / step_to_greater_unit) >= 1:
-        number_of_bytes /= step_to_greater_unit
+    if (value / step_to_greater_unit) >= 1:
+        value /= step_to_greater_unit
         unit = "TB"
 
-    number_of_bytes = round(number_of_bytes, 1)
-    return f"{number_of_bytes} {unit}"
+    value = round(value, 1)
+    return f"{value} {unit}"

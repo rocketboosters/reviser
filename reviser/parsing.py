@@ -84,7 +84,7 @@ def create_parser(internal_parser: bool) -> argparse.ArgumentParser:
         help="""
             The root directory where the lambda shell executions will
             take place. By default it is the current directory at the
-            time the shell is started. 
+            time the shell is started.
             """,
     )
     parser.add_argument(

@@ -45,6 +45,7 @@ class CopyPath:
             src=str(self.source.absolute()),
             dst=str(self.destination.absolute()),
         )
+        return True
 
 
 @dataclasses.dataclass(frozen=True)
@@ -72,12 +73,14 @@ class Bundle(abstracts.Specification):
         """Python filename associated with the specified handler."""
         if handler := self.handler:
             return "{}.py".format(handler.rsplit(".", 1)[0])
+        return None
 
     @property
     def handler_function(self) -> typing.Optional[str]:
         """Python entrypoint function name for the specified handler."""
         if handler := self.handler:
             return handler.rsplit(".", 1)[-1]
+        return None
 
     @property
     def omitted_packages(self) -> typing.List[str]:
@@ -103,7 +106,10 @@ class Bundle(abstracts.Specification):
         defined by the location of the configuration file and stored in
         the directory value of this object.
         """
-        includes = self.get("includes", default=self.get("include")) or []
+        includes = [
+            pathlib.Path(p)
+            for p in self.get_as_list("includes", default=self.get_as_list("include"))
+        ]
         if isinstance(includes, str):
             includes = [includes]
 

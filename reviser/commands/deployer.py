@@ -51,7 +51,7 @@ def run(ex: "interactivity.Execution"):
         context=ex.shell.context,
         selection=ex.shell.selection,
         description=description,
-        dry_run=ex.args.get("dry_run"),
+        dry_run=ex.args.get("dry_run") or False,
     )
     print("\n")
     return ex.finalize(

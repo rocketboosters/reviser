@@ -75,7 +75,7 @@ def test_simple_scenario_reload():
             before_target.uuid == after_target.uuid
         ), """
             Expect target uuids to be preserved during reload because
-            no significant changes between target reloads were found. 
+            no significant changes between target reloads were found.
             """
 
 

@@ -95,13 +95,13 @@ class LambdaLayer:
         return self.get("Description")
 
     @property
-    def created(self) -> typing.Optional[datetime.datetime]:
+    def created(self) -> datetime.datetime:
         try:
             return datetime.datetime.fromisoformat(
-                (self.response or {}).get("CreatedDate").rsplit("+", 1)[0]
+                (self.response or {}).get("CreatedDate", "").rsplit("+", 1)[0]
             ).replace(microsecond=0)
         except Exception:
-            return None
+            return datetime.datetime(1900, 1, 1)
 
     @property
     def runtimes(self) -> typing.List[str]:

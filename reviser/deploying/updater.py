@@ -31,9 +31,9 @@ def _get_layer_updates(
 
     latest = []
     for arn in layers:
-        if arn.count(":") == 7:
+        if arn and arn.count(":") == 7:
             latest.append(arn)
-        elif found_versions := servicer.get_layer_versions(client, arn):
+        elif arn and (found_versions := servicer.get_layer_versions(client, arn)):
             version = found_versions[-1].version
             latest.append(f"{arn}:{version}")
         else:
@@ -45,7 +45,7 @@ def _get_layer_updates(
 
 
 def _get_runtime_update(
-    target: "configurations.Target",
+    target: "definitions.Target",
     current_configuration: dict,
 ) -> typing.Optional[str]:
     """Specifies an updated runtime if a change is found."""
@@ -57,7 +57,7 @@ def _get_runtime_update(
 
 
 def _get_memory_update(
-    target: "configurations.Target",
+    target: "definitions.Target",
     current_configuration: dict,
 ) -> typing.Optional[int]:
     existing = current_configuration.get("MemorySize")
@@ -68,7 +68,7 @@ def _get_memory_update(
 
 
 def _get_timeout_update(
-    target: "configurations.Target",
+    target: "definitions.Target",
     current_configuration: dict,
 ) -> typing.Optional[int]:
     existing = current_configuration.get("Timeout")

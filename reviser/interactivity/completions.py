@@ -60,6 +60,9 @@ def _get_completions(
     Creates a list of completions that should be returned by the
     ShellCompleter.get_completions function.
     """
+    if not completer.document:
+        return []
+
     if completer.document.text.lstrip().find(" ") == -1:
         return _get_action_completions(completer)
 

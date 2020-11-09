@@ -1,5 +1,6 @@
 import contextlib
 import pathlib
+import typing
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -97,8 +98,8 @@ class AwsClient:
     def __init__(self, scenario: dict):
         """Populate with the loaded scenario data."""
         self._scenario = scenario
-        self._identifier = None
-        self._calls = []
+        self._identifier: typing.Optional[str] = None
+        self._calls: typing.List[dict] = []
         self.exceptions = MagicMock()
         self.exceptions.ResourceNotFoundException = ValueError
 

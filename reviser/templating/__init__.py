@@ -2,10 +2,11 @@ import pathlib
 import re
 import textwrap
 import traceback
+import typing
 
+import colorama
 import yaml
 from jinja2 import Environment
-import colorama
 
 import reviser
 
@@ -67,6 +68,7 @@ def print_error(message: str, error: Exception = None):
     Renders an exception template to stdout. If error is specified,
     that will be rendered as a stacktrace as well.
     """
+    stack_trace: typing.Optional[str]
     if error:
         stack_trace = "\n".join(
             traceback.format_exception(

@@ -89,6 +89,9 @@ class ScenarioRunner:
 
     def cleanup(self) -> "ScenarioRunner":
         """Cleans up temporary data after a test."""
+        if self.shell is None:
+            return self
+
         for t in self.shell.context.configuration.targets:
             if t.bundle_directory.exists():
                 shutil.rmtree(t.bundle_directory)
@@ -119,5 +122,5 @@ class ScenarioRunner:
     def __enter__(self) -> "ScenarioRunner":
         return self.run()
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> typing.NoReturn:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.cleanup()

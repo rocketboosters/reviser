@@ -4,10 +4,12 @@ from importlib import metadata as _metadata
 try:
     from reviser.interactivity import run_shell  # noqa
 except ImportError as error:
+    _stored_error = error
 
-    def run_shell(*args, **kwargs):
+    def run_shell(*args, **kwargs):  # type:ignore
         """Replacement shell when import fails due to missing dependencies."""
-        raise error
+        global _stored_error
+        raise _stored_error
 
 
 try:

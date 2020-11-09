@@ -54,8 +54,8 @@ def _prune_function(
     function_name: str,
     start: int = None,
     end: int = None,
-    dry_run: bool = False,
-    confirm: bool = True,
+    dry_run: typing.Optional[bool] = False,
+    confirm: typing.Optional[bool] = True,
 ):
     """
     Executes a pruning operation on the given lambda functions.
@@ -81,8 +81,9 @@ def _prune_function(
         v.arn
         for v in versions
         if v.version != "$LATEST"
-        and (start is None or start <= int(v.version))
-        and (end is None or int(v.version) <= end)
+        and v.arn
+        and (start is None or start <= int(v.version or 0))
+        and (end is None or int(v.version or 0) <= end)
         and not v.aliases
     ]
 
@@ -116,8 +117,8 @@ def _prune_layer(
     layer_name: str,
     start: int = None,
     end: int = None,
-    dry_run: bool = False,
-    confirm: bool = True,
+    dry_run: typing.Optional[bool] = False,
+    confirm: typing.Optional[bool] = True,
 ):
     """
     Executes a pruning operation on the given lambda layers.
@@ -142,15 +143,15 @@ def _prune_layer(
     removals = [
         version
         for version in versions[:-1]
-        if (start is None or start <= int(version.version))
-        and (end is None or int(version.version) <= end)
+        if (start is None or start <= int(version.version or 0))
+        and (end is None or int(version.version or 0) <= end)
     ]
-    arns = [r.arn for r in removals]
+    arns = [r.arn for r in removals if r.arn]
 
     print("\nARN Versions to be removed:")
     print(
         textwrap.indent(
-            "\n".join(arns),
+            "\n".join(arns or []),
             prefix="  - ",
         )
     )
@@ -178,20 +179,20 @@ def run(ex: "interactivity.Execution") -> "interactivity.Execution":
     selected = ex.shell.context.get_selected_targets(ex.shell.selection)
     targets = sorted(selected.targets, key=lambda t: t.kind.value)
 
-    kwargs = {
-        "start": ex.args.get("start"),
-        "end": ex.args.get("end"),
-        "dry_run": ex.args.get("dry_run", False),
-        "confirm": not ex.args.get("yes", False),
-    }
-
     caller = {
         definitions.TargetType.FUNCTION: _prune_function,
         definitions.TargetType.LAYER: _prune_layer,
     }
 
     results = {
-        name: caller[target.kind](target.client("lambda"), name, **kwargs)
+        name: caller[target.kind](
+            target.client("lambda"),
+            name,
+            start=ex.args.get("start"),
+            end=ex.args.get("end"),
+            dry_run=ex.args.get("dry_run") or False,
+            confirm=not ex.args.get("yes") or False,
+        )
         for target in targets
         for name in target.names
     }

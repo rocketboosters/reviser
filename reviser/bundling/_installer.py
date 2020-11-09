@@ -104,7 +104,7 @@ def _install_pipper(dependency: "definitions.PipperDependency"):
 def install_dependencies(target: "definitions.Target"):
     """Install the dependencies for the specified target."""
     if target.site_packages_directory.exists():
-        print(f"\n[RESET]: Site packages directory exists and is being reset.")
+        print("\n[RESET]: Site packages directory exists and is being reset.")
         shutil.rmtree(
             str(target.site_packages_directory),
             ignore_errors=True,
@@ -112,7 +112,7 @@ def install_dependencies(target: "definitions.Target"):
 
     target.site_packages_directory.mkdir(exist_ok=True, parents=True)
 
-    callers = {
+    callers: typing.Any = {
         definitions.DependencyType.PIPPER: _install_pipper,
         definitions.DependencyType.PIP: _install_pip,
         definitions.DependencyType.POETRY: _install_poetry,

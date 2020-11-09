@@ -32,7 +32,7 @@ def publish_function(
             dry_run=dry_run,
         )
 
-        print(f"[PUBLISHING]: Publishing new version from bundle")
+        print("[PUBLISHING]: Publishing new version from bundle")
         if response and not dry_run:
             response = client.publish_version(
                 FunctionName=response["FunctionName"],

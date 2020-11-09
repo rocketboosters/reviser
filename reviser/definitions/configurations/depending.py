@@ -93,7 +93,7 @@ class PipperDependency(Dependency):
         buckets = self.get("buckets", default=self.get("bucket", default=None))
 
         if not buckets and self.file:
-            return self.get_package_data().get("bucket") or None
+            return (self.get_package_data() or {}).get("bucket") or None
 
         if isinstance(buckets, str):
             return buckets

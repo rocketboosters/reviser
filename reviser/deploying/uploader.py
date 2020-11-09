@@ -34,15 +34,15 @@ def upload(
         uploading the data.
     """
     try:
-        size = os.path.getsize(target.bundle_zip_path)
+        size_bytes = os.path.getsize(target.bundle_zip_path)
     except FileNotFoundError:
         if not dry_run:
             raise RuntimeError("Bundling is required before deploy.")
-        size = 0
+        size_bytes = 0
 
     upload_status = {
         "uploaded_bytes": 0,
-        "total_bytes": size,
+        "total_bytes": size_bytes,
         "display_progress": -5,
     }
 

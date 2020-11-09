@@ -30,7 +30,7 @@ def get_function_versions(
         aliased[a["FunctionVersion"]].append(a)
 
     versions.sort(
-        key=lambda x: int(1e8 if x.version == "$LATEST" else x.version),
+        key=lambda x: int(1e8 if x.version == "$LATEST" else (x.version or 0)),
     )
     return [
         dataclasses.replace(v, alias_responses=aliased[v.version]) for v in versions
@@ -70,7 +70,7 @@ def echo_function_versions(client: BaseClient, names: typing.List[str]):
 
         groups = defaultdict(list)
         for v in versions:
-            dt = datetime.datetime.fromisoformat(v.modified.split("+")[0])
+            dt = datetime.datetime.fromisoformat((v.modified or "").split("+")[0])
             groups[str(dt.date())].append({"time": dt.strftime("%H:%M"), "data": v})
 
         templating.printer(

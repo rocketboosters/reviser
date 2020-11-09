@@ -39,21 +39,26 @@ def _get_layer_version_info(
     layer_reference: "definitions.LambdaLayerReference",
 ) -> dict:
     """Fetches layer information for display."""
+    if not layer_reference.unversioned_arn:
+        return {}
+
     versions = servicer.get_layer_versions(
         client,
         layer_reference.unversioned_arn,
     )
     current = next((v for v in versions if v.arn == layer_reference.arn), None)
-    latest = versions[-1]
+    if current is None:
+        return {}
 
     out = {
         "name": current.name,
-        "version": current.version,
+        "version": current.version or "UNKNOWN",
         "created": current.created.isoformat("T"),
         "runtimes": ", ".join(current.runtimes),
-        "arn": layer_reference.arn,
+        "arn": layer_reference.arn or "UNKNOWN",
     }
 
+    latest = versions[-1]
     if latest != current:
         out["status"] = f"Newer version {latest.version} exists."
     else:
@@ -106,21 +111,20 @@ def _display_layer_info(
     client: BaseClient,
     name: str,
     qualifier: str,
-):
+) -> None:
     """Display layer version information."""
     try:
         version = int(qualifier)
     except (ValueError, TypeError):
-        version = None
-
-    if version is None:
-        version = servicer.get_layer_versions(client, name)[-1].version
+        version = servicer.get_layer_versions(client, name)[-1].version or 0
 
     layer = servicer.get_layer_version(
         lambda_client=client,
         layer_name=name,
         version=version,
     )
+    if layer is None:
+        return
 
     print(f"\n--- {layer.name}:{version} ---")
     data = {
@@ -137,7 +141,9 @@ def _display_layer_info(
 def run(ex: "interactivity.Execution") -> "interactivity.Execution":
     """Displays the current configuration of the lambda target(s)."""
     selected = ex.shell.context.get_selected_targets(ex.shell.selection)
-    qualifier = ex.args.get("qualifier")
+    qualifier = ex.args.get("qualifier") or "$LATEST"
+
+    items: typing.List[typing.Tuple[definitions.Target, str]]
 
     items = [(t, n) for t in selected.function_targets for n in t.names]
     for target, name in items:

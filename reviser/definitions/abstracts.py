@@ -51,12 +51,14 @@ class DataWrapper:
         instead, but if the key is explicitly defined as `null` an empty
         list is returned instead fo the default.
         """
-        if not self.has(*args):
-            return default
+        if self.has(*args):
+            value = self.get(*args, default=default)
+        else:
+            value = default
 
-        value = self.get(*args, default=default)
         if value is None:
             return []
+
         if isinstance(value, list):
             return value
         return [value]

@@ -57,7 +57,7 @@ class Target(abstracts.Specification):
     """
 
     configuration: "configurations.Configuration"
-    selection: "selections.Selection" = None
+    selection: typing.Optional["selections.Selection"] = None
 
     @property
     def aws_region(self) -> str:
@@ -190,7 +190,9 @@ class Target(abstracts.Specification):
             return int(value)
         except ValueError:
             regex = re.compile(r"^(?P<value>\d+).*")
-            return int(regex.match(value).groupdict()["value"])
+            if (match := regex.match(value)) is not None:
+                return int(match.groupdict()["value"])
+            return None
 
     @property
     def memory(self) -> typing.Optional[int]:
@@ -206,13 +208,16 @@ class Target(abstracts.Specification):
             return int(value)
         except ValueError:
             regex = re.compile(r"^(?P<value>\d+).*")
-            return int(regex.match(value).groupdict()["value"])
+            if (match := regex.match(value)) is not None:
+                return int(match.groupdict()["value"])
+            return None
 
     @property
-    def dependencies(self) -> typing.List["configurations.Dependency"]:
+    def dependencies(self) -> typing.Tuple["configurations.Dependency", ...]:
         """Dependencies for this function definition."""
         output = []
 
+        dependency: configurations.Dependency
         for data in self.get("dependencies", default=[]):
             if data.get("kind") == enumerations.DependencyType.PIPPER.value:
                 dependency = configurations.PipperDependency(
@@ -230,7 +235,7 @@ class Target(abstracts.Specification):
                 )
             output.append(dependency)
 
-        return output
+        return tuple(output)
 
     def ignores_any(self, *args: str) -> bool:
         """True if any of the specified args appear in the ignores list."""

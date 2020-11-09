@@ -93,7 +93,7 @@ def _get_version(target: "definitions.Target", version: str) -> str:
 
     client = target.client("lambda")
     versions = servicer.get_function_versions(client, target.names[0])
-    return versions[number - 1].version
+    return versions[number - 1].version or "unknown"
 
 
 def run(ex: "interactivity.Execution") -> "interactivity.Execution":
@@ -118,7 +118,7 @@ def run(ex: "interactivity.Execution") -> "interactivity.Execution":
     name = ex.args.get("function") or target.names[0]
     client = target.client("lambda")
     alias = ex.args.get("alias")
-    version = _get_version(target, ex.args.get("version"))
+    version = _get_version(target, ex.args.get("version", "unknown"))
     create = ex.args.get("create")
     yes = ex.args.get("yes")
 

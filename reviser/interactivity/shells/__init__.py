@@ -59,7 +59,7 @@ class Execution:
             self,
             result=ExecutionResult(
                 status=(status or "???").upper(),
-                message=message,
+                message=message or "???",
                 info=info,
                 data=data,
             ),
@@ -132,7 +132,9 @@ class Shell:
         determined by whether or not it is running interactively or
         there are queued commands to still process.
         """
-        return not self.shutdown and (bool(self.command_queue) or self.is_interactive)
+        return not self.shutdown and bool(
+            bool(self.command_queue) or self.is_interactive
+        )
 
     def _create_prompt_session(self) -> bool:
         """
@@ -166,7 +168,7 @@ class Shell:
         # loop, consider the loop to be running in interactive mode.
         self.is_interactive = not bool(self.command_queue)
 
-    def run(self) -> typing.NoReturn:
+    def run(self) -> None:
         """Launches the command execution loop."""
         self._setup()
 
@@ -212,18 +214,20 @@ class Shell:
         if self.command_queue:
             line = self.command_queue.pop(0)
             print(f"{prompt}{line}")
-        else:
+        elif self._prompt_session is not None:
             # noinspection PyTypeChecker
             line = self._prompt_session.prompt(
                 message=ANSI(prompt),
                 completer=self._shell_completer,
                 complete_while_typing=True,
             )
+        else:
+            line = ""
 
         return line.strip()
 
 
-def execute(shell: "Shell", line: str) -> typing.NoReturn:
+def execute(shell: "Shell", line: str) -> None:
     """
     Executes the specified input command within the given shell
     environment.

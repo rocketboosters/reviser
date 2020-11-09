@@ -21,6 +21,8 @@ class EnvironmentVariable(abstracts.Specification):
         if (arg := self.get("arg")) is not None:
             return arg.split("=")[0]
 
+        return "unknown-environment-variable"
+
     @property
     def preserve(self) -> bool:
         """

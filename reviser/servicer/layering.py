@@ -30,7 +30,7 @@ def get_layer_versions(
             for page in paginator.paginate(**request)
             for layer in page.get("LayerVersions") or []
         ]
-        return list(sorted(layers, key=lambda x: x.version))
+        return list(sorted(layers, key=lambda x: x.version or 0))
     except lambda_client.exceptions.ResourceNotFoundException:
         return []
 
@@ -85,7 +85,7 @@ def echo_layer_versions(
             print(f'\n[IGNORED]: No layer "{name}" was found.')
             continue
 
-        functions = defaultdict(list)
+        functions: typing.DefaultDict[str, list] = defaultdict(list)
         for func in function_versions:
             match = func.get_layer(name)
             if match is not None:
