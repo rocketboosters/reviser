@@ -1,4 +1,4 @@
-# Reviser (v0.1.4)
+# Reviser (v0.1.6)
 
 [![PyPI version](https://badge.fury.io/py/reviser.svg)](https://pypi.org/project/reviser/)
 [![build status](https://gitlab.com/rocket-boosters/reviser/badges/main/pipeline.svg)](https://gitlab.com/rocket-boosters/reviser/commits/main)

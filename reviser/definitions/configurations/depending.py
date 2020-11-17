@@ -2,6 +2,7 @@ import dataclasses
 import json
 import pathlib
 import subprocess
+import sys
 import typing
 
 from reviser.definitions import abstracts
@@ -144,7 +145,30 @@ class PoetryDependency(Dependency):
         if not self.file or not self.file.exists():
             return packages
 
-        command = ["poetry", "export", "--format=requirements.txt", "--without-hashes"]
+        directories = [
+            pathlib.Path(sys.prefix).joinpath("bin"),
+            pathlib.Path(sys.executable).parent,
+        ]
+        directories = [d for d in directories if d.exists()]
+
+        finder = (
+            str(p)
+            for d in directories
+            for p in d.iterdir()
+            if p.name == "poetry" or p.name.startswith("poetry.")
+        )
+        executable = next(finder, None)
+        if executable is None:
+            raise RuntimeError(
+                "Unable to find poetry installation in current Python environment."
+            )
+
+        command = [
+            executable,
+            "export",
+            "--format=requirements.txt",
+            "--without-hashes",
+        ]
 
         for group in self.extras:
             command.append(f"--extras={group}")
