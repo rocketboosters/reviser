@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "reviser"
-version = "0.1.6"
+version = "0.1.7"
 description = "AWS Lambda function/layer version deployment manager."
 authors = ["Scott Ernst <swernst@gmail.com>"]
 license = "MIT"
@@ -39,7 +39,7 @@ pytest = "^6.1.2"
 black = "yes"
 coverage = "^5.3"
 pytest-cov = "yes"
-lobotomy = "^0.1.7"
+lobotomy = "^0.1.13"
 flake8 = "^3.8.4"
 flake8-black = "^0.2.1"
 mypy = "^0.790"

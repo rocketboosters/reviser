@@ -63,7 +63,7 @@ class PipDependency(Dependency):
         the various ways packages can be specified.
         """
         packages = self.packages.copy()
-        if self.file and self.file.exists():
+        if self.file:
             packages += [
                 item
                 for line in (self.file.read_text() or "").split("\n")
@@ -103,7 +103,7 @@ class PipperDependency(Dependency):
 
     def get_package_data(self) -> typing.Optional[dict]:
         """Returns the data stored in the specified package file."""
-        if self.file and self.file.exists():
+        if self.file:
             return json.loads(self.file.read_text())
         return None
 
@@ -142,7 +142,7 @@ class PoetryDependency(Dependency):
         the various ways packages can be specified.
         """
         packages = self.packages.copy()
-        if not self.file or not self.file.exists():
+        if not self.file:
             return packages
 
         directories = [

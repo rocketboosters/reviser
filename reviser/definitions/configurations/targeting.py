@@ -218,22 +218,23 @@ class Target(abstracts.Specification):
         output = []
 
         dependency: configurations.Dependency
+        dependency_types = enumerations.DependencyType
+        mappings: typing.Dict[str, typing.Callable] = {
+            dependency_types.PIP.value: configurations.PipDependency,
+            dependency_types.PIPPER.value: configurations.PipperDependency,
+            dependency_types.POETRY.value: configurations.PoetryDependency,
+        }
         for data in self.get("dependencies", default=[]):
-            if data.get("kind") == enumerations.DependencyType.PIPPER.value:
-                dependency = configurations.PipperDependency(
+            kind = data.get("kind", dependency_types.PIP.value)
+            constructor = mappings.get(kind, configurations.PipDependency)
+            output.append(
+                constructor(
                     directory=self.directory,
                     data=data,
                     connection=self.connection,
                     target=self,
                 )
-            else:
-                dependency = configurations.PipDependency(
-                    directory=self.directory,
-                    data=data,
-                    connection=self.connection,
-                    target=self,
-                )
-            output.append(dependency)
+            )
 
         return tuple(output)
 
