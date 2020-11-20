@@ -44,6 +44,18 @@ def _get_layer_updates(
     return latest
 
 
+def _get_handler_update(
+    target: "definitions.Target",
+    current_configuration: dict,
+) -> typing.Optional[str]:
+    """Specifies an updated handler if a change is found."""
+    latest = target.bundle.handler
+    existing = current_configuration.get("Handler")
+    if target.ignores_any("handler") or latest == existing:
+        return None
+    return latest
+
+
 def _get_runtime_update(
     target: "definitions.Target",
     current_configuration: dict,
@@ -125,6 +137,7 @@ def update_function_configuration(
         MemorySize=_get_memory_update(target, current),
         Timeout=_get_timeout_update(target, current),
         Environment=_get_variable_updates(function_name, target, current),
+        Handler=_get_handler_update(target, current),
     )
 
     modifications = {k: v for k, v in changes.items() if v is not None}
