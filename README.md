@@ -1,4 +1,4 @@
-# Reviser (v0.1.8)
+# Reviser (v0.2.0)
 
 [![PyPI version](https://badge.fury.io/py/reviser.svg)](https://pypi.org/project/reviser/)
 [![build status](https://gitlab.com/rocket-boosters/reviser/badges/main/pipeline.svg)](https://gitlab.com/rocket-boosters/reviser/commits/main)
@@ -59,6 +59,7 @@ or scripted shell of commands.
       - [(function) targets[N].variable(s)](#function-targetsnvariables)
       - [(function) targets[N].ignore(s)](#function-targetsnignores)
    - [run](#run)
+- [Local Execution](#local-execution)
 
 # Basic Usage
 
@@ -281,20 +282,29 @@ Allows for selecting subsets of the targets within the loaded configuration.
 The subsets are fuzzy-matched unless the --exact flag is used.
 
 ```
-usage: select [--exact] {function,layer,*} [name]
+usage: select [--functions] [--layers] [--exact] [name [name ...]]
 
 positional arguments:
-  {function,layer,*}  Specify the type of objects to select or use * to select
-                      both types.
-  name                Specifies the value to match against the function and
-                      layer target names available from the configuration.
-                      This can include shell-style wildcards and will also
-                      match against partial strings. If the --exact flag is
-                      specified, this value must exactly match one of the
-                      targets instead of the default fuzzy matching behavior.
+  name                  Specifies the value to match against the function and
+                        layer target names available from the configuration.
+                        This can include shell-style wildcards and will also
+                        match against partial strings. If the --exact flag is
+                        specified, this value must exactly match one of the
+                        targets instead of the default fuzzy matching
+                        behavior.
 
 optional arguments:
-  --exact             Forces the match to be exact instead of fuzzy.
+  --functions, --function, --func, -f
+                        When specified, functions will be selected. This will
+                        default to true if neither of --functions or --layers
+                        is specified. Will default to false if --layers is
+                        specified.
+  --layers, --layer, -l
+                        When specified, layers will be selected. This will
+                        default to true if neither of --functions or --layers
+                        is specified. Will default to false if --functions is
+                        specified.
+  --exact               Forces the match to be exact instead of fuzzy.
 
 ```
 
@@ -983,3 +993,23 @@ input. The benefit of this particular run command macro/group is to select
 the development targets and pre-build them to cache the dependencies for the
 shell user while they continue to develop and deploy the source code to the
 function.
+
+
+
+# Local Execution
+
+When running reviser in your current environment instead of launching the shell within
+a new container, you will want to use the command `reviser-shell`. This is the local
+version of the CLI that is meant to be used within a suitable container environment
+that mimics the lambda runtime environment. It is merely a change in entrypoint, and
+has all the shell functionality described for the `reviser` command above.
+
+Also, to run the `reviser-shell` successfully, you must install the extra shell
+dependencies with the installation:
+
+```shell
+$ pip install reviser[shell]
+```
+
+Without the shell extras install, the `reviser-shell` will fail. This is how you would
+use reviser in a containerized CI environment as well.

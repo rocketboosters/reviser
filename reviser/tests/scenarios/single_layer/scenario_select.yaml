@@ -1,5 +1,5 @@
 commands:
-- command: select * foo
+- command: select foo
   expected:
     status: MATCH
     info:
@@ -13,28 +13,28 @@ commands:
       functions: None
       layers: [foo-layer]
 
-- command: select layer foo
+- command: select foo
   expected:
     status: MATCH
     info:
       functions: None
       layers: [foo-layer]
 
-- command: select layer foo-layer --exact
+- command: select foo-layer --exact
   expected:
     status: EXACT
     info:
       functions: None
       layers: [foo-layer]
 
-- command: select layer foo --exact
+- command: select foo --exact
   expected:
     status: EXACT
     info:
       functions: None
       layers: None
 
-- command: select layer bar
+- command: select bar
   expected:
     status: MATCH
     info:

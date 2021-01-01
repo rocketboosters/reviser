@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "reviser"
-version = "0.1.8"
+version = "0.2.0"
 description = "AWS Lambda function/layer version deployment manager."
 authors = ["Scott Ernst <swernst@gmail.com>"]
 license = "MIT"
@@ -22,6 +22,7 @@ exclude = ["reviser/tests"]
 
 [tool.poetry.scripts]
 reviser = 'reviser.cli:main'
+reviser-shell = 'reviser:run_shell'
 
 [tool.poetry.dependencies]
 python = "^3.8"

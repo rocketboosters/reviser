@@ -26,6 +26,7 @@ or scripted shell of commands.
 - [Shell Commands](#shell-commands)
 {{ shell_commands_toc }}
 {{ configuration_toc }}
+- [Local Execution](#local-execution)
 
 # Basic Usage
 
@@ -83,3 +84,22 @@ commands are defined. For more details see the `run` attribute section of the
 configuration file definitions below.
 
 {{ configuration }}
+
+
+# Local Execution
+
+When running reviser in your current environment instead of launching the shell within
+a new container, you will want to use the command `reviser-shell`. This is the local
+version of the CLI that is meant to be used within a suitable container environment
+that mimics the lambda runtime environment. It is merely a change in entrypoint, and
+has all the shell functionality described for the `reviser` command above.
+
+Also, to run the `reviser-shell` successfully, you must install the extra shell
+dependencies with the installation:
+
+```shell
+$ pip install reviser[shell]
+```
+
+Without the shell extras install, the `reviser-shell` will fail. This is how you would
+use reviser in a containerized CI environment as well.

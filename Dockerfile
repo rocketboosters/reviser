@@ -11,10 +11,9 @@ RUN pip install poetry \
  && poetry install --extras shell --no-root
 
 COPY reviser /application/reviser
-COPY main.py /application/main.py
 
 RUN cd /application \
  && poetry config virtualenvs.create false \
  && poetry install
 
-ENTRYPOINT ["python", "-u", "/application/main.py"]
+ENTRYPOINT ["reviser-shell"]

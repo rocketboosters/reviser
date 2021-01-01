@@ -3,41 +3,43 @@ commands:
   expected:
     status: MATCH
     info:
-      functions: [ foo-function ]
-      layers: None
+      functions: [foo-function]
+      layers: [foo-layer]
 
-- command: select *
-  expected:
-    status: ALL
-    info:
-      functions: [ foo-function ]
-      layers: None
-
-- command: select foo
+- command: select foo --layers
   expected:
     status: MATCH
     info:
-      functions: [ foo-function ]
+      functions: None
+      layers: [foo-layer]
+
+- command: select foo --functions
+  expected:
+    status: MATCH
+    info:
+      functions: [foo-function]
       layers: None
 
-- command: select foo-function --exact
+- command: select foo-layer --exact
   expected:
     status: EXACT
     info:
-      functions: [ foo-function ]
-      layers: None
+      functions: None
+      layers: [foo-layer]
 
 - command: select foo --exact
   expected:
     status: EXACT
     info:
       functions: None
+      layers: None
 
-- command: select bar
+- command: select foo-layer foo-function
   expected:
-    status: MATCH
+    status: EXACT
     info:
-     functions: None
+      functions: [foo-function]
+      layers: [foo-layer]
 
 lobotomy:
   session:
