@@ -37,3 +37,8 @@ def run_shell(
     shell.command_queue += command_queue or shell.context.command_queue or []
     shell.run()
     return shell
+
+
+def main_shell() -> None:  # pragma: no cover
+    """Main entrypoint for the local shell cli."""
+    run_shell()

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "reviser"
-version = "0.2.0"
+version = "0.2.1"
 description = "AWS Lambda function/layer version deployment manager."
 authors = ["Scott Ernst <swernst@gmail.com>"]
 license = "MIT"
@@ -15,6 +15,7 @@ classifiers = [
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
   "Topic :: Utilities",
   "Typing :: Typed"
 ]
@@ -22,29 +23,29 @@ exclude = ["reviser/tests"]
 
 [tool.poetry.scripts]
 reviser = 'reviser.cli:main'
-reviser-shell = 'reviser:run_shell'
+reviser-shell = 'reviser:main_shell'
 
 [tool.poetry.dependencies]
 python = "^3.8"
-boto3 = { version = "^1.16.11", optional = true }
-colorama = { version = "^0.4.4", optional = true }
-Jinja2 = { version = "^2.11.2", optional = true }
-prompt-toolkit = { version = "^3.0.8", optional = true }
-PyYAML = { version = "^5.3.1", optional = true }
-pipper = { version = "^0.7.0", optional = true }
-toml = { version = "^0.10.2", optional = true }
-poetry = { version = "^1.1.4", optional = true }
+boto3 = { version = ">=1.16.11", optional = true }
+colorama = { version = ">=0.4.4", optional = true }
+Jinja2 = { version = ">=2.11.2", optional = true }
+prompt-toolkit = { version = ">=3.0.8", optional = true }
+PyYAML = { version = ">=5.3.0", optional = true }
+pipper = { version = ">=0.7.0", optional = true }
+toml = { version = ">=0.10.0", optional = true }
+poetry = { version = ">=1.1.0", optional = true }
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.1.2"
+pytest = "yes"
 black = "yes"
-coverage = "^5.3"
+coverage = "yes"
 pytest-cov = "yes"
-lobotomy = "^0.1.13"
-flake8 = "^3.8.4"
-flake8-black = "^0.2.1"
-mypy = "^0.790"
-taskipy = "^1.4.0"
+lobotomy = ">=0.1.13"
+flake8 = "yes"
+flake8-black = "yes"
+mypy = "yes"
+taskipy = ">=1.4.0"
 
 [tool.taskipy.tasks]
 # https://github.com/illBeRoy/taskipy

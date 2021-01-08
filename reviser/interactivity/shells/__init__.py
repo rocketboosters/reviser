@@ -184,6 +184,9 @@ class Shell:
                 error=error,
                 message="An unexpected command error occurred.",
             )
+            if not self.is_interactive:
+                # Raise the error when running in non-interactive mode.
+                raise
 
         self._teardown()
 
