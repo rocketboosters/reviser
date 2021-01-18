@@ -79,6 +79,13 @@ def test_simple_scenario_reload():
             """
 
 
+def test_simple_scenario_region():
+    """Should carry out region switching operations as expected without error."""
+    with supports.ScenarioRunner("simple/scenario_region.yaml") as sr:
+        sr.check_success()
+        sr.check_commands()
+
+
 def test_simple_scenario_select():
     """Should carry out select operations as expected without error."""
     with supports.ScenarioRunner("simple/scenario_select.yaml") as sr:

@@ -99,6 +99,18 @@ def create_parser(internal_parser: bool) -> argparse.ArgumentParser:
             """,
     )
     parser.add_argument(
+        "--region",
+        dest="aws_region_name",
+        help="""
+            The region name for the AWS session that will be used to
+            interact with lambda during the deployment process. If not
+            set the default region will be used if environment variables
+            are not set as an overriding alternative. Specifying the region
+            in a lambda function/layer target will override this value for that
+            specific target.
+            """,
+    )
+    parser.add_argument(
         "--run",
         dest="command_group_name",
         help="""

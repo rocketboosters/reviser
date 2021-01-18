@@ -1,5 +1,5 @@
 {% filter colorize(color='green') -%}
-{{ profile }}@{{ user_slug }}
+{{ profile }}.{{ region }}@{{ user_slug }}
 {%- endfilter -%}
 {%- if alias -%} {{ ' > ' + alias | colorize(color='magenta') }}{%- endif -%}
 {{ " ~" | colorize(color='green') }}

@@ -25,9 +25,9 @@ buckets:
   "987654321": bucket-in-account-987654321
 ``` 
 
-## region
+## AWS region
 
-The AWS region in which teh resources reside can be specified at the top
+The AWS region in which the resources reside can be specified at the top
 level of the file if desired. It is recommended that the region be specified
 within the calling AWS profile if possible for flexibility, but there are
 situations where it makes more sense to make it explicit within the 

@@ -9,6 +9,7 @@ from ..commands import helper
 from ..commands import lister
 from ..commands import pruner
 from ..commands import pusher
+from ..commands import region_switcher
 from ..commands import reloader
 from ..commands import reporter
 from ..commands import selector
@@ -25,6 +26,7 @@ COMMANDS = {
     "list": lister,
     "prune": pruner,
     "push": pusher,
+    "region": region_switcher,
     "reload": reloader,
     "select": selector,
     "shell": sheller,
