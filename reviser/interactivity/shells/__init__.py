@@ -206,10 +206,11 @@ class Shell:
         without a prompt instead.
         """
         context = self.context
+        configuration = context.configuration
         templating.printer(
             "interactivity/shells/prompt.jinja2",
             profile=context.connection.session.profile_name or "default",
-            region=context.connection.session.region_name or "us-east-1",
+            region=configuration.aws_region,
             user_slug=context.connection.user_slug,
             selected=context.get_selected_targets(self.selection),
         )
