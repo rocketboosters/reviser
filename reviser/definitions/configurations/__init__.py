@@ -1,6 +1,7 @@
 import dataclasses
 import typing
 
+from reviser import utils
 from reviser.definitions import abstracts
 from reviser.definitions import enumerations
 from .bundling import Bundle  # noqa: F401
@@ -43,18 +44,11 @@ class Configuration(abstracts.Specification):
     @property
     def bucket(self) -> typing.Optional[str]:
         """Retrieves the bucket to use for uploading to S3."""
-        buckets = self.get(
-            "buckets",
-            default=self.get("bucket", default=None),
+        return utils.get_matching_bucket(
+            buckets=self.get_first(["buckets"], ["bucket"]),
+            aws_region=self.aws_region,
+            aws_account_id=self.connection.aws_account_id,
         )
-
-        if not buckets:
-            return None
-
-        if isinstance(buckets, str):
-            return buckets
-
-        return buckets[self.connection.aws_account_id]
 
     @property
     def aws_region(self) -> str:

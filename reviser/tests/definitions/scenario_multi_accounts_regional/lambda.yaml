@@ -1,0 +1,14 @@
+bucket:
+  '123':
+    us-west-2: upload-bucket-123-us-west-2
+    us-east-1: upload-bucket-123-us-east-1
+  '234':
+    us-west-2: upload-bucket-234-us-west-2
+    us-east-1: upload-bucket-234-us-east-1
+
+targets:
+- kind: layer
+  name: foo-layer
+  dependencies:
+  - kind: pip
+  - kind: pipper

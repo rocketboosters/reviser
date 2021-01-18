@@ -1,6 +1,6 @@
 # Configuration Files
 
-Configuration files, named `lambda.yaml` define the the lambda targets to be
+Configuration files, named `lambda.yaml` define the lambda targets to be
 managed within a project. The top-level keys in the configuration file are:
 
 ## bucket(s)
@@ -24,6 +24,28 @@ buckets:
   "123456789": bucket-in-account-123456789
   "987654321": bucket-in-account-987654321
 ``` 
+
+Multiple region buckets can also be specified using the AWS region as the key:
+
+```yaml
+buckets:
+  us-east-1: bucket-in-region-us-east-1
+  us-west-2: bucket-in-region-us-west-2
+```
+
+These can be combined to define buckets for multiple accounts and multiple
+regions as:
+
+
+```yaml
+buckets:
+  "123456789":
+    us-east-1: bucket-123456789-in-region-us-east-1
+    us-west-2: bucket-123456789-in-region-us-west-2
+  "987654321":
+    us-east-1: bucket-987654321-in-region-us-east-1
+    us-west-2: bucket-987654321-in-region-us-west-2
+```
 
 ## AWS region
 

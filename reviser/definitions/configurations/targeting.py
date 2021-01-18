@@ -7,6 +7,7 @@ import typing
 
 from botocore.client import BaseClient
 
+from reviser import utils
 from reviser.definitions import abstracts
 from reviser.definitions import configurations
 from reviser.definitions import enumerations
@@ -67,19 +68,12 @@ class Target(abstracts.Specification):
     @property
     def bucket(self) -> typing.Optional[str]:
         """Retrieves the bucket to use for uploading to S3."""
-        buckets = self.get_first(
-            ["buckets"],
-            ["bucket"],
-            default=self.configuration.bucket,
+        return utils.get_matching_bucket(
+            buckets=self.get_first(["buckets"], ["bucket"]),
+            aws_region=self.aws_region,
+            aws_account_id=self.connection.aws_account_id,
+            default_bucket=self.configuration.bucket,
         )
-
-        if not buckets:
-            return None
-
-        if isinstance(buckets, str):
-            return buckets
-
-        return buckets[self.connection.aws_account_id]
 
     @property
     def bundle(self) -> "configurations.Bundle":

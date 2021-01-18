@@ -1,0 +1,10 @@
+bucket:
+  us-west-2: upload-bucket-us-west-2
+  us-east-1: upload-bucket-us-east-1
+
+targets:
+- kind: layer
+  name: foo-layer
+  dependencies:
+  - kind: pip
+  - kind: pipper

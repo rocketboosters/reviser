@@ -33,3 +33,26 @@ def to_human_readable_size(
 
     value = round(value, 1)
     return f"{value} {unit}"
+
+
+def get_matching_bucket(
+    buckets: typing.Union[None, str, dict],
+    aws_account_id: str,
+    aws_region: str,
+    default_bucket: str = None,
+):
+    """Fetches a bucket name from the buckets argument."""
+    if not buckets:
+        return default_bucket
+
+    if isinstance(buckets, str):
+        return buckets
+
+    # Allow for setting buckets by account ID.
+    account_buckets = buckets.get(aws_account_id, buckets)
+
+    if isinstance(account_buckets, str):
+        return account_buckets
+
+    # Allow for settings buckets by aws region name.
+    return account_buckets.get(aws_region, default_bucket)

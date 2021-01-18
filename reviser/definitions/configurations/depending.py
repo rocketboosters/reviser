@@ -5,6 +5,7 @@ import subprocess
 import sys
 import typing
 
+from reviser import utils
 from reviser.definitions import abstracts
 from reviser.definitions import configurations
 from reviser.definitions import enumerations
@@ -91,15 +92,11 @@ class PipperDependency(Dependency):
     @property
     def bucket(self) -> typing.Optional[str]:
         """S3 bucket where the pipper repository resides."""
-        buckets = self.get("buckets", default=self.get("bucket", default=None))
-
-        if not buckets and self.file:
-            return (self.get_package_data() or {}).get("bucket") or None
-
-        if isinstance(buckets, str):
-            return buckets
-
-        return buckets[self.connection.aws_account_id]
+        return utils.get_matching_bucket(
+            buckets=self.get_first(["buckets"], ["bucket"]),
+            aws_region=self.target.aws_region,
+            aws_account_id=self.connection.aws_account_id,
+        )
 
     def get_package_data(self) -> typing.Optional[dict]:
         """Returns the data stored in the specified package file."""
