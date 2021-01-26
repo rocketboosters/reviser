@@ -20,7 +20,7 @@ targets:
     only: foo*
     except: food-*
   bundle:
-    handler: lambda_function.run
+    handler: lambda_complex.run
     includes:
     - "*.txt"
     - complex_package

@@ -3,7 +3,7 @@ commands:
   expected:
     status: MATCH
     info:
-      functions: [foo-function]
+      functions: [foo-function, food-function]
       layers: [foo-layer]
 
 - command: select foo --layers
@@ -17,7 +17,7 @@ commands:
   expected:
     status: MATCH
     info:
-      functions: [foo-function]
+      functions: [foo-function, food-function]
       layers: None
 
 - command: select foo-layer --exact
@@ -36,7 +36,7 @@ commands:
 
 - command: select foo-layer foo-function
   expected:
-    status: EXACT
+    status: MATCH
     info:
       functions: [foo-function]
       layers: [foo-layer]

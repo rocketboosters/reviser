@@ -175,20 +175,24 @@ class Shell:
         try:
             while not self.shutdown and self.is_active:
                 if line := self._get_next_command():
-                    execute(self, line)
+                    should_error_exit = execute(self, line)
+                    self.shutdown = bool(self.shutdown or should_error_exit)
+
+                if self.error and not self.is_interactive:
+                    # Abort if an error was encountered in non-interactive mode.
+                    return
         except KeyboardInterrupt:
             print("\n[INTERRUPTED]: Shutting down terminal.")
         except Exception as error:
-            self.error = error
-            templating.print_error(
-                error=error,
-                message="An unexpected command error occurred.",
-            )
-            if not self.is_interactive:
-                # Raise the error when running in non-interactive mode.
-                raise
-
-        self._teardown()
+            if self.error is None:
+                # If the error was not already caught, catch it now.
+                self.error = error
+                templating.print_error(
+                    error=error,
+                    message="An unexpected command error occurred.",
+                )
+        finally:
+            self._teardown()
 
     def _teardown(self):
         """Teardown after exiting the command loop."""
@@ -232,13 +236,18 @@ class Shell:
         return line.strip()
 
 
-def execute(shell: "Shell", line: str) -> None:
+def execute(shell: "Shell", line: str) -> bool:
     """
     Executes the specified input command within the given shell
-    environment.
+    environment. Returns true if an error was encountered during execution
+    and the shell should be shutdown as a consequence, which happens in non-interactive
+    mode.
     """
+    # Continue if interactive, but die if non-interactive.
+    should_error_exit = not shell.is_interactive
+
     if len(line.strip()) < 1:
-        return
+        return should_error_exit
 
     try:
         raw_args = shlex.split(line)
@@ -250,14 +259,14 @@ def execute(shell: "Shell", line: str) -> None:
             error=error,
             message=f'An error occurred parsing "{line}".',
         )
-        return
+        return should_error_exit
 
     action_module = commands.get_module(action)
 
     print("\n")
     if action_module is None:
         templating.print_error(f'Unknown command "{action}".')
-        return
+        return should_error_exit
 
     try:
         try:
@@ -265,16 +274,18 @@ def execute(shell: "Shell", line: str) -> None:
             action_module.populate_subparser(parser)
             args = vars(parser.parse_args(raw_args))
         except SystemExit:
-            return
+            return should_error_exit
 
         execution = action_module.run(Execution(action, args, shell))
         shell.execution_history.append(execution)
         shell.command_history.append(line)
+        return False
     except Exception as error:
         shell.error = error
         templating.print_error(
             error=error,
             message="An unexpected command error occurred.",
         )
+        return should_error_exit
     finally:
         print("\n")

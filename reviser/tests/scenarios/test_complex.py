@@ -13,7 +13,14 @@ def test_complex_scenario_push():
 
 
 def test_complex_scenario_status():
-    """Should carry out select operations as expected without error."""
+    """Should carry out status operation as expected without error."""
     with supports.ScenarioRunner("complex/scenario_status.yaml") as sr:
+        sr.check_success()
+        sr.check_commands()
+
+
+def test_complex_scenario_select():
+    """Should carry out select operations as expected without error."""
+    with supports.ScenarioRunner("complex/scenario_select.yaml") as sr:
         sr.check_success()
         sr.check_commands()

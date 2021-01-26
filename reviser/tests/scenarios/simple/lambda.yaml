@@ -4,3 +4,5 @@ targets:
 - kind: function
   names:
   - foo-function
+  bundle:
+    handler: lambda_simple.lambda_handler

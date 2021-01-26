@@ -2,7 +2,6 @@ from unittest.mock import MagicMock
 from unittest.mock import patch
 
 from reviser import interactivity
-import pytest
 
 ROOT = "reviser.interactivity.shells"
 
@@ -51,16 +50,29 @@ def test_keyboard_interrupt(prompt_session_init: MagicMock):
     assert len(shell.execution_history) == 0
 
 
-def test_non_interactive_error():
-    """Should raise errors when running in non-interactive mode."""
+def test_uncaught_error():
+    """Should stop with an error."""
     context = MagicMock()
     shell = interactivity.Shell(context)
-    shell.command_queue = ["foo"]
+    shell.command_queue = ["foo", "bar"]
     shell._get_next_command = MagicMock(side_effect=ValueError("whoops"))
+    shell.run()
 
-    with pytest.raises(ValueError):
-        shell.run()
+    assert shell.error
+    assert len(shell.execution_history) == 0
 
+
+@patch("reviser.interactivity.shells.execute")
+def test_non_interactive_error(shells_execute: MagicMock):
+    """Should stop with an error when running in non-interactive mode."""
+    shells_execute.return_value = True
+
+    context = MagicMock()
+    shell = interactivity.Shell(context)
+    shell.command_queue = ["foo", "bar"]
+    shell.run()
+
+    assert shells_execute.call_count == 1
     assert len(shell.execution_history) == 0
 
 

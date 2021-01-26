@@ -1,5 +1,6 @@
 import pathlib
 import typing
+import sys
 
 import boto3
 
@@ -44,4 +45,5 @@ def run_shell(
 
 def main_shell() -> None:  # pragma: no cover
     """Main entrypoint for the local shell cli."""
-    run_shell()
+    shell = run_shell()
+    sys.exit(1 if shell.error else 0)
