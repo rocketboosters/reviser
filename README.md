@@ -1,4 +1,4 @@
-# Reviser (v0.2.5)
+# Reviser (v0.2.6)
 
 [![PyPI version](https://badge.fury.io/py/reviser.svg)](https://pypi.org/project/reviser/)
 [![build status](https://gitlab.com/rocket-boosters/reviser/badges/main/pipeline.svg)](https://gitlab.com/rocket-boosters/reviser/commits/main)
@@ -239,8 +239,12 @@ Removes old function and/or layer versions for the selected targets.
 usage: prune [--start START] [--end END] [--dry-run] [-y]
 
 optional arguments:
-  --start START  Keep versions lower (earlier/before) this one.
-  --end END      Do not prune versions higher than this value.
+  --start START  Keep versions lower (earlier/before) this one. A negative
+                 value can be specified for relative indexing in the same
+                 fashion as Python lists.
+  --end END      Do not prune versions higher than this value. A negative
+                 value can be specified for relative indexing in the same
+                 fashion as Python lists.
   --dry-run      Echo pruning operation without actually executing it.
   -y, --yes      Run the prune process without reviewing first.
 
