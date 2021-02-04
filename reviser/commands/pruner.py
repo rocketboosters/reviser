@@ -1,8 +1,8 @@
 """
 Removes old function and/or layer versions for the selected targets.
 """
-import textwrap
 import argparse
+import textwrap
 import typing
 
 from botocore.client import BaseClient
@@ -25,28 +25,58 @@ def populate_subparser(parser: argparse.ArgumentParser):
         "--start",
         type=int,
         default=None,
-        help="Keep versions lower (earlier/before) this one.",
+        help="""
+            Keep versions lower (earlier/before) this one. A negative value can be
+            specified for relative indexing in the same fashion as Python lists.
+            """,
     )
-
     parser.add_argument(
         "--end",
         type=int,
         default=None,
-        help="Do not prune versions higher than this value.",
+        help="""
+            Do not prune versions higher than this value. A negative value can be
+            specified for relative indexing in the same fashion as Python lists.
+            """,
     )
-
     parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Echo pruning operation without actually executing it.",
     )
-
     parser.add_argument(
         "-y",
         "--yes",
         action="store_true",
         help="Run the prune process without reviewing first.",
     )
+
+
+def _resolve_version(
+    versions: typing.Union[
+        typing.List[definitions.LambdaLayer],
+        typing.List[definitions.LambdaFunction],
+    ],
+    value: int = None,
+) -> typing.Optional[int]:
+    """
+    Leaves None and positive integer values alone, but will convert relative negative
+    integers into their positive integer equivalents based on the available versions
+    included in the version argument.
+
+    :param versions:
+        List of function or layer versions that currently exist, which will be used
+        to resolve relative, negative values.
+    :param value:
+        Value to resolve.
+    """
+    if value is None or value >= 0:
+        return value
+
+    highest_version = max(
+        [int(v.version or 0) for v in versions if "$" not in str(v.version)]
+    )
+    return max(0, highest_version + value)
 
 
 def _prune_function(
@@ -77,13 +107,15 @@ def _prune_function(
         Whether or not to ask before proceeding with the prune operation.
     """
     versions = servicer.get_function_versions(lambda_client, function_name)
+    start_value = _resolve_version(versions, start)
+    end_value = _resolve_version(versions, end)
     removal_arns = [
         v.arn
         for v in versions
         if v.version != "$LATEST"
         and v.arn
-        and (start is None or start <= int(v.version or 0))
-        and (end is None or int(v.version or 0) <= end)
+        and (start_value is None or start_value <= int(v.version or 0))
+        and (end_value is None or int(v.version or 0) <= end_value)
         and not v.aliases
     ]
 
@@ -140,11 +172,13 @@ def _prune_layer(
         Whether or not to ask before proceeding with the prune operation.
     """
     versions = servicer.get_layer_versions(lambda_client, layer_name)
+    start_value = _resolve_version(versions, start)
+    end_value = _resolve_version(versions, end)
     removals = [
         version
         for version in versions[:-1]
-        if (start is None or start <= int(version.version or 0))
-        and (end is None or int(version.version or 0) <= end)
+        if (start_value is None or start_value <= int(version.version or 0))
+        and (end_value is None or int(version.version or 0) <= end_value)
     ]
     arns = [r.arn for r in removals if r.arn]
 

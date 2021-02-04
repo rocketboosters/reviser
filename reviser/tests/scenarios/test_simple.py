@@ -42,6 +42,25 @@ def test_simple_scenario_prune():
             """
 
 
+def test_simple_scenario_prune_relative():
+    """Should prune function versions 2 and 4 successfully."""
+    with supports.ScenarioRunner("simple/scenario_prune_relative.yaml") as sr:
+        sr.check_success()
+        result = sr.shell.execution_history[0].result
+        assert result.status == "PRUNED"
+
+        expected = [
+            "arn:aws:lambda:us-east-1:123:function:foo-function:2",
+            "arn:aws:lambda:us-east-1:123:function:foo-function:4",
+        ]
+        assert (
+            result.info.get("foo-function") == expected
+        ), """
+            Expect version 2 and 4 to be deleted, but not version 3 because
+            it has an alias attached to it.
+            """
+
+
 def test_simple_scenario_push():
     """Should execute the scenario as expected."""
     with supports.ScenarioRunner("simple/scenario_push.yaml") as sr:
