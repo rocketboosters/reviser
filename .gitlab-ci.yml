@@ -20,6 +20,7 @@ mypy-lint:
   stage: check
   script:
   - pip install mypy
+  - echo y | mypy . --install-types
   - mypy . --ignore-missing-imports
 
 pytest-py38:

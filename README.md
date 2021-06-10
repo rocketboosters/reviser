@@ -693,7 +693,7 @@ targets:
 - kind: function
   name: foo
   bundle:
-    handler: function:main
+    handler: function.main
 ```
 
 In this case the bundler would expect to find `function.py` in the top-leve
