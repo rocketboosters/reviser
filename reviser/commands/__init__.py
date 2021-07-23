@@ -14,6 +14,7 @@ from ..commands import reloader
 from ..commands import reporter
 from ..commands import selector
 from ..commands import sheller
+from ..commands import tailer
 
 #: Commands available to the shell.
 COMMANDS = {
@@ -31,6 +32,7 @@ COMMANDS = {
     "select": selector,
     "shell": sheller,
     "status": reporter,
+    "tail": tailer,
 }
 
 #: Aliases of commands to make available to the shell.

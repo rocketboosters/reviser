@@ -1,3 +1,5 @@
+from unittest import mock
+
 from ..scenarios import supports
 
 from reviser import definitions
@@ -117,3 +119,22 @@ def test_simple_scenario_status():
     with supports.ScenarioRunner("simple/scenario_status.yaml") as sr:
         sr.check_success()
         sr.check_commands()
+
+
+@mock.patch("time.time", new=lambda: 1627345070)
+@mock.patch("reviser.commands.tailer._escape_hook")
+def test_simple_scenario_tail(
+    escape_hook: mock.MagicMock,
+):
+    """Should carry out tail operations as expected without error."""
+    escape_hook.side_effect = KeyboardInterrupt
+
+    with supports.ScenarioRunner("simple/scenario_tail.yaml") as sr:
+        sr.check_success()
+        sr.check_commands()
+
+    lobotomized = sr.patches.boto3_session
+    gets = lobotomized.get_service_calls("logs", "get_log_events")
+    assert len(gets) == 1
+    expected_stream = "/aws/lambda/foobar/[$latest]active"
+    assert gets[0].request["logStreamName"] == expected_stream
