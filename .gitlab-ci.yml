@@ -107,7 +107,7 @@ pytest-py39:
     - coverage.xml
     expire_in: 1 day
 
-docker-build-script:
+docker-script:
   image: python:3.9
   stage: prepare
   script:
@@ -122,7 +122,7 @@ docker-build-script:
 
 build-library:
   image: python:3.9
-  stage: release
+  stage: prepare
   script:
   - pip install poetry
   - poetry install -E shell
