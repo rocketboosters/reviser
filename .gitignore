@@ -242,3 +242,4 @@ fabric.properties
 .lambda_package_cache/
 *.parquet
 poetry.lock
+build-images.sh

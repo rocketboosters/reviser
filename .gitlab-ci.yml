@@ -1,5 +1,8 @@
 stages:
 - check
+- prepare
+- deploy
+- release
 
 black-lint:
   image: python:3.9
@@ -103,3 +106,53 @@ pytest-py39:
     - .coverage
     - coverage.xml
     expire_in: 1 day
+
+docker-build-script:
+  image: python:3.9
+  stage: prepare
+  script:
+  - pip install toml
+  - python ./image_builder.py --script=build-images.sh --push
+  artifacts:
+    paths:
+    - build-images.sh
+    expire_in: 1 day
+  rules:
+  - if: $CI_PROJECT_NAMESPACE == "rocket-boosters" && $CI_COMMIT_TAG
+
+build-library:
+  image: python:3.9
+  stage: release
+  script:
+  - pip install poetry
+  - poetry install -E shell
+  - poetry run python docs_builder.py
+  - poetry build
+  artifacts:
+    paths:
+    - dist/
+    expire_in: 90 days
+  rules:
+  - if: $CI_PROJECT_NAMESPACE == "rocket-boosters" && $CI_COMMIT_TAG
+
+docker-build:
+  image: docker
+  stage: deploy
+  services:
+  - docker:dind
+  before_script:
+  - docker login -u "$DOCKER_HUB_USER" -p "$DOCKER_HUB_PASSWORD" docker.io
+  - docker info
+  script:
+  - ./build-images.sh
+  rules:
+  - if: $CI_PROJECT_NAMESPACE == "rocket-boosters" && $CI_COMMIT_TAG
+
+publish-library:
+  image: python:3.9
+  stage: release
+  script:
+  - pip install poetry
+  - poetry publish -u "$PYPI_USER" -p "$PYPI_REVISER_PAT"
+  rules:
+  - if: $CI_PROJECT_NAMESPACE == "rocket-boosters" && $CI_COMMIT_TAG
