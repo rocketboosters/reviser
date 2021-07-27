@@ -1,3 +1,4 @@
+"""Context definitions module."""
 import argparse
 import dataclasses
 import pathlib
@@ -14,16 +15,17 @@ from reviser.definitions import selections
 @dataclasses.dataclass(frozen=True)
 class SelectedTargets:
     """
-    Container for selected target results that have been filtered
-    down from the entire list of targets stored in the parent
-    configuration.
+    Data structure that acts as a container for the selected targets.
+
+    this container is for selected target results that have been filtered down from the
+    entire list of targets stored in the parent configuration.
     """
 
     targets: typing.List["configurations.Target"]
 
     @property
     def function_targets(self) -> typing.List["configurations.Target"]:
-        """List of function targets in the selection."""
+        """List function targets in the selection."""
         return [
             t
             for t in (self.targets or [])
@@ -32,7 +34,7 @@ class SelectedTargets:
 
     @property
     def layer_targets(self) -> typing.List["configurations.Target"]:
-        """List of layer targets in the selection."""
+        """List layer targets in the selection."""
         return [
             t for t in (self.targets or []) if t.kind == enumerations.TargetType.LAYER
         ]
@@ -49,24 +51,20 @@ class Context:
     @property
     def command_queue(self) -> typing.Optional[typing.List[str]]:
         """
-        A list of commands to process within the execution shell
-        and then exit instead of running interactively. These are
-        loaded from `run:` configuration command group definitions
-        in the loaded configuration object if a `--run` argument
-        specifies the command group definition to execute. Otherwise,
-        this will be None.
-        """
+        List commands to process within the execution shell.
 
+        These commands will execute and then exit instead of running interactively.
+        These are loaded from `run:` configuration command group definitions in the
+        loaded configuration object if a `--run` argument specifies the command group
+        definition to execute. Otherwise, this will be None.
+        """
         name = self.arguments.command_group_name
         return self.configuration.get_as_list("run", name) or None
 
     def get_selected_targets(
         self, selection: "selections.Selection"
     ) -> "SelectedTargets":
-        """
-        Creates a modified configuration filtered down to the specified
-        selection criteria.
-        """
+        """Create a target selection from the specified selection criteria."""
         return SelectedTargets(
             targets=[
                 ts
@@ -83,8 +81,9 @@ class Context:
         connection: "aws.AwsConnection" = None,
     ) -> "Context":
         """
-        Loads a context from a configuration path target. Loads files
-        using the `lambda.yaml` file by default as this is the preferred
+        Load a context from a configuration path target.
+
+        Loads files using the `lambda.yaml` file by default as this is the preferred
         extension: https://yaml.org/faq.html
         """
         target = pathlib.Path(path or "./lambda.yaml").absolute()

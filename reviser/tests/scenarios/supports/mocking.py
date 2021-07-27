@@ -1,3 +1,4 @@
+"""Testing support library for mocking and patching scenario executions."""
 import contextlib
 import pathlib
 import typing
@@ -11,8 +12,9 @@ from reviser.tests.scenarios.supports import running
 
 class Patches:
     """
-    Wrapper class for patching external system interfaces within the
-    reviser package for general scenario testing.
+    Wrapper class for patching external system interfaces within the reviser package.
+
+    This is used for general scenario testing.
     """
 
     def __init__(
@@ -20,6 +22,7 @@ class Patches:
         runner: "running.ScenarioRunner",
         stack: contextlib.ExitStack,
     ):
+        """Create a patches instance for the specified scenario."""
         self.runner = runner
         self.stack = stack
         self.time_sleep = self._patch("time.sleep")
@@ -31,6 +34,7 @@ class Patches:
     def _add(self, context_manager):
         """
         Add the context manager to the exit stack stored within this object.
+
         These context managers will be exited when the `with` block in which
         the stack has been entered is exited.
         """
@@ -42,8 +46,9 @@ class Patches:
 
     def _patch_input(self) -> MagicMock:
         """
-        Patches the builtin input() function so that it returns the value(s)
-        specified in the scenario.
+        Patch the builtin input() function.
+
+        The patched version will return the value(s) specified in the scenario.
         """
         mock = self._patch("builtins.input")
         values = self.runner.scenario.get_first(["inputs"], ["input"])
@@ -54,18 +59,18 @@ class Patches:
         return mock
 
     def _patch_boto_session(self) -> MagicMock:
-        """Creates a patch for boto3.Session() constructors."""
+        """Create a patch for boto3.Session() constructors."""
         lobotomized = lobotomy.Lobotomy(self.runner.scenario.get("lobotomy") or {})
         return self._patch("boto3.Session", new=lobotomized)
 
     def _patch_pip_install_package(self) -> MagicMock:
-        """Creates a patch for installing pip packages."""
+        """Create a patch for installing pip packages."""
         mock = self._patch("reviser.bundling._installer._install_pip_package")
         mock.side_effect = self._mock_pip_install_package
         return mock
 
     def _patch_pipper_install_package(self) -> MagicMock:
-        """Creates a patch for installing pipper packages."""
+        """Create a patch for installing pipper packages."""
         mock = self._patch("reviser.bundling._installer._install_pipper_package")
         mock.side_effect = self._mock_pipper_install_package
         return mock
@@ -90,10 +95,7 @@ class Patches:
 
 
 class AwsClient:
-    """
-    Mocks AWS boto3.client behaviors that pull response data from
-    the loaded scenario dictionary.
-    """
+    """Mocks AWS boto3.clients that pull response data from the loaded scenario."""
 
     def __init__(self, scenario: dict):
         """Populate with the loaded scenario data."""
@@ -104,12 +106,12 @@ class AwsClient:
         self.exceptions.ResourceNotFoundException = ValueError
 
     def __call__(self, identifier: str, *args, **kwargs):
-        """Simulates the creation of a boto3.client."""
+        """Simulate the creation of a boto3.client."""
         self._identifier = identifier
         return self
 
     def _get_response(self, item: str):
-        """Retrieves the response for the given object."""
+        """Retrieve the response for the given object."""
         aws = self._scenario.get("aws") or {}
         client_data = aws.get(self._identifier) or {}
         response = client_data.get(item) or {}
@@ -119,14 +121,15 @@ class AwsClient:
 
     def __getattr__(self, item: str):
         """
-        Retrieves response data for the given client call from the
-        scenario data that defines the execution.
+        Retrieve response data for the given client call.
+
+        This comes from the scenario data that defines the execution.
         """
         response = self._get_response(item)
         return lambda *args, **kwargs: response
 
     def get_paginator(self, item: str):
-        """Mocks a single-page paginator response."""
+        """Mock a single-page paginator response."""
         paginator = MagicMock()
         paginator.paginate.return_value = [self._get_response(item)]
         return paginator

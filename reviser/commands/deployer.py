@@ -1,6 +1,7 @@
 """
-Uploads the bundled contents to the upload S3 bucket and then publishes
-a new version of each of the lambda targets with that new bundle and
+Upload the bundled contents to the upload S3 bucket and then publish a new version.
+
+This will be carried out for each of the lambda targets with that new bundle and
 any modified settings between the current configuration and that target's
 existing configuration. This command will fail if a target being deployed
 has not already been bundled.
@@ -17,7 +18,7 @@ from reviser import interactivity
 def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
-    """Shell auto-completes for this command."""
+    """Get shell auto-completes for this command."""
     return ["--description", "--dry-run"]
 
 

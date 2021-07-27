@@ -1,3 +1,6 @@
+"""Simple scenario handler entrypoint."""
+
+
 def lambda_handler(event: dict, context):
-    """Example handler."""
+    """Execute entrypoint example handler."""
     pass

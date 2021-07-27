@@ -1,3 +1,4 @@
+"""Bundle configuration data structures and IO module."""
 import dataclasses
 import glob
 import pathlib
@@ -10,10 +11,7 @@ from reviser.definitions import enumerations
 
 
 def _get_paths(patterns: typing.Set[pathlib.Path]) -> typing.Set[pathlib.Path]:
-    """
-    Converts a set of file/directory patterns into a list of matching.
-    files.
-    """
+    """Convert a set of file/directory patterns into a list of matching files."""
     raw = [
         pathlib.Path(item)
         for pattern in patterns
@@ -37,7 +35,7 @@ class CopyPath:
     destination: pathlib.Path
 
     def copy(self) -> bool:
-        """Copies the file from source to destination."""
+        """Copy the file from source to destination."""
         if not self.source.exists():
             return False
         self.destination.parent.mkdir(parents=True, exist_ok=True)
@@ -51,8 +49,10 @@ class CopyPath:
 @dataclasses.dataclass(frozen=True)
 class Bundle(abstracts.Specification):
     """
-    Defines the function or layer bundle that will be generated, i.e. built,
-    and deployed as a zipped artifact to the lambda function or layer target.
+    Define the function or layer bundle that will be generated.
+
+    That is this defines the function or layer that will be built and deployed as a
+    zipped artifact to the lambda function or layer target.
     """
 
     target: "configurations.Target"
@@ -60,9 +60,10 @@ class Bundle(abstracts.Specification):
     @property
     def handler(self) -> typing.Optional[str]:
         """
-        Function handler in the format `filename.function_name`. If not
-        specified explicitly, it will default to the lambda function
-        default value of `lambda_function.lambda_handler`.
+        Get the function handler in the format `filename.function_name`.
+
+        If not specified explicitly, it will default to the lambda function default
+        value of `lambda_function.lambda_handler`.
         """
         if self.target.kind == enumerations.TargetType.LAYER:
             return None
@@ -70,14 +71,14 @@ class Bundle(abstracts.Specification):
 
     @property
     def handler_filename(self) -> typing.Optional[str]:
-        """Python filename associated with the specified handler."""
+        """Get the python filename associated with the specified handler."""
         if handler := self.handler:
             return "{}.py".format(handler.rsplit(".", 1)[0])
         return None
 
     @property
     def handler_function(self) -> typing.Optional[str]:
-        """Python entrypoint function name for the specified handler."""
+        """Get the python entrypoint function name for the specified handler."""
         if handler := self.handler:
             return handler.rsplit(".", 1)[-1]
         return None
@@ -85,8 +86,9 @@ class Bundle(abstracts.Specification):
     @property
     def omitted_packages(self) -> typing.List[str]:
         """
-        A list of site-packages to skip with creating the bundle. This
-        is especially useful when package dependencies are installed
+        List site-packages to skip with creating the bundle.
+
+        This is especially useful when package dependencies are installed
         in both a function and layer definition and should be omitted from
         one such that they are not duplicated in the final lambda function
         environment.
@@ -100,11 +102,10 @@ class Bundle(abstracts.Specification):
     @property
     def file_include_patterns(self) -> typing.Set[pathlib.Path]:
         """
-        A list of file matching patterns that will be used to determine
-        what to copy into the bundled artifact deployed to lambda for the
-        given target. These should be defined relative the root directory
-        defined by the location of the configuration file and stored in
-        the directory value of this object.
+        List file matching patterns that will be copied into the bundled artifact.
+
+        These should be defined relative the root directory defined by the location of
+        the configuration file and stored in the directory value of this object.
         """
         includes = [
             pathlib.Path(p)
@@ -137,13 +138,12 @@ class Bundle(abstracts.Specification):
     @property
     def file_exclude_patterns(self) -> typing.Set[pathlib.Path]:
         """
-        A list of file matching patterns that will be used to determine
-        what to skip copying into the bundled artifact deployed to lambda
-        for the given target. These should be defined relative the root
-        directory defined by the location of the configuration file and
-        stored in the directory value of this object. Note that exclusions
-        are applied to the inclusion results after so only need to specify
-        things to remove from the inclusion list, e.g. a `tests` folder.
+        List file matching patterns that will be skipped when copying sources.
+
+        These should be defined relative the root directory defined by the location of
+        the configuration file and stored in the directory value of this object. Note
+        that exclusions are applied to the inclusion results after so only need to
+        specify things to remove from the inclusion list, e.g. a `tests` folder.
         """
         excludes = self.get("excludes", default=self.get("exclude")) or []
         if isinstance(excludes, str):
@@ -158,7 +158,7 @@ class Bundle(abstracts.Specification):
         self,
         relative: bool = False,
     ) -> typing.Set[pathlib.Path]:
-        """Generates a list of file paths matching the bundle includes."""
+        """Generate a list of file paths matching the bundle includes."""
         items = _get_paths(self.file_include_patterns)
         if filename := self.handler_filename:
             items.add(self.directory.joinpath(filename))
@@ -170,7 +170,7 @@ class Bundle(abstracts.Specification):
         self,
         relative: bool = False,
     ) -> typing.Set[pathlib.Path]:
-        """Generates a list of file paths matching the bundle excludes."""
+        """Generate a list of file paths matching the bundle excludes."""
         items = _get_paths(self.file_exclude_patterns)
         if relative:
             return set([item.relative_to(self.directory) for item in items])
@@ -180,15 +180,17 @@ class Bundle(abstracts.Specification):
         self,
         relative: bool = False,
     ) -> typing.Set[pathlib.Path]:
-        """Generates a list of file paths matching the bundle excludes."""
+        """Generate a list of file paths matching the bundle excludes."""
         return self.get_include_paths(relative=relative) - self.get_exclude_paths(
             relative=relative
         )
 
     def get_copy_paths(self) -> typing.List["CopyPath"]:
         """
-        A list of copy paths that map included (and not excluded) source
-        paths to their respective destination path in the bundle directory.
+        List paths to copy where each maps source to destination for bundling.
+
+        Each item returned contains an included (and not excluded) mapping from the
+        source paths to their respective destination path in the bundle directory.
         """
         return [
             CopyPath(
@@ -200,9 +202,9 @@ class Bundle(abstracts.Specification):
 
     def get_site_package_paths(self) -> typing.Set[pathlib.Path]:
         """
-        A list of paths in the target bundle site packages directory
-        that should be copied into the bundle zip for deployment. Omitted
-        packages will be excluded from this list if any are specified in
+        List paths in the target bundle site packages directory to include in bundles.
+
+        Omitted packages will be excluded from this list if any are specified in
         the bundle.
         """
         directory = self.target.site_packages_directory
@@ -220,7 +222,7 @@ class Bundle(abstracts.Specification):
         return paths - omitted_paths
 
     def serialize(self) -> dict:
-        """Serializes the object for output representation."""
+        """Serialize the object for output representation."""
         return {
             "handler": self.handler,
             "handler_filename": self.handler_filename,

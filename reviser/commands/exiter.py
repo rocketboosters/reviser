@@ -1,6 +1,4 @@
-"""
-Exits the shell and returns to the parent terminal.
-"""
+"""Exit the shell and returns to the parent terminal."""
 import argparse
 import typing
 
@@ -10,7 +8,7 @@ from reviser import interactivity
 def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
-    """Shell auto-completes for this command."""
+    """Get shell auto-completes for this command."""
     return []
 
 
@@ -20,7 +18,7 @@ def populate_subparser(parser: argparse.ArgumentParser):
 
 
 def run(ex: "interactivity.Execution") -> "interactivity.Execution":
-    """Exits the shell."""
+    """Exit the shell."""
     ex.shell.shutdown = True
     return ex.finalize(
         status="EXIT",

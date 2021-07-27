@@ -3,28 +3,28 @@ commands:
   expected:
     status: MATCH
     info:
-      functions: [ foo-function ]
+      functions: [foo-function]
       layers: None
 
 - command: select *
   expected:
     status: ALL
     info:
-      functions: [ foo-function ]
+      functions: [foo-function]
       layers: None
 
 - command: select foo
   expected:
     status: MATCH
     info:
-      functions: [ foo-function ]
+      functions: [foo-function]
       layers: None
 
 - command: select foo-function --exact
   expected:
     status: EXACT
     info:
-      functions: [ foo-function ]
+      functions: [foo-function]
       layers: None
 
 - command: select foo --exact
@@ -37,7 +37,7 @@ commands:
   expected:
     status: MATCH
     info:
-     functions: None
+      functions: None
 
 lobotomy:
   session:

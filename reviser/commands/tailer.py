@@ -1,6 +1,4 @@
-"""
-Tail the logs for the selected lambda functions.
-"""
+"""Tail the logs for the selected lambda functions."""
 import argparse
 import datetime
 import json
@@ -16,7 +14,7 @@ from reviser import interactivity
 def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
-    """Shell auto-completes for this command."""
+    """Get shell auto-completes for this command."""
     return []
 
 
@@ -46,7 +44,7 @@ def run(ex: "interactivity.Execution") -> "interactivity.Execution":
 
 
 def _log_forever(targets: typing.List[definitions.Target]):
-    """Continuously tail the given targets without end."""
+    """Tail continuously the given targets without end."""
     tokens: typing.Dict[str, str] = {}
     started_at = time.time()
     has_multiple = len([n for t in targets for n in t.names]) > 1
@@ -152,7 +150,5 @@ def _get_active_log_streams(
 
 
 def _escape_hook():
-    """
-    Hook function for giving unit tests a means to escape the infinite
-    loop.
-    """
+    """Escape function for giving unit tests a means to escape the infinite loop."""
+    pass

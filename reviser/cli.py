@@ -1,3 +1,4 @@
+"""Reviser lambda management package command-line interface."""
 import os
 import pathlib
 import subprocess
@@ -13,11 +14,13 @@ def _remove_arg(
     has_value: bool,
 ) -> typing.List[str]:
     """
-    Searches for the specified flag within the source arguments and removes it
-    and its optional value if has_value is specified, returning a copy of the source
-    list with those elements removed. If the flag is not found an unaltered copy of
-    the source list is returned instead. This is used in the CLI command to prevent
-    certain flags from being used in both the host and container invocation contexts.
+    Search for and remove the specified flag within the source arguments.
+
+    This function removes it and its optional value if has_value is specified,
+    returning a copy of the source list with those elements removed. If the flag is not
+    found an unaltered copy of the source list is returned instead. This is used in the
+    CLI command to prevent certain flags from being used in both the host and container
+    invocation contexts.
     """
     try:
         index = source.index(flag)

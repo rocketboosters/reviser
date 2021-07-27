@@ -1,3 +1,4 @@
+"""Definitions subpackage containing shared data structures used throughout reviser."""
 from .abstracts import DataWrapper  # noqa: F401
 from .abstracts import Specification  # noqa: F401
 from .aws import AwsConnection  # noqa: F401

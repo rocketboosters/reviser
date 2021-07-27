@@ -1,6 +1,4 @@
-"""
-Shows the current status information for each of the selected lambda targets.
-"""
+"""Show the current status information for each of the selected lambda targets."""
 import argparse
 import textwrap
 import typing
@@ -16,7 +14,7 @@ from reviser import servicer
 def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
-    """Shell auto-completes for this command."""
+    """Get shell auto-completes for this command."""
     return []
 
 
@@ -38,7 +36,7 @@ def _get_layer_version_info(
     client: BaseClient,
     layer_reference: "definitions.LambdaLayerReference",
 ) -> dict:
-    """Fetches layer information for display."""
+    """Fetch layer information for display."""
     if not layer_reference.unversioned_arn:
         return {}
 
@@ -72,7 +70,7 @@ def _display_function_info(
     name: str,
     qualifier: str,
 ):
-    """Displays the response lambda function information."""
+    """Display the response lambda function information."""
     lambda_function = servicer.get_function_version(
         lambda_client=client,
         function_name=name,
@@ -139,7 +137,7 @@ def _display_layer_info(
 
 
 def run(ex: "interactivity.Execution") -> "interactivity.Execution":
-    """Displays the current configuration of the lambda target(s)."""
+    """Display the current configuration of the lambda target(s)."""
     selected = ex.shell.context.get_selected_targets(ex.shell.selection)
     qualifier = ex.args.get("qualifier") or "$LATEST"
 

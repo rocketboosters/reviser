@@ -23,5 +23,5 @@ lobotomy:
       update_function_configuration: {}
       publish_version:
         Version: 1
-        FunctionArn: 'arn:aws:lambda:us-east-1:123:function:foo-function:1'
-        Runtime: 'python3.8'
+        FunctionArn: arn:aws:lambda:us-east-1:123:function:foo-function:1
+        Runtime: python3.8

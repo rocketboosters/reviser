@@ -1,6 +1,4 @@
-"""
-Reloads the lambda.yaml configuration file from disk.
-"""
+"""Reload the lambda.yaml configuration file from disk."""
 import argparse
 import typing
 
@@ -13,7 +11,7 @@ from reviser import interactivity
 def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
-    """Shell auto-completes for this command."""
+    """Get shell auto-completes for this command."""
     return []
 
 
@@ -26,10 +24,7 @@ def _merge_target_uuids(
     before: "definitions.Target",
     after: "definitions.Target",
 ):
-    """
-    Adds matching UUIDs from the before to the after targets and children
-    for continuity.
-    """
+    """Match UUIDs from the before to the after targets/children for continuity."""
     after.data["_uuid"] = before.uuid
     after.bundle.data["_uuid"] = before.bundle.uuid
 
@@ -50,7 +45,7 @@ def _merge_uuids(
     before: "definitions.Configuration",
     after: "definitions.Configuration",
 ):
-    """Adds matching UUIDs from before to the after for continuity."""
+    """Add matching UUIDs from before to the after for continuity."""
     after.data["_uuid"] = before.uuid
 
     mapping = {name: target for target in before.targets for name in target.names}

@@ -28,10 +28,10 @@ lobotomy:
         - Version: '3'
           FunctionArn: arn:aws:lambda:us-east-1:123:function:foo-function:3
           LastModified: '2020-01-01T12:25:00'
-        - Version: '$LATEST'
+        - Version: $LATEST
           FunctionArn: arn:aws:lambda:us-east-1:123:function:foo-function:$LATEST
           LastModified: '2020-01-01T12:26:00'
       list_aliases:
         Aliases:
         - FunctionVersion: '1'
-          Name: 'a'
+          Name: a

@@ -1,6 +1,4 @@
-"""
-Switches the target region.
-"""
+"""Switch the target region."""
 import argparse
 import typing
 
@@ -39,7 +37,7 @@ AVAILABLE_REGIONS = {
 def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
-    """Shell auto-completes for this command."""
+    """Get shell auto-completes for this command."""
     return list(AVAILABLE_REGIONS.keys())
 
 
@@ -58,7 +56,7 @@ def populate_subparser(parser: argparse.ArgumentParser):
 
 
 def run(ex: "interactivity.Execution") -> "interactivity.Execution":
-    """Switches the configured region for the shell."""
+    """Switch the configured region for the shell."""
     region_name = ex.args.get("region_name")
     configs = ex.shell.context.configuration
 

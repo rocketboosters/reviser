@@ -17,9 +17,9 @@ lobotomy:
     lambda:
       list_layer_versions:
         LayerVersions:
-          - LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:1
-            Version: 1
-          - LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:2
-            Version: 2
-          - LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:3
-            Version: 3
+        - LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:1
+          Version: 1
+        - LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:2
+          Version: 2
+        - LayerVersionArn: arn:aws:lambda:us-east-1:123:layer:foo-layer:3
+          Version: 3

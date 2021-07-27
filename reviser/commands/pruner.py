@@ -1,6 +1,4 @@
-"""
-Removes old function and/or layer versions for the selected targets.
-"""
+"""Remove old function and/or layer versions for the selected targets."""
 import argparse
 import textwrap
 import typing
@@ -15,7 +13,7 @@ from reviser import servicer
 def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
-    """Shell auto-completes for this command."""
+    """Get shell auto-completes for this command."""
     return ["--start", "--end", "--dry-run"]
 
 
@@ -60,6 +58,8 @@ def _resolve_version(
     value: int = None,
 ) -> typing.Optional[int]:
     """
+    Normalize specified versions by making them absolute, positive version integers.
+
     Leaves None and positive integer values alone, but will convert relative negative
     integers into their positive integer equivalents based on the available versions
     included in the version argument.
@@ -79,6 +79,37 @@ def _resolve_version(
     return max(0, highest_version + value)
 
 
+def _is_within_range(
+    function: "definitions.LambdaFunction",
+    start_value: typing.Optional[int],
+    end_value: typing.Optional[int],
+) -> bool:
+    """Determine if the function version is within the start and end range."""
+    return (start_value is None or start_value <= int(function.version or 0)) and (
+        end_value is None or int(function.version or 0) <= end_value
+    )
+
+
+def _get_function_removal_versions(
+    lambda_client: BaseClient,
+    function_name: str,
+    start: int = None,
+    end: int = None,
+):
+    """Get ARNs for the function that should be pruned."""
+    versions = servicer.get_function_versions(lambda_client, function_name)
+    start_value = _resolve_version(versions, start)
+    end_value = _resolve_version(versions, end)
+    return [
+        v.arn
+        for v in versions
+        if v.version != "$LATEST"
+        and v.arn
+        and _is_within_range(v, start_value, end_value)
+        and not v.aliases
+    ]
+
+
 def _prune_function(
     lambda_client: BaseClient,
     function_name: str,
@@ -88,7 +119,7 @@ def _prune_function(
     confirm: typing.Optional[bool] = True,
 ):
     """
-    Executes a pruning operation on the given lambda functions.
+    Execute a pruning operation on the given lambda functions.
 
     :param lambda_client:
         Boto3 client interface for the lambda service
@@ -106,18 +137,12 @@ def _prune_function(
     :param confirm:
         Whether or not to ask before proceeding with the prune operation.
     """
-    versions = servicer.get_function_versions(lambda_client, function_name)
-    start_value = _resolve_version(versions, start)
-    end_value = _resolve_version(versions, end)
-    removal_arns = [
-        v.arn
-        for v in versions
-        if v.version != "$LATEST"
-        and v.arn
-        and (start_value is None or start_value <= int(v.version or 0))
-        and (end_value is None or int(v.version or 0) <= end_value)
-        and not v.aliases
-    ]
+    removal_arns = _get_function_removal_versions(
+        lambda_client=lambda_client,
+        function_name=function_name,
+        start=start,
+        end=end,
+    )
 
     print("\nARN Versions to be removed:")
     print(
@@ -144,6 +169,25 @@ def _prune_function(
     return removal_arns
 
 
+def _get_layer_removal_versions(
+    lambda_client: BaseClient,
+    layer_name: str,
+    start: int = None,
+    end: int = None,
+):
+    """Get ARNs for the layer that should be pruned."""
+    versions = servicer.get_layer_versions(lambda_client, layer_name)
+    start_value = _resolve_version(versions, start)
+    end_value = _resolve_version(versions, end)
+    removals = [
+        version
+        for version in versions[:-1]
+        if (start_value is None or start_value <= int(version.version or 0))
+        and (end_value is None or int(version.version or 0) <= end_value)
+    ]
+    return [r.arn for r in removals if r.arn]
+
+
 def _prune_layer(
     lambda_client: BaseClient,
     layer_name: str,
@@ -153,7 +197,7 @@ def _prune_layer(
     confirm: typing.Optional[bool] = True,
 ):
     """
-    Executes a pruning operation on the given lambda layers.
+    Execute a pruning operation on the given lambda layers.
 
     :param lambda_client:
         Boto3 client interface for the lambda service.
@@ -171,21 +215,17 @@ def _prune_layer(
     :param confirm:
         Whether or not to ask before proceeding with the prune operation.
     """
-    versions = servicer.get_layer_versions(lambda_client, layer_name)
-    start_value = _resolve_version(versions, start)
-    end_value = _resolve_version(versions, end)
-    removals = [
-        version
-        for version in versions[:-1]
-        if (start_value is None or start_value <= int(version.version or 0))
-        and (end_value is None or int(version.version or 0) <= end_value)
-    ]
-    arns = [r.arn for r in removals if r.arn]
+    removal_arns = _get_layer_removal_versions(
+        lambda_client=lambda_client,
+        layer_name=layer_name,
+        start=start,
+        end=end,
+    )
 
     print("\nARN Versions to be removed:")
     print(
         textwrap.indent(
-            "\n".join(arns or []),
+            "\n".join(removal_arns or []),
             prefix="  - ",
         )
     )
@@ -201,15 +241,15 @@ def _prune_layer(
         print("\n[ABORTED]: Skipped removal process.")
         return
 
-    for arn in arns:
+    for arn in removal_arns:
         print(f"[PRUNING]: {arn}")
         servicer.remove_layer_version(lambda_client, arn)
 
-    return arns
+    return removal_arns
 
 
 def run(ex: "interactivity.Execution") -> "interactivity.Execution":
-    """Runs the pruning operation on the targets."""
+    """Execute the pruning operation on the selected or specified targets."""
     selected = ex.shell.context.get_selected_targets(ex.shell.selection)
     targets = sorted(selected.targets, key=lambda t: t.kind.value)
 

@@ -1,3 +1,4 @@
+"""Abstract classes utilized elsewhere for parent inheritance."""
 import dataclasses
 import pathlib
 import typing
@@ -15,7 +16,7 @@ class DataWrapper:
     data: dict
 
     def get(self, *args: str, default: typing.Any = None) -> typing.Any:
-        """Fetches the value from the data dictionary."""
+        """Fetch the value from the data dictionary."""
         value = self.data or {}
         for k in args:
             if k not in value:
@@ -29,9 +30,10 @@ class DataWrapper:
         default: typing.Any = None,
     ) -> typing.Any:
         """
-        Fetches the value from the data dictionary in the key-grouped
-        order, returning the default value if none of the key-group args
-        exist in the data dictionary.
+        Fetch the value from the data dictionary in the key-grouped order.
+
+        The default value will be returned instead if none of the key-group args exist
+        in the data dictionary.
         """
         found_args = next((a for a in args if self.has(*a)), None)
         if found_args is None:
@@ -44,7 +46,8 @@ class DataWrapper:
         default: typing.Any = None,
     ) -> typing.List[typing.Any]:
         """
-        Fetches the value from the data dictionary as a list.
+        Fetch the value from the data dictionary as a list.
+
         None values will be returned as an empty list. Values that are
         not lists will be wrapped into single-length lists when returned.
         If the nested key does not exist, the default will be returned
@@ -69,8 +72,9 @@ class DataWrapper:
         default: typing.Any = None,
     ) -> typing.Any:
         """
-        Fetches the value from the data dictionary in the key-grouped
-        order, returning the default value if none of the key-group args
+        Fetch the value from the data dictionary in the key-grouped order.
+
+        The default value will be returned if none of the key-group args
         exist in the data dictionary. If a match is found it will be returned
         as a list in the same fashion as the get_as_list function.
         """
@@ -80,7 +84,7 @@ class DataWrapper:
         return self.get_as_list(*found_args, default=default)
 
     def has(self, *args: str) -> bool:
-        """Determines whether or not the nested key exists."""
+        """Determine whether or not the nested key exists."""
         value = self.data or {}
         for k in args:
             if k not in value:
@@ -89,9 +93,7 @@ class DataWrapper:
         return True
 
     def update(self, *args, value: typing.Any = None, overwrite: bool = False):
-        """
-        Updates the data object if the key is not found to be set already.
-        """
+        """Update the data object if the key is not found to be set already."""
         container = self.data or {}
         for k in args[:-1]:
             if k not in container:
@@ -116,18 +118,15 @@ class Specification(DataWrapper):
     connection: "aws.AwsConnection"
 
     def __post_init__(self):
-        """
-        Add an internal uuid to the object's data dictionary after creation
-        if it has not already been set.
-        """
+        """Add an internal uuid to the data dictionary if one is not already set."""
         if not self.has("_uuid"):
             self.update("_uuid", value=str(uuid.uuid4()), overwrite=False)
 
     @property
     def uuid(self) -> str:
-        """An internal unique identifier for the configuration object."""
+        """Identify this instance uniquely within the broader configuration."""
         return self.get("_uuid")
 
     def serialize(self) -> dict:
-        """Serializes the object for output representation."""
+        """Serialize the object for output representation."""
         return {}

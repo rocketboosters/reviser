@@ -1,3 +1,4 @@
+"""Subpackage for lambda function management and status functionality."""
 import dataclasses
 import datetime
 import typing
@@ -13,7 +14,7 @@ def get_function_versions(
     lambda_client: BaseClient,
     function_name: str,
 ) -> typing.List["definitions.LambdaFunction"]:
-    """Lists all of a function's versions and their associated aliases."""
+    """List all of a function's versions and their associated aliases."""
     try:
         paginator = lambda_client.get_paginator("list_versions_by_function")
         versions = [
@@ -39,15 +40,15 @@ def get_function_versions(
 
 def remove_function_version(lambda_client, version_arn: str):
     """
-    Removes the lambda function version with the specified version ARN. This
-    will fail for any versions.
+    Remove the lambda function version with the specified version ARN.
+
+    This will fail for any versions attached to an alias.
 
     :param lambda_client:
         Boto3 client for interacting with the lambda function.
     :param version_arn:
         The ARN for the version of the lambda function that should be removed.
     """
-
     try:
         lambda_client.delete_function(FunctionName=version_arn)
         print("[PRUNED]: {}".format(version_arn))
@@ -58,10 +59,7 @@ def remove_function_version(lambda_client, version_arn: str):
 
 
 def echo_function_versions(client: BaseClient, names: typing.List[str]):
-    """
-    Displays function versions with basic info for each specified
-    lambda function.
-    """
+    """Display function version info for each specified lambda function."""
     for name in names:
         versions = get_function_versions(client, name)
         if not versions:
@@ -85,7 +83,7 @@ def get_function_version(
     function_name: str,
     qualifier: str = "$LATEST",
 ) -> "definitions.LambdaFunction":
-    """Retrieves the configuration for the specified lambda function."""
+    """Retrieve the configuration for the specified lambda function."""
     response = lambda_client.get_function_configuration(
         FunctionName=function_name,
         Qualifier=qualifier or "$LATEST",

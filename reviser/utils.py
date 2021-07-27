@@ -1,10 +1,11 @@
+"""Shared utility function module."""
 import typing
 
 
 def to_human_readable_size(
     number_of_bytes: typing.Optional[int],
 ) -> typing.Optional[str]:
-    """Converts bytes value to human readable size."""
+    """Convert bytes value to human readable size."""
     if number_of_bytes is None:
         return None
 
@@ -41,7 +42,7 @@ def get_matching_bucket(
     aws_region: str,
     default_bucket: str = None,
 ):
-    """Fetches a bucket name from the buckets argument."""
+    """Fetch a bucket name from the buckets argument."""
     if not buckets:
         return default_bucket
 

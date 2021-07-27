@@ -1,3 +1,4 @@
+"""Subpackage containing the deployment functionality."""
 import time
 import typing
 
@@ -13,12 +14,20 @@ def deploy_target(
     dry_run: bool = False,
 ) -> typing.List["definitions.PublishedLayer"]:
     """
-    Deploy the bundled ZIP file to S3 for access by Lambda functions. The
-    file is uploaded to the specified storage bucket with a timestamped key
-    and then published to the lambda function.
+    Deploy the bundled ZIP file to S3 for access by Lambda functions.
+
+    The file is uploaded to the specified storage bucket with a timestamped key and
+    then published to the lambda function.
 
     :param target:
         Configuration target to deploy.
+    :param description:
+        A user-specified description to apply to the target version when deployed.
+    :param published_layers:
+        List of published layers to potentially update in the target deployment.
+    :param dry_run:
+        Whether or not this is executing as a dry-run command that will echo the results
+        without actually carrying out the update.
     """
     s3_keys = uploader.upload(target, dry_run=dry_run)
 
@@ -53,8 +62,9 @@ def deploy(
     dry_run: bool = False,
 ) -> typing.List["definitions.Target"]:
     """
-    Executes the deploy operation on the context's configuration filtered
-    by the specified selection.
+    Execute the deploy operation on the context's configuration.
+
+    This execution is filtered to targets by the specified selection argument value.
     """
     selected = context.get_selected_targets(selection)
 

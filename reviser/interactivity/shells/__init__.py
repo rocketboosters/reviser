@@ -1,3 +1,4 @@
+"""Shell data structures and functionality module."""
 import argparse
 import dataclasses
 import datetime
@@ -43,7 +44,7 @@ class Execution:
 
     @property
     def timestamp(self) -> str:
-        """A string representation of the created at datetime."""
+        """Get a string representation of the created at datetime."""
         return self.executed_at.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
     def finalize(
@@ -66,7 +67,7 @@ class Execution:
         ).echo_if(echo)
 
     def echo(self) -> "Execution":
-        """Echoes the result if set for display to the console."""
+        """Echo the result if set for display to the console."""
         if self.result:
             templating.printer(
                 "interactivity/shells/execution_result.jinja2",
@@ -75,7 +76,7 @@ class Execution:
         return self
 
     def echo_if(self, condition) -> "Execution":
-        """Echoes the result if set for display to the console."""
+        """Echo the result if set for display to the console."""
         if bool(condition):
             return self.echo()
         return self
@@ -83,6 +84,8 @@ class Execution:
 
 class Shell:
     """
+    Reviser Shell wrapper class.
+
     Interactive lambda deployer interactivity class responsible for managing
     the state and interactivity for the interface.
     """
@@ -92,7 +95,7 @@ class Shell:
         context: "definitions.Context",
         selection: "definitions.Selection" = None,
     ):
-        """Creates a new shell for queued and/or interactive execution."""
+        """Create a new shell for queued and/or interactive execution."""
         self.command_history: typing.List[str] = []
         self.execution_history: typing.List["Execution"] = []
         self._prompt_session: typing.Optional[prompt_toolkit.PromptSession] = None
@@ -110,15 +113,12 @@ class Shell:
 
     @property
     def is_interactive(self) -> typing.Optional[bool]:
-        """
-        Whether or not the shell is running as an interactive
-        command loop the prompts users for input.
-        """
+        """Get whether the shell is running as an interactive command loop."""
         return self._is_interactive
 
     @is_interactive.setter
     def is_interactive(self, value: typing.Optional[bool]):
-        """Sets the is_interactive property."""
+        """Set the is_interactive property."""
         if value and self._prompt_session is None:
             if not self._create_prompt_session():
                 raise RuntimeError("Terminal connectivity not supported.")
@@ -128,9 +128,10 @@ class Shell:
     @property
     def is_active(self) -> bool:
         """
-        Whether or not the shell should continue running or not as
-        determined by whether or not it is running interactively or
-        there are queued commands to still process.
+        Get Whether the shell should continue running.
+
+        This is determined by whether or not it is running interactively or there are
+        queued commands to still process.
         """
         return not self.shutdown and bool(
             bool(self.command_queue) or self.is_interactive
@@ -138,10 +139,12 @@ class Shell:
 
     def _create_prompt_session(self) -> bool:
         """
-        Attempts to create a session for the interactive command execution
-        prompts and returns whether or not that session was successfully
-        created. It will fail when executed in non-interactive environments
-        that do no support user input.
+        Attempt creation of a session for interactive command execution.
+
+        :return:
+            Whether that session was successfully created. It will fail when executed
+            in non-interactive environments that do no support user input and return
+            False.
         """
         history = InMemoryHistory()
         for line in self.command_history:
@@ -156,7 +159,7 @@ class Shell:
         return True
 
     def _setup(self):
-        """Initialization before entering the command loop."""
+        """Initialize before entering the command loop."""
         templating.printer(
             "interactivity/shells/splash.jinja2",
             version=reviser.__version__,
@@ -169,7 +172,7 @@ class Shell:
         self.is_interactive = not bool(self.command_queue)
 
     def run(self) -> None:
-        """Launches the command execution loop."""
+        """Launch the command execution loop."""
         self._setup()
 
         try:
@@ -205,9 +208,9 @@ class Shell:
 
     def _get_next_command(self) -> str:
         """
-        Prompts user for input and returns that for command execution
-        unless there is a queued command, in which case that is returned
-        without a prompt instead.
+        Prompt user for input and returns that for command execution.
+
+        However, if there is a queued command that is returned without a prompt instead.
         """
         context = self.context
         configuration = context.configuration
@@ -238,10 +241,11 @@ class Shell:
 
 def execute(shell: "Shell", line: str) -> bool:
     """
-    Executes the specified input command within the given shell
-    environment. Returns true if an error was encountered during execution
-    and the shell should be shutdown as a consequence, which happens in non-interactive
-    mode.
+    Execute the specified input command within the given shell environment.
+
+    :return:
+        True if an error was encountered during execution and the shell should be
+        shutdown as a consequence, which happens in non-interactive mode.
     """
     # Continue if interactive, but die if non-interactive.
     should_error_exit = not shell.is_interactive

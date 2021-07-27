@@ -1,7 +1,4 @@
-"""
-Lists versions of the specified lambda targets with
-info about each version.
-"""
+"""List versions of the specified lambda targets with info about each version."""
 import typing
 from argparse import ArgumentParser
 
@@ -12,7 +9,7 @@ from reviser import servicer
 def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
-    """Shell auto-completes for this command."""
+    """Get shell auto-completes for this command."""
     return []
 
 

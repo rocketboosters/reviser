@@ -1,3 +1,4 @@
+"""Definitions and execution supports for scenario testing."""
 import contextlib
 import os
 import pathlib
@@ -15,12 +16,14 @@ from ..supports import validating
 
 class ScenarioRunner:
     """
-    Execution runner for scenario testing, which works as a ContextManager
-    within tests to carry out the specified scenario and return an object
-    with results of the execution for assertion validation.
+    Execution runner for scenario testing.
+
+    This works as a ContextManager within tests to carry out the specified scenario and
+    return an object with results of the execution for assertion validation.
     """
 
     def __init__(self, slug: str):
+        """Create a new ScenarioRunner for the scenario defined by the slug."""
         self.slug: str = slug
         self.scenario = abstracts.DataWrapper(yaml.safe_load(self.path.read_text()))
         self.shell: typing.Optional["interactivity.Shell"] = None
@@ -29,27 +32,27 @@ class ScenarioRunner:
 
     @property
     def context(self) -> typing.Optional["definitions.Context"]:
-        """Context object created for the given scenario."""
+        """Get the context object created for the given scenario."""
         return self.shell.context if self.shell else None
 
     @property
     def configuration(self) -> typing.Optional["definitions.Configuration"]:
-        """Configuration object created for the given scenario."""
+        """Get the configuration object created for the given scenario."""
         return self.shell.context.configuration if self.shell else None
 
     @property
     def path(self) -> pathlib.Path:
-        """Returns the scenario definition path."""
+        """Get the scenario definition path."""
         return pathlib.Path(__file__).parent.parent.joinpath(self.slug).absolute()
 
     @property
     def directory(self) -> pathlib.Path:
-        """Returns the directory in which the scenario definition resides."""
+        """Get the directory in which the scenario definition resides."""
         return self.path.parent.absolute()
 
     @property
     def commands(self) -> typing.List["abstracts.DataWrapper"]:
-        """Commands loaded from the scenario to execute."""
+        """Get the commands loaded from the scenario to execute."""
         raw = self.scenario.get_as_list(
             "commands",
             default=self.scenario.get_as_list("command"),
@@ -61,8 +64,10 @@ class ScenarioRunner:
 
     def run(self) -> "ScenarioRunner":
         """
-        Executes the scenario, loading it if it has not already been loaded
-        via a call to the load method.
+        Execute the scenario.
+
+        This will load it if it has not already been loaded via a call to the load
+        method.
         """
         start_directory = pathlib.Path()
         os.chdir(self.directory)
@@ -88,7 +93,7 @@ class ScenarioRunner:
         return self
 
     def cleanup(self) -> "ScenarioRunner":
-        """Cleans up temporary data after a test."""
+        """Clean up temporary data after a test."""
         if self.shell is None:
             return self
 
@@ -102,16 +107,17 @@ class ScenarioRunner:
         return self
 
     def check_success(self):
-        """Raises an error if the execution process raised an error."""
+        """Raise an error if the execution process raised an error."""
         error = self.error or getattr(self.shell, "error", None)
         if error is not None:
             raise AssertionError("Command execution failed") from error
 
     def check_commands(self):
         """
-        Iterates over scenario commands and validates the execution results
-        for any that have defined expected result values within the command
-        scenario.
+        Iterate over scenario commands and validates the execution results.
+
+        This will be carried out against any that have defined expected result values
+        within the command scenario.
         """
         commands = self.commands
         history = self.shell.execution_history
@@ -120,7 +126,9 @@ class ScenarioRunner:
                 validating.assert_command_result(command, execution.result)
 
     def __enter__(self) -> "ScenarioRunner":
+        """Begin the context manager state by running the scenario."""
         return self.run()
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """End the context manager state and clean up execution side effects."""
         self.cleanup()

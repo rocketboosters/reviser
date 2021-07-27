@@ -1,3 +1,4 @@
+"""Build docs into the README.md file from docs and code sources."""
 import argparse
 import io
 import os
@@ -16,7 +17,7 @@ VERSION = PROJECT_DATA["tool"]["poetry"]["version"]
 
 
 def _explode_docs(docs: str) -> typing.Tuple[str, str]:
-    """Returns the first paragraph of the command documentation."""
+    """Extract the first paragraph of the command documentation."""
     lines = [line.rstrip() for line in (docs or "").split("\n")]
     start_index = next((i for i, line in enumerate(lines) if line), 0)
 
@@ -28,7 +29,7 @@ def _explode_docs(docs: str) -> typing.Tuple[str, str]:
 
 
 def _assemble_command(name: str, command_module) -> typing.Tuple[str, str]:
-    """Creates the documentation entry for the given command."""
+    """Create the documentation entry for the given command."""
     summary, details = _explode_docs(command_module.__doc__)
 
     # Force the output of the ArgumentParser to a width of 80 columns.
@@ -58,13 +59,15 @@ def _assemble_command(name: str, command_module) -> typing.Tuple[str, str]:
 
 
 def _to_anchor(value: str) -> str:
-    """Converts a header string into its anchor equivalent."""
+    """Convert a header string into its anchor equivalent."""
     cleaner = re.compile(r"[^A-Za-z0-9\-_]+")
     return cleaner.sub("", value.replace(" ", "-").lower())
 
 
 def _create_commands_docs() -> typing.Tuple[str, str]:
     """
+    Create documentations for all available commands.
+
     Iterates through all available shell commands in alphabetical order
     and creates a combined docstring for them all in markdown format.
     """
@@ -79,10 +82,11 @@ def _create_commands_docs() -> typing.Tuple[str, str]:
 
 def _create_configuration_docs() -> typing.Tuple[str, str]:
     """
+    Assemble documentation for configuration information.
+
     Loads and processes configuration documentation into a single doc
     string block and a toc string for the header.
     """
-
     root = pathlib.Path(__file__).parent.joinpath("docs").absolute()
     docs = root.joinpath("configuration.md").read_text()
     matcher = re.compile(r"(?P<prefix>#+)\s+(?P<name>.+)")
@@ -101,7 +105,7 @@ def _create_configuration_docs() -> typing.Tuple[str, str]:
 
 
 def main():
-    """Creates the README.md file from template and code documentation."""
+    """Create the README.md file from template and code documentation."""
     shell_commands, shell_commands_toc = _create_commands_docs()
     configuration, configuration_toc = _create_configuration_docs()
 

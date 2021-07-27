@@ -1,8 +1,8 @@
 """
-Displays the configs loaded from the lambda.yaml file and fully
-populated with defaults and dynamic values. Use this to inspect
-and validate that the loaded configuration meets expectations
-when parsed into the reviser shell.
+Display the configs merged from its source file, dynamic values and defaults.
+
+Use this to inspect and validate that the loaded configuration meets expectations when
+parsed into the reviser shell.
 """
 import argparse
 import typing
@@ -15,7 +15,7 @@ from reviser import interactivity
 def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
-    """Shell auto-completes for this command."""
+    """Get shell auto-completes for this command."""
     return []
 
 

@@ -1,3 +1,4 @@
+"""Publisher functionality module."""
 import typing
 
 from reviser import definitions
@@ -57,10 +58,7 @@ def publish_layer(
     description: str = None,
     dry_run: bool = False,
 ) -> typing.List["definitions.PublishedLayer"]:
-    """
-    Publish an updated version of the layer after bundle has been uploaded
-    to S3 and is available to source as the new lambda layer code.
-    """
+    """Publish an updated version of the layer after bundle has been uploaded to S3."""
     published_layers = []
     client = target.client("lambda")
 

@@ -38,7 +38,7 @@ commands:
   expected:
     status: MATCH
     info:
-     functions: None
+      functions: None
 
 lobotomy:
   session:

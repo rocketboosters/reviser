@@ -1,3 +1,4 @@
+"""Uploader functionality module."""
 import datetime
 import functools
 import os
@@ -8,7 +9,7 @@ from reviser import utils
 
 
 def upload_callback(bytes_uploaded: int, status: dict):
-    """Update the display with current update status"""
+    """Update the display with current update status."""
     status["uploaded_bytes"] += bytes_uploaded
     progress = int(100 * status["uploaded_bytes"] / status["total_bytes"])
     size = utils.to_human_readable_size(status["uploaded_bytes"])
@@ -23,8 +24,7 @@ def upload(
     dry_run: bool = False,
 ) -> typing.List[str]:
     """
-    Upload deployment bundle using Boto3 with progress callback
-    display
+    Upload deployment bundle using Boto3 with progress callback display.
 
     :param target:
         The lambda function(s)/layer(s) target that will be uploaded

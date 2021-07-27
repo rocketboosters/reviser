@@ -1,3 +1,4 @@
+"""Shell execution module."""
 import pathlib
 import typing
 import sys
@@ -11,9 +12,10 @@ from reviser import parsing
 
 def create_shell(arguments: typing.List[str] = None) -> "interactivity.Shell":
     """
-    Creates a shell for interactive or queued command execution based on
-    the specified command line arguments, which default to sys.argv if no
-    arguments are specified.
+    Create a shell for interactive or queued command execution.
+
+    The type of shell is based on the specified command line arguments, which default
+    to sys.argv if no arguments are specified.
     """
     args = parsing.create_parser(True).parse_args(arguments)
     directory = pathlib.Path(args.root_directory).absolute()
@@ -34,7 +36,9 @@ def run_shell(
     command_queue: typing.List[str] = None,
 ) -> "interactivity.Shell":
     """
-    Start the shell process after loading configuration from the target
+    Start the shell process.
+
+    The shell is started after first loading configuration from the target
     directory determined by the command line arguments.
     """
     shell = create_shell(arguments)
@@ -44,6 +48,6 @@ def run_shell(
 
 
 def main_shell() -> None:  # pragma: no cover
-    """Main entrypoint for the local shell cli."""
+    """Execute entrypoint for the local shell cli."""
     shell = run_shell()
     sys.exit(1 if shell.error else 0)

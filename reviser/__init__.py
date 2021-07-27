@@ -1,3 +1,4 @@
+"""Reviser lambda management package."""
 import pathlib as _pathlib
 from importlib import metadata as _metadata
 
@@ -7,7 +8,7 @@ except ImportError as error:
     _stored_error = error
 
     def main_shell() -> None:
-        """Replacement shell when import fails due to missing dependencies."""
+        """Raise an error when import fails due to missing dependencies."""
         global _stored_error
         raise _stored_error
 

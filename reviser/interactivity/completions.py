@@ -1,3 +1,4 @@
+"""Auto-completion functionality module for the shell."""
 import re
 import shlex
 import typing
@@ -11,12 +12,13 @@ from reviser.interactivity import shells
 
 class ShellCompleter(completion.Completer):
     """
-    Implements a concrete Prompt Toolkit Completer class specific to the
-    behaviors of the lambda deployer interactive shell.
+    Implement a concrete Prompt Toolkit Completer class.
+
+    This class is specific to the behaviors of the lambda deployer interactive shell.
     """
 
     def __init__(self, shell: "shells.Shell"):
-        """Initializes the prompt toolkit custom auto-completer."""
+        """Initialize the prompt toolkit custom auto-completer."""
         super(ShellCompleter, self).__init__()
         self.shell = shell
         self.document: typing.Optional[Document] = None
@@ -25,18 +27,20 @@ class ShellCompleter(completion.Completer):
 
     @property
     def action(self) -> str:
-        """Currently specified root shell command action."""
+        """Get the currently specified root shell command action."""
         return self.args[0] if self.args else ""
 
     @property
     def last(self) -> str:
-        """The last argument in the current line."""
+        """Get the last argument in the current line."""
         return self.args[-1] if self.args else ""
 
     def get_completions(
         self, document: Document, complete_event: completion.CompleteEvent
     ) -> typing.Generator[completion.Completion, None, None]:
         """
+        Get the auto-completions for the current shell command state.
+
         Implements the completion process where the Prompt Toolkit document
         and complete event are used to determine the applicable completions
         for the current shell input state.
@@ -56,10 +60,7 @@ class ShellCompleter(completion.Completer):
 def _get_completions(
     completer: ShellCompleter,
 ) -> typing.List[completion.Completion]:
-    """
-    Creates a list of completions that should be returned by the
-    ShellCompleter.get_completions function.
-    """
+    """List completions to return by the ShellCompleter.get_completions function."""
     if not completer.document:
         return []
 
@@ -70,7 +71,7 @@ def _get_completions(
 
 
 def _get_action_completions(completer: ShellCompleter):
-    """Returns matching command actions for the current shell prompt state."""
+    """Get matching command actions for the current shell prompt state."""
     actions = list(commands.ALIASES.keys()) + list(commands.COMMANDS.keys())
     index = len(completer.action)
     matches = [a for a in actions if a.startswith(completer.action)]
@@ -79,9 +80,10 @@ def _get_action_completions(completer: ShellCompleter):
 
 def _get_command_completions(completer: ShellCompleter):
     """
-    Returns completions specific to the currently specified command
-    and/or sub-command in the shell. These completions are defined in the
-    completer.configs module in the configs.COMMAND_COMPLETES dictionary.
+    Get completions specific to the currently specified shell command/subcommand.
+
+    These completions are defined in the completer.configs module in the
+    configs.COMMAND_COMPLETES dictionary.
     """
     command_module = commands.get_module(completer.action)
     get_completions = getattr(command_module, "get_completions", lambda x: [])
@@ -96,8 +98,9 @@ def _get_command_completions(completer: ShellCompleter):
 
 def _get_state_completions(completer: ShellCompleter):
     """
-    Returns completions based on the current state of the shell. At this
-    point, this only includes lambda function/layer name completion.
+    Get completion for the current state of the shell.
+
+    At this point, this only includes lambda function/layer name completion.
     """
     index = len(completer.last)
     targets = [

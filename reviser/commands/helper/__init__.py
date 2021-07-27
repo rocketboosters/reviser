@@ -1,7 +1,8 @@
 """
-Displays help information on the commands available within the
-shell. Additional help on each command can be found using the
---help flag on the command in question.
+Display help information on the commands available within the shell.
+
+Additional help on each command can be found using the --help flag on the command in
+question.
 """
 import argparse
 import typing
@@ -17,7 +18,7 @@ HEADER_REGEX = re.compile(r"#+\s+")
 def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
-    """Shell auto-completes for this command."""
+    """Get shell auto-completes for this command."""
     return []
 
 
@@ -27,7 +28,7 @@ def populate_subparser(parser: argparse.ArgumentParser):
 
 
 def _get_command_header_doc(name: str, docs: str) -> str:
-    """Returns the first paragraph of the command documentation."""
+    """Get the first paragraph of the command documentation."""
     lines = [
         line.rstrip()
         for line in (docs or "").split("\n")
@@ -48,7 +49,7 @@ def _get_command_header_doc(name: str, docs: str) -> str:
 
 
 def run(ex: "interactivity.Execution") -> "interactivity.Execution":
-    """Displays basic command help for the available shell commands."""
+    """Display basic command help for the available shell commands."""
     command_docs = {
         name: _get_command_header_doc(name, docs)
         for name, command_module in commands.COMMANDS.items()

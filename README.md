@@ -1,4 +1,4 @@
-# Reviser (v0.2.6)
+# Reviser (v0.2.7)
 
 [![PyPI version](https://badge.fury.io/py/reviser.svg)](https://pypi.org/project/reviser/)
 [![build status](https://gitlab.com/rocket-boosters/reviser/badges/main/pipeline.svg)](https://gitlab.com/rocket-boosters/reviser/commits/main)
@@ -65,7 +65,7 @@ or scripted shell of commands.
 
 # Basic Usage
 
-A project defines one or more lambda function configuration targets in a
+A project defines one or more lambda function configuration targets in a 
 `lambda.yaml` file in the root project directory. The most basic configuration
 looks like this:
 
@@ -86,7 +86,7 @@ By default the package will include no external, e.g. pip, package
 dependencies. It will search for the first folder in the directory where the
 `lambda.yaml` file is located that contains an `__init__.py` file, identifying
 that folder as a Python source package for the function. It will also look for
-a `lambda_function.py` alongside the `lambda.yaml` file to serve as the
+a `lambda_function.py` alongside the `lambda.yaml` file to serve as the 
 entrypoint. These will be included in the uploaded and deployed code bundle
 when a `push` or a `deploy` command is executed. These default settings can
 all be configured along with many more as will be outlined below.
@@ -102,7 +102,7 @@ a new version of the `foo-function` lambda function with the uploaded results.
 
 # Shell commands
 
-The reviser command starts an interactive shell within a Docker container
+The reviser command starts an interactive shell within a Docker container 
 compatible with the AWS Python Lambda runtime. This shell contains various
 commands for deploying and managing deployments of lambda functions and layers
 defined in a project's `lambda.yaml` configuration file, the format of which
@@ -110,9 +110,8 @@ is described later in this document. The shell commands are:
 
 ## alias
 
-Assigns an alias to the specified version of the selected or specified lambda
-function. Or it will create a new alias and assign it to the specified version
-if the --create flag is included.
+Assign an alias to the specified version of the selected or specified lambda
+function.
 
 ```
 usage: alias [--function FUNCTION] [--yes] [--create] alias version
@@ -144,7 +143,8 @@ optional arguments:
 
 ```
 
-To assign an existing `test` alias to version 42 of the selected
+Or it will create a new alias and assign it to the specified version if the --create
+flag is included. To assign an existing `test` alias to version 42 of the selected
 function, the command would be:
 
 ```
@@ -156,8 +156,8 @@ to identify the function to which the alias change will be applied.
 
 ## bundle
 
-Installs dependencies and copies includes into a zipped file that is structured
-correctly to be deployed to the lambda function/layer target.
+Install dependencies and copies includes into a zipped file ready for
+deployment.
 
 ```
 usage: bundle [--reinstall]
@@ -171,24 +171,25 @@ optional arguments:
 
 ```
 
+The resulting zip file is structured correctly to be deployed to the lambda
+function/layer target via an S3 upload and subsequent publish command.
+
 ## configs
 
-Displays the configs loaded from the lambda.yaml file and fully populated with
-defaults and dynamic values. Use this to inspect and validate that the loaded
-configuration meets expectations when parsed into the reviser shell.
+Display the configs merged from its source file, dynamic values and defaults.
 
 ```
 usage: configs
 
 ```
 
+Use this to inspect and validate that the loaded configuration meets expectations when
+parsed into the reviser shell.
+
 ## deploy
 
-Uploads the bundled contents to the upload S3 bucket and then publishes a new
-version of each of the lambda targets with that new bundle and any modified
-settings between the current configuration and that target's existing
-configuration. This command will fail if a target being deployed has not
-already been bundled.
+Upload the bundled contents to the upload S3 bucket and then publish a new
+version.
 
 ```
 usage: deploy [--description DESCRIPTION] [--dry-run]
@@ -203,9 +204,14 @@ optional arguments:
 
 ```
 
+This will be carried out for each of the lambda targets with that new bundle and
+any modified settings between the current configuration and that target's
+existing configuration. This command will fail if a target being deployed
+has not already been bundled.
+
 ## exit
 
-Exits the shell and returns to the parent terminal.
+Exit the shell and returns to the parent terminal.
 
 ```
 usage: exit
@@ -214,18 +220,19 @@ usage: exit
 
 ## help (?)
 
-Displays help information on the commands available within the shell.
-Additional help on each command can be found using the --help flag on the
-command in question.
+Display help information on the commands available within the shell.
 
 ```
 usage: help
 
 ```
 
+Additional help on each command can be found using the --help flag on the command in
+question.
+
 ## list
 
-Lists versions of the specified lambda targets with info about each version.
+List versions of the specified lambda targets with info about each version.
 
 ```
 usage: list
@@ -234,7 +241,7 @@ usage: list
 
 ## prune
 
-Removes old function and/or layer versions for the selected targets.
+Remove old function and/or layer versions for the selected targets.
 
 ```
 usage: prune [--start START] [--end END] [--dry-run] [-y]
@@ -275,7 +282,7 @@ optional arguments:
 
 ## region
 
-Switches the target region.
+Switch the target region.
 
 ```
 usage: region
@@ -291,7 +298,7 @@ positional arguments:
 
 ## reload
 
-Reloads the lambda.yaml configuration file from disk.
+Reload the lambda.yaml configuration file from disk.
 
 ```
 usage: reload
@@ -300,8 +307,7 @@ usage: reload
 
 ## select
 
-Allows for selecting subsets of the targets within the loaded configuration.
-The subsets are fuzzy-matched unless the --exact flag is used.
+Allow for selecting subsets of the targets within the loaded configuration.
 
 ```
 usage: select [--functions] [--layers] [--exact] [name [name ...]]
@@ -330,26 +336,29 @@ optional arguments:
 
 ```
 
+The subsets are fuzzy-matched unless the --exact flag is used.
+
 ## shell
 
-Special command to use in run command groups/macros to start interactive
-command mode for the terminal. Useful when in scenarios where you wish to
-prefix an interactive session with commonly executed commands. For example, if
-you want to select certain targets with the select command as part of starting
-the shell, you could create a run command group/macro in your lambda.yaml that
-executes the select command and then executes the shell command. This would
-updated the selection and then with the shell command, start the shell in
-interactive mode. Without specifying the shell command here, the run command
-group/macro would just set a selection and then exit.
+Macro command to convert to interactive shell operation.
 
 ```
 usage: shell
 
 ```
 
+This is a special command to use in run command groups/macros to start interactive
+command mode for the terminal. Useful when in scenarios where you wish to prefix an
+interactive session with commonly executed commands. For example, if you want to select
+certain targets with the select command as part of starting the shell, you could create
+a run command group/macro in your lambda.yaml that executes the select command and then
+executes the shell command. This would updated the selection and then with the shell
+command, start the shell in interactive mode. Without specifying the shell command
+here, the run command group/macro would just set a selection and then exit.
+
 ## status
 
-Shows the current status information for each of the selected lambda targets.
+Show the current status information for each of the selected lambda targets.
 
 ```
 usage: status [qualifier]
@@ -361,24 +370,22 @@ positional arguments:
 
 ```
 
-More detail on any of these commands can be found from within the shell by
-executing them with the `--help` flag.
-
-The reviser application also supports non-interactive batch command
-execution via `run` macros that behave similarly to how `npm run <command>`
-commands are defined. For more details see the `run` attribute section of the
-configuration file definitions below.
-
 ## tail
 
-Tail the CloudWatch logs of the selected lambda function(s). This will
-continuously poll the cloudwatch logs associated with the lambda
-function until interrupted by a keyboard interrupt.
+Tail the logs for the selected lambda functions.
 
 ```
 usage: tail
 
 ```
+    
+More detail on any of these commands can be found from within the shell by
+executing them with the `--help` flag.
+
+The reviser application also supports non-interactive batch command
+execution via `run` macros that behave similarly to how `npm run <command>` 
+commands are defined. For more details see the `run` attribute section of the
+configuration file definitions below.
 
 # Configuration Files
 
@@ -405,7 +412,7 @@ shell initialization. Specifying multiple buckets looks like:
 buckets:
   "123456789": bucket-in-account-123456789
   "987654321": bucket-in-account-987654321
-```
+``` 
 
 Multiple region buckets can also be specified using the AWS region as the key:
 
@@ -434,7 +441,7 @@ buckets:
 The AWS region in which the resources reside can be specified at the top
 level of the file if desired. It is recommended that the region be specified
 within the calling AWS profile if possible for flexibility, but there are
-situations where it makes more sense to make it explicit within the
+situations where it makes more sense to make it explicit within the 
 configuration file instead. If no region is found either in the configuration
 file or in the AWS profile the `us-east-1` region will be used as the default
 in keeping with AWS region defaulting conventions. Specify the region with
@@ -470,7 +477,7 @@ The name specifies the name of the target object, not the ARN. For example,
 a function named foo would be represented as:
 
 ```yaml
-targets:```
+targets:```  
 - kind: function
   name: foo
 ```
@@ -486,7 +493,7 @@ targets:
   names:
   - foo-devel
   - foo-prod
-```
+``` 
 
 ### targets[N].region
 
@@ -513,7 +520,7 @@ targets:
 ```
 
 Currently `pip`, `pipper` and `poetry` package managers are supported. For any of the
-package managers, the dependencies can be specified explicitly with the
+package managers, the dependencies can be specified explicitly with the 
 `package(s)` key.
 
 ```yaml
@@ -522,7 +529,7 @@ targets:
   name: foo
   dependencies:
   - kind: pip
-    packages:
+    packages: 
     - spam
     - hamd
   - kind: pipper
@@ -603,7 +610,7 @@ with the following attributes.
 The `include(s)` key is a string or list of Python glob-styled includes
 to add to the bundle. If no includes are specified, the default behavior is:
 
-- **function targets**: copy the first directory found that contains an
+- **function targets**: copy the first directory found that contains an 
   *__init__.py* file.
 - **layer targets**: do not copy anything and assume dependencies are the
   only files to copy into the bundle.
@@ -657,7 +664,7 @@ This example would remove two of the template file matches from the includes
 from the files copied into the bundle for deployment.
 
 All `__pycache__`, `*.pyc` and `.DS_Store` files/directories are
-excluded from the copying process in all cases and do not need to be
+excluded from the copying process in all cases and do not need to be 
 specified explicitly.
 
 #### targets[N].bundle.omit_package(s)
@@ -697,7 +704,7 @@ function can be aged and stale.
 
 This attribute only applies to function targets and gives the location of
 file and function entrypoint for the lambda function(s) in the target. The
-format matches the expected value for lambda functions, which is
+format matches the expected value for lambda functions, which is 
 `<filename_without_extension>.<function_name>`.
 
 ```yaml
@@ -705,11 +712,11 @@ targets:
 - kind: function
   name: foo
   bundle:
-    handler: function.main
+    handler: function:main
 ```
 
 In this case the bundler would expect to find `function.py` in the top-leve
-directory alongside `lambda.yaml` and inside it there would be a
+directory alongside `lambda.yaml` and inside it there would be a 
 `main(event, context)` function that would be called when the function(s)
 are invoked.
 
@@ -777,7 +784,7 @@ example from above could be rewritten as:
 targets:
 - kind: function
   name: foo
-  layers:
+  layers: 
   - arn: arn:aws:lambda:us-west-2:999999999:layer:bar
   - name: baz
   ...
@@ -793,7 +800,7 @@ programmatic/automation:
 targets:
 - kind: function
   name: foo
-  layers:
+  layers: 
   - arn: arn:aws:lambda:us-west-2:999999999:layer:bar
     version: 42
   - name: baz
@@ -807,7 +814,7 @@ This can be useful in cases where development and production targets share
 a lot in common, but perhaps point to different versions of a layer or perhaps
 separate development and production layers entirely. It can also be useful
 when a target of functions share a common codebase but don't all need the
-same dependencies. For performance optimization, restricting the layer
+same dependencies. For performance optimization, restricting the layer 
 inclusions only to those that need the additional dependencies can be
 beneficial.
 
@@ -818,12 +825,12 @@ expanding on the example from above:
 ```yaml
 targets:
 - kind: function
-  names:
+  names: 
   - foo-devel
   - foo-devel-worker
   - foo-prod
   - foo-prod-worker
-  layers:
+  layers: 
   - name: baz-devel
     only: foo-devel*
   - name: baz-devel-worker
@@ -841,12 +848,12 @@ keyword. The example could be rewritten with the `except` key instead:
 ```yaml
 targets:
 - kind: function
-  names:
+  names: 
   - foo-devel
   - foo-devel-worker
   - foo-prod
   - foo-prod-worker
-  layers:
+  layers: 
   - name: baz-devel
     except: foo-prod*
   - name: baz-devel-worker
@@ -873,7 +880,7 @@ could also be written as:
 ```
 
 Note that if `only` is specified it is processed first and then `except` is
-removed from the matches found by `only`.
+removed from the matches found by `only`. 
 
 ### (function) targets[N].memory
 
@@ -884,7 +891,7 @@ a string with an `MB` suffix.
 targets:
 - kind: function
   name: foo
-  memory: 256MB
+  memory: 256MB 
 ```
 
 ### (function) targets[N].timeout
@@ -896,7 +903,7 @@ a string with an `s` suffix.
 targets:
 - kind: function
   name: foo
-  timeout: 42s
+  timeout: 42s 
 ```
 
 ### (function) targets[N].variable(s)
@@ -919,12 +926,12 @@ name and value as attributes of a variable:
 targets:
 - kind: function
   name: foo
-  variables:
+  variables: 
   - name: MODE
     value: read-only
 ```
 
-Some environment variables may be managed through other means, e.g.
+Some environment variables may be managed through other means, e.g. 
 terraform that created the function in the first place or another command
 interface used to update the function. For those cases, the `preserve`
 attribute should be set to true and no value specified.
@@ -933,7 +940,7 @@ attribute should be set to true and no value specified.
 targets:
 - kind: function
   name: foo
-  variables:
+  variables: 
   - name: MODE
     preserve: true
 ```
@@ -952,10 +959,10 @@ expanding on the example from above:
 ```yaml
 targets:
 - kind: function
-  names:
+  names: 
   - foo-prod
   - foo-devel
-  variables:
+  variables: 
   - name: MODE
     value: write
     only: '*prod'
@@ -967,7 +974,7 @@ targets:
 ### (function) targets[N].ignore(s)
 
 Ignores allows you to specify one or more configuration keys within a function
-target that should be ignored during deployments. For cases where any of the
+target that should be ignored during deployments. For cases where any of the 
 configuration values:
 
 - `memory`
@@ -989,7 +996,7 @@ targets:
 ## run
 
 The run attribute contains an optional object of batch non-interactive commands
-to run when the shell is called with that run key. This is useful for
+to run when the shell is called with that run key. This is useful for 
 orchestrating actions for CI/CD purposes as the commands will be processed
 within a shell environment without user prompts and then the shell will exit
 when complete without waiting for additional input.
@@ -997,7 +1004,7 @@ when complete without waiting for additional input.
 ```yaml
 run:
   deploy-prod:
-  - select function *prod
+  - select function *prod 
   - push --description="($CI_COMMIT_SHORT_SHA): $CI_COMMIT_TITLE"
   - alias test -1
 targets:
@@ -1023,7 +1030,7 @@ the interactive shell. Building on the previous example,
 ```yaml
 run:
   deploy-prod:
-  - select function *prod
+  - select function *prod 
   - push --description="($CI_COMMIT_SHORT_SHA): $CI_COMMIT_TITLE"
   - alias test -1
   devel:

@@ -1,3 +1,4 @@
+"""Commands subpackage for reviser command invcations."""
 from collections import defaultdict as _defaultdict
 
 from ..commands import aliaser
@@ -42,7 +43,7 @@ ALIASES = {
 
 
 def _invert_aliases():
-    """Reverses the alias dictionary to be a lookup from command to aliases."""
+    """Reverse the alias dictionary to be a lookup from command to aliases."""
     out = _defaultdict(list)
     for alias, name in ALIASES.items():
         out[name].append(alias)
@@ -54,5 +55,5 @@ REVERSED_ALIASES = _invert_aliases()
 
 
 def get_module(command: str):
-    """Retrieves the command module for the associated command."""
+    """Retrieve the command module for the associated command."""
     return COMMANDS.get(ALIASES.get(command, command), None)

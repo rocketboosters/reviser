@@ -1,3 +1,4 @@
+"""Subpackage for assembling a lambda code package bundle for upload and deployment."""
 import os
 import zipfile
 
@@ -7,8 +8,9 @@ from reviser.bundling import _installer
 
 def _create_zip(target: "definitions.Target"):
     """
-    Bundle together all of the source files into a single zip file that can
-    be uploaded as an AWS Lambda function
+    Bundle together all of the source files into a single zip file.
+
+    This zip file is structured so that it can be uploaded as an AWS Lambda function.
 
     :param target:
         A target configuration to bundle into a zip file for deployment.
@@ -50,7 +52,9 @@ def create(
     reinstall: bool = False,
 ):
     """
-    Copies the entire contents of the project folder to a temporary location
+    Assemble the contents of the bundle folder for zipping.
+
+    This copies the entire contents of the project folder to a temporary location
     and then installs and bundles the copied project for deployment.
 
     :param context:

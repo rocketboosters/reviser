@@ -1,3 +1,4 @@
+"""Dependency configuration data structures and IO module."""
 import dataclasses
 import json
 import pathlib
@@ -19,7 +20,7 @@ class Dependency(abstracts.Specification):
 
     @property
     def kind(self) -> "enumerations.DependencyType":
-        """Kind of dependency"""
+        """Get the kind of dependency."""
         return enumerations.DependencyType(
             value=self.get(
                 "kind",
@@ -29,7 +30,7 @@ class Dependency(abstracts.Specification):
 
     @property
     def file(self) -> typing.Optional[pathlib.Path]:
-        """Optionally specified path used to load dependencies."""
+        """Get the optionally-specified path used to load dependencies."""
         if value := self.get("file"):
             return self.directory.joinpath(value).absolute()
 
@@ -43,14 +44,11 @@ class Dependency(abstracts.Specification):
 
     @property
     def packages(self) -> typing.List[str]:
-        """Explicitly defined packages."""
+        """Get the explicitly defined packages."""
         return self.get_first_as_list(["packages"], ["package"], default=[])
 
     def get_package_names(self) -> typing.List[str]:
-        """
-        Returns a list of package names to install collected from
-        the various ways packages can be specified.
-        """
+        """List package names to install from the various package sources."""
         return []
 
 
@@ -59,10 +57,7 @@ class PipDependency(Dependency):
     """Pip package dependency data structure."""
 
     def get_package_names(self) -> typing.List[str]:
-        """
-        Returns a list of package names to install collected from
-        the various ways packages can be specified.
-        """
+        """List of package names to install collected from the various sources."""
         packages = self.packages.copy()
         if self.file:
             packages += [
@@ -73,7 +68,7 @@ class PipDependency(Dependency):
         return packages
 
     def serialize(self) -> dict:
-        """Serializes the object for output representation."""
+        """Serialize the object for output representation."""
         return {
             "kind": self.kind.value,
             "packages": self.get_package_names(),
@@ -86,12 +81,12 @@ class PipperDependency(Dependency):
 
     @property
     def prefix(self) -> typing.Optional[str]:
-        """Custom S3 key prefix in the bucket where the repository resides."""
+        """Get the custom S3 key prefix in the bucket where the repository resides."""
         return self.get("prefix")
 
     @property
     def bucket(self) -> typing.Optional[str]:
-        """S3 bucket where the pipper repository resides."""
+        """Get the S3 bucket where the pipper repository resides."""
         return utils.get_matching_bucket(
             buckets=self.get_first(["buckets"], ["bucket"]),
             aws_region=self.target.aws_region,
@@ -99,23 +94,20 @@ class PipperDependency(Dependency):
         )
 
     def get_package_data(self) -> typing.Optional[dict]:
-        """Returns the data stored in the specified package file."""
+        """Get the  data stored in the specified package file."""
         if self.file:
             return json.loads(self.file.read_text())
         return None
 
     def get_package_names(self) -> typing.List[str]:
-        """
-        Returns a list of package names to install collected from
-        the various ways packages can be specified.
-        """
+        """List collected package names to install from various definition sources."""
         packages = self.packages.copy()
         if data := self.get_package_data():
             packages += data.get("dependencies") or []
         return packages
 
     def serialize(self) -> dict:
-        """Serializes the object for output representation."""
+        """Serialize the object for output representation."""
         return {
             "kind": self.kind.value,
             "prefix": self.prefix,
@@ -124,42 +116,44 @@ class PipperDependency(Dependency):
         }
 
 
+def _find_poetry_executable() -> str:
+    """Find the poetry executable path, or raise an error if not found."""
+    directories = [
+        pathlib.Path(sys.prefix).joinpath("bin"),
+        pathlib.Path(sys.executable).parent,
+    ]
+    directories = [d for d in directories if d.exists()]
+
+    finder = (
+        str(p)
+        for d in directories
+        for p in d.iterdir()
+        if p.name == "poetry" or p.name.startswith("poetry.")
+    )
+    try:
+        return next(finder)
+    except StopIteration:
+        raise RuntimeError(
+            "Unable to find poetry installation in current Python environment."
+        )
+
+
 @dataclasses.dataclass(frozen=True)
 class PoetryDependency(Dependency):
     """Poetry package dependency data structure."""
 
     @property
     def extras(self) -> typing.List[str]:
-        """List of extra packages to install."""
+        """List extra packages to install."""
         return self.get_as_list("extras", default=self.get_as_list("extra")) or []
 
     def get_package_names(self) -> typing.List[str]:
-        """
-        Returns a list of package names to install collected from
-        the various ways packages can be specified.
-        """
+        """List collected package names to install from various definition sources."""
         packages = self.packages.copy()
         if not self.file:
             return packages
 
-        directories = [
-            pathlib.Path(sys.prefix).joinpath("bin"),
-            pathlib.Path(sys.executable).parent,
-        ]
-        directories = [d for d in directories if d.exists()]
-
-        finder = (
-            str(p)
-            for d in directories
-            for p in d.iterdir()
-            if p.name == "poetry" or p.name.startswith("poetry.")
-        )
-        executable = next(finder, None)
-        if executable is None:
-            raise RuntimeError(
-                "Unable to find poetry installation in current Python environment."
-            )
-
+        executable = _find_poetry_executable()
         command = [
             executable,
             "export",
@@ -181,7 +175,7 @@ class PoetryDependency(Dependency):
         return packages
 
     def serialize(self) -> dict:
-        """Serializes the object for output representation."""
+        """Serialize the object for output representation."""
         return {
             "kind": self.kind.value,
             "packages": self.get_package_names(),

@@ -1,3 +1,4 @@
+"""Parse command line arguments module."""
 import argparse
 import os
 import pathlib
@@ -7,14 +8,14 @@ import reviser
 
 
 def _suppress(condition: bool, help_doc: str) -> str:
-    """Returns the help status based on the suppression condition."""
+    """Specify the help status based on the suppression condition."""
     if condition:
         return argparse.SUPPRESS
     return help_doc
 
 
 def _get_auth_directory() -> pathlib.Path:
-    """Finds the first valid and specified AWS credentials directory."""
+    """Find the first valid and specified AWS credentials directory."""
     if creds_path := os.environ.get("AWS_SHARED_CREDENTIALS_FILE"):
         return pathlib.Path(creds_path).expanduser().parent.absolute()
 
@@ -25,7 +26,7 @@ def _get_auth_directory() -> pathlib.Path:
 
 
 def create_parser(internal_parser: bool) -> argparse.ArgumentParser:
-    """..."""
+    """Create the command parser to use when parsing reviser CLI commands."""
     parser = argparse.ArgumentParser(
         allow_abbrev=False,
         prog="reviser",

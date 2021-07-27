@@ -1,9 +1,8 @@
 """
-Assigns an alias to the specified version of the selected or
-specified lambda function. Or it will create a new alias and assign
-it to the specified version if the --create flag is included.
+Assign an alias to the specified version of the selected or specified lambda function.
 
-To assign an existing `test` alias to version 42 of the selected
+Or it will create a new alias and assign it to the specified version if the --create
+flag is included. To assign an existing `test` alias to version 42 of the selected
 function, the command would be:
 
 ```
@@ -24,12 +23,12 @@ from reviser import servicer
 def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
-    """Shell auto-completes for this command."""
+    """Get shell auto-completes for this command."""
     return ["--function", "--yes", "--create"]
 
 
 def populate_subparser(parser: ArgumentParser):
-    """Add alias subcommand to supplied parser"""
+    """Add alias subcommand to supplied parser."""
     parser.add_argument(
         "alias",
         help="""
@@ -80,9 +79,7 @@ def populate_subparser(parser: ArgumentParser):
 
 
 def _get_version(target: "definitions.Target", version: str) -> str:
-    """
-    Converts the version value into an absolute function version.
-    """
+    """Convert the version value into an absolute function version."""
     try:
         number = int(version)
     except ValueError:

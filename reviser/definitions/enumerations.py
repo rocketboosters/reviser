@@ -1,3 +1,4 @@
+"""Shared enumerations module."""
 import enum
 import typing
 import sys

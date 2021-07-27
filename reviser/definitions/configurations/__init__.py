@@ -1,3 +1,4 @@
+"""Configurations definitions package containing data structures and IO for configs."""
 import dataclasses
 import typing
 
@@ -20,7 +21,7 @@ class Configuration(abstracts.Specification):
 
     @property
     def targets(self) -> typing.List["Target"]:
-        """Build and deploy targets."""
+        """Get the duild and deploy targets."""
         return [
             Target(
                 directory=self.directory,
@@ -33,17 +34,17 @@ class Configuration(abstracts.Specification):
 
     @property
     def function_targets(self) -> typing.List["Target"]:
-        """Build and deploy function targets."""
+        """Get the build and deploy function targets."""
         return [t for t in self.targets if t.kind == enumerations.TargetType.FUNCTION]
 
     @property
     def layer_targets(self) -> typing.List["Target"]:
-        """Build and deploy layer targets."""
+        """Get the build and deploy layer targets."""
         return [t for t in self.targets if t.kind == enumerations.TargetType.LAYER]
 
     @property
     def bucket(self) -> typing.Optional[str]:
-        """Retrieves the bucket to use for uploading to S3."""
+        """Retrieve the bucket to use for uploading to S3."""
         return utils.get_matching_bucket(
             buckets=self.get_first(["buckets"], ["bucket"]),
             aws_region=self.aws_region,
@@ -52,19 +53,19 @@ class Configuration(abstracts.Specification):
 
     @property
     def aws_region(self) -> str:
-        """Name of the region that this configuration is targeting."""
+        """Get the name of the region that this configuration is targeting."""
         return self.get("region") or self.connection.session.region_name or "us-east-1"
 
     def get_function(self, name: str) -> typing.Optional["Target"]:
-        """Retrieves the target with the matching name."""
+        """Retrieve the target with the matching name."""
         return next((t for t in self.function_targets if name in t.names), None)
 
     def get_layer(self, name: str) -> typing.Optional["Target"]:
-        """Retrieves the target with the matching name."""
+        """Retrieve the target with the matching name."""
         return next((t for t in self.layer_targets if name in t.names), None)
 
     def serialize(self) -> dict:
-        """Serializes the object for output representation."""
+        """Serialize the object for output representation."""
         return {
             "bucket": self.bucket,
             "run": self.get("run"),

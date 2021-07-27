@@ -1,3 +1,4 @@
+"""Lambda layer functionality module."""
 import textwrap
 import typing
 from collections import defaultdict
@@ -14,8 +15,9 @@ def get_layer_versions(
     layer_name: str,
 ) -> typing.List["definitions.LambdaLayer"]:
     """
-    Returns a list of layer versions for the specified layer name (or ARN)
-    in order of increasing version.
+    Get a list of layer versions for the specified layer name (or ARN).
+
+    These are sorted increasing version order.
 
     :param lambda_client:
         Boto3 client used to query for layer version info.
@@ -36,7 +38,7 @@ def get_layer_versions(
 
 
 def remove_layer_version(lambda_client: BaseClient, layer_arn: str) -> bool:
-    """Removes the specified lambda layer."""
+    """Remove the specified lambda layer."""
     parts = layer_arn.rsplit(":", 1)
     request = dict(
         LayerName=parts[0],
@@ -58,7 +60,7 @@ def get_layer_version(
     layer_name: str,
     version: int,
 ) -> "definitions.LambdaLayer":
-    """Retrieves the configuration for the specified lambda layer."""
+    """Retrieve the configuration for the specified lambda layer."""
     return definitions.LambdaLayer(
         lambda_client.get_layer_version(
             LayerName=layer_name,
@@ -67,17 +69,40 @@ def get_layer_version(
     )
 
 
+def _get_associated_function_versions(
+    client: BaseClient,
+    function_names: typing.List[str],
+) -> typing.List["definitions.LambdaFunction"]:
+    return [
+        version
+        for name in function_names
+        for version in functioning.get_function_versions(client, name)
+    ]
+
+
+def _get_attached_function_versions(
+    layer_name: str,
+    function_versions: typing.List["definitions.LambdaFunction"],
+) -> typing.DefaultDict[str, typing.List[str]]:
+    """Get a list of function version and alias attachments for this layer."""
+    functions: typing.DefaultDict[str, typing.List[str]] = defaultdict(list)
+    for func in function_versions:
+        match = func.get_layer(layer_name)
+        if match is not None:
+            functions[str(match.version)] += [
+                f"{func.name}:{func.version}",
+                *[f"{func.name}:{a.name}" for a in func.aliases],
+            ]
+    return functions
+
+
 def echo_layer_versions(
     client: BaseClient,
     layer_names: typing.List[str],
     function_names: typing.List[str],
 ):
-    """Print a table of lambda layer versions to the terminal"""
-    function_versions = [
-        version
-        for name in function_names
-        for version in functioning.get_function_versions(client, name)
-    ]
+    """Print a table of lambda layer versions to the terminal."""
+    function_versions = _get_associated_function_versions(client, function_names)
 
     for name in layer_names:
         versions = get_layer_versions(client, name)
@@ -85,14 +110,7 @@ def echo_layer_versions(
             print(f'\n[IGNORED]: No layer "{name}" was found.')
             continue
 
-        functions: typing.DefaultDict[str, list] = defaultdict(list)
-        for func in function_versions:
-            match = func.get_layer(name)
-            if match is not None:
-                functions[str(match.version)] += [
-                    f"{func.name}:{func.version}",
-                    *[f"{func.name}:{a.name}" for a in func.aliases],
-                ]
+        functions = _get_attached_function_versions(name, function_versions)
 
         print("\n{}".format(64 * "="))
         print(f"(L) {name}")

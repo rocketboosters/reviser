@@ -1,3 +1,4 @@
+"""Subpackage for CLI display templating."""
 import pathlib
 import re
 import textwrap
@@ -22,7 +23,7 @@ _COLOR_MAP = {
 
 
 def _yaml_filter(value: dict, indent: int = 0) -> str:
-    """Renders the value as yaml"""
+    """Render the value as yaml."""
     if not value:
         return ""
 
@@ -30,13 +31,13 @@ def _yaml_filter(value: dict, indent: int = 0) -> str:
 
 
 def _single_line_filter(value: str) -> str:
-    """Reduces a string to a single line with no insignificant padding."""
+    """Reduce a string to a single line with no insignificant padding."""
     regex = re.compile(r"\s{2,}")
     return regex.sub(" ", (value or "").replace("\n", " ")).strip()
 
 
 def _colorize_filter(value: str, color: str = None) -> str:
-    """Applies ansi console coloring to the string."""
+    """Apply ansi console coloring to the string."""
     if color_value := _COLOR_MAP.get((color or "").lower()):
         return f'{color_value}{value or ""}{colorama.Style.RESET_ALL}'
     return value
@@ -49,7 +50,7 @@ _environment.filters["colorize"] = _colorize_filter
 
 
 def render(location: str, **kwargs) -> str:
-    """Loads a template from the path and returns the rendered contents."""
+    """Load a template from the path and returns the rendered contents."""
     contents = (
         pathlib.Path(reviser.__file__)
         .parent.joinpath(*location.strip("/").split("/"))
@@ -59,14 +60,15 @@ def render(location: str, **kwargs) -> str:
 
 
 def printer(location: str, **kwargs):
-    """Renders the template and prints it to stdout."""
+    """Render the template and prints it to stdout."""
     print(render(location, **kwargs))
 
 
 def print_error(message: str, error: Exception = None):
     """
-    Renders an exception template to stdout. If error is specified,
-    that will be rendered as a stacktrace as well.
+    Render an exception template to stdout.
+
+    If error is specified, that will be rendered as a stacktrace as well.
     """
     stack_trace: typing.Optional[str]
     if error:

@@ -1,3 +1,4 @@
+"""Data structure and IO module for function and layer targets."""
 import dataclasses
 import fnmatch
 import pathlib
@@ -18,10 +19,7 @@ def _is_selected_match(
     target: "Target",
     name: str,
 ):
-    """
-    Determines whether or not the target name is a match for the
-    current selection set on the target object.
-    """
+    """Determine whether the name matches the current selection set on the target."""
     if not target.selection:
         return True
 
@@ -50,6 +48,8 @@ def _is_selected_match(
 @dataclasses.dataclass(frozen=True)
 class Target(abstracts.Specification):
     """
+    Data structure for defining a target.
+
     Function or layer definition data structure where a target can
     represent one or more functions or one or more layers in the same
     definition for cases where function/layer duplication is desirable.
@@ -62,12 +62,12 @@ class Target(abstracts.Specification):
 
     @property
     def aws_region(self) -> str:
-        """AWS region name where this target resides."""
+        """Get the AWS region name where this target resides."""
         return self.get("region", default=self.configuration.aws_region)
 
     @property
     def bucket(self) -> typing.Optional[str]:
-        """Retrieves the bucket to use for uploading to S3."""
+        """Get the  bucket to use for uploading to S3."""
         return utils.get_matching_bucket(
             buckets=self.get_first(["buckets"], ["bucket"]),
             aws_region=self.aws_region,
@@ -77,7 +77,7 @@ class Target(abstracts.Specification):
 
     @property
     def bundle(self) -> "configurations.Bundle":
-        """Bundle object associated with this target configuration."""
+        """Get the bundle object associated with this target configuration."""
         return configurations.Bundle(
             directory=self.directory,
             data=self.get("bundle", default={}),
@@ -88,7 +88,8 @@ class Target(abstracts.Specification):
     @property
     def layer_attachments(self) -> typing.List["configurations.AttachedLayer"]:
         """
-        List of layers that should be attached to functions in this target.
+        List layers that should be attached to functions in this target.
+
         This will always be an empty list for layer targets.
         """
         if self.kind == enumerations.TargetType.LAYER:
@@ -108,9 +109,9 @@ class Target(abstracts.Specification):
     @property
     def variables(self) -> typing.List["configurations.EnvironmentVariable"]:
         """
-        List of environment variables that will be applied during
-        function configuration updates within the deploy action. This
-        will always be an empty list for layer targets that don't support
+        List environment variables that will be applied during function updates.
+
+        This will always be an empty list for layer targets that don't support
         environment variables.
         """
         if self.kind == enumerations.TargetType.LAYER:
@@ -130,32 +131,34 @@ class Target(abstracts.Specification):
     @property
     def ignores(self) -> typing.List[str]:
         """
-        Items that should be skipped when modifying function configurations
-        during the deployment process.
+        List items to skip when modifying function configurations.
+
+        These are the items that should be skipped when modifying function
+        configurations during the deployment process.
         """
         ignores = self.get_first_as_list(["ignores"], ["ignore"], default=[])
         return [i.lower() for i in ignores]
 
     @property
     def bundle_directory(self) -> pathlib.Path:
-        """Temporary location where the target will be assembled."""
+        """Get the temporary location where the target will be assembled."""
         return pathlib.Path(tempfile.gettempdir()).joinpath(self.uuid)
 
     @property
     def bundle_zip_path(self) -> pathlib.Path:
-        """Temporary location where the target zip bundle will be saved."""
+        """Get the temporary location where the target zip bundle will be saved."""
         return pathlib.Path(tempfile.gettempdir()).joinpath(f"{self.uuid}.zip")
 
     @property
     def site_packages_directory(self) -> pathlib.Path:
-        """Temporary location where site packages will be installed."""
+        """Get the temporary location where site packages will be installed."""
         if self.kind == enumerations.TargetType.LAYER:
             return self.bundle_directory.joinpath("python")
         return self.bundle_directory.joinpath("site_packages")
 
     @property
     def kind(self) -> "enumerations.TargetType":
-        """Target type as one of 'function' or 'layer'."""
+        """Get the target type as one of 'function' or 'layer'."""
         # noinspection PyArgumentList
         return enumerations.TargetType(
             value=self.get(
@@ -166,15 +169,16 @@ class Target(abstracts.Specification):
 
     @property
     def names(self) -> typing.List[str]:
-        """Names of the targets associated with this definition."""
+        """Get the names of the targets associated with this definition."""
         names = self.get_first_as_list(["names"], ["name"], default=[])
         return [str(n) for n in names if n and _is_selected_match(self, n)]
 
     @property
     def timeout(self) -> typing.Optional[int]:
         """
-        Timeout, in seconds, after which the function stops executing. This
-        will always be None for layers.
+        Get the seconds after which the function stops executing.
+
+        This will always be None for layers.
         """
         value = self.get("timeout")
         if not value or self.kind == enumerations.TargetType.LAYER:
@@ -191,8 +195,9 @@ class Target(abstracts.Specification):
     @property
     def memory(self) -> typing.Optional[int]:
         """
-        Memory, in MB, available to the function when executing. This
-        will always be None for layers.
+        Get the MB available to the function when executing.
+
+        This will always be None for layers.
         """
         value = self.get("memory")
         if not value or self.kind == enumerations.TargetType.LAYER:
@@ -208,7 +213,7 @@ class Target(abstracts.Specification):
 
     @property
     def dependencies(self) -> typing.Tuple["configurations.Dependency", ...]:
-        """Dependencies for this function definition."""
+        """Get the dependencies for this function definition."""
         output = []
 
         dependency: configurations.Dependency
@@ -233,20 +238,17 @@ class Target(abstracts.Specification):
         return tuple(output)
 
     def ignores_any(self, *args: str) -> bool:
-        """True if any of the specified args appear in the ignores list."""
+        """Determine if any of the specified args appear in the ignores list."""
         ignores = self.ignores
         finder = (True for a in args if a in ignores)
         return next(finder, False)
 
     def client(self, service_name: str) -> BaseClient:
-        """
-        Creates a boto3 client for the given service configured for use
-        when acting on this target.
-        """
+        """Create a boto3 client configured for use with this target."""
         return self.connection.client(service_name, region_name=self.aws_region)
 
     def serialize(self) -> dict:
-        """Serializes the object for output representation."""
+        """Serialize the object for output representation."""
         if self.kind == enumerations.TargetType.FUNCTION:
             values = {
                 "layers": [a.serialize() for a in self.layer_attachments],

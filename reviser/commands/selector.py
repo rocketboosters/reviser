@@ -1,5 +1,6 @@
 """
-Allows for selecting subsets of the targets within the loaded configuration.
+Allow for selecting subsets of the targets within the loaded configuration.
+
 The subsets are fuzzy-matched unless the --exact flag is used.
 """
 import argparse
@@ -13,7 +14,7 @@ from reviser import interactivity
 def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
-    """Shell auto-completes for this command."""
+    """Get shell auto-completes for this command."""
     return ["*", "--exact", "--functions", "--layers"]
 
 
@@ -117,6 +118,25 @@ def _update_fuzzy_selection(
     )
 
 
+def _get_names(ex: "interactivity.Execution") -> typing.List[str]:
+    """Get selection names to use as filters."""
+    names: typing.Union[str, typing.List[str]] = ex.args.get("name") or "*"
+    if names and isinstance(names, str):
+        return [names]
+
+    return list(names)
+
+
+def _to_names(
+    targets: typing.List["definitions.Target"],
+) -> typing.Union[str, typing.List[str]]:
+    """Convert list of targets to a list of target names for output."""
+    if not targets:
+        return "None"
+
+    return [n for t in targets for n in t.names]
+
+
 def run(ex: "interactivity.Execution"):
     """Specify the target function(s) and/or layer(s) to target."""
     selection: "definitions.Selection" = ex.shell.selection
@@ -124,12 +144,7 @@ def run(ex: "interactivity.Execution"):
     functions = ex.args.get("functions", False)
     layers = ex.args.get("layers", False)
     both = not functions and not layers
-
-    names = ex.args.get("name") or "*"
-    if names and isinstance(names, str):
-        names = [names]
-    else:
-        names = list(names)
+    names = _get_names(ex)
 
     if both and names == ["*"]:
         status = "ALL"
@@ -160,14 +175,12 @@ def run(ex: "interactivity.Execution"):
         )
 
     targets = ex.shell.context.get_selected_targets(ex.shell.selection)
-    functions = [n for t in targets.function_targets for n in t.names]
-    layers = [n for t in targets.layer_targets for n in t.names]
     return ex.finalize(
         status=status,
         message=message,
         echo=True,
         info={
-            "functions": functions or "None",
-            "layers": layers or "None",
+            "functions": _to_names(targets.function_targets),
+            "layers": _to_names(targets.layer_targets),
         },
     )

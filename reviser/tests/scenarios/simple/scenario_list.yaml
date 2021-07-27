@@ -26,6 +26,6 @@ lobotomy:
       list_aliases:
         Aliases:
         - FunctionVersion: '1'
-          Name: 'a'
+          Name: a
         - FunctionVersion: '2'
-          Name: 'b'
+          Name: b

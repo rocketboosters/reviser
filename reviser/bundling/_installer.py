@@ -9,7 +9,7 @@ from reviser import definitions
 
 
 def _install_pip_package(name: str, site_packages: pathlib.Path):
-    """Installs the specified pip package."""
+    """Install the specified pip package."""
     cmd = [
         "python",
         "-m",
@@ -30,7 +30,7 @@ def _install_pipper_package(
     env: dict,
     arguments: typing.List[str] = None,
 ):
-    """Installs the specified pipper package."""
+    """Install the specified pipper package."""
     cmd = [
         "pipper",
         "install",
@@ -45,7 +45,7 @@ def _install_pipper_package(
 
 
 def _install_poetry(dependency: "definitions.PoetryDependency"):
-    """Installs poetry dependencies in the target's site packages."""
+    """Install poetry dependencies in the target's site packages."""
     for package in dependency.get_package_names() or []:
         print(f'\n[INSTALLING]: "{package}" poetry package')
         _install_pip_package(
@@ -56,7 +56,7 @@ def _install_poetry(dependency: "definitions.PoetryDependency"):
 
 
 def _install_pip(dependency: "definitions.PipDependency"):
-    """Installs poetry dependencies in the target's site packages."""
+    """Install poetry dependencies in the target's site packages."""
     for package in dependency.get_package_names() or []:
         print(f'\n[INSTALLING]: "{package}" pip package')
         _install_pip_package(
@@ -68,8 +68,9 @@ def _install_pip(dependency: "definitions.PipDependency"):
 
 def _install_pipper(dependency: "definitions.PipperDependency"):
     """
-    Installs any pipper dependencies alongside the standard pip site packages
-    at the specified bundle site packages directory location.
+    Install any pipper dependencies alongside the standard pip site packages.
+
+    This is carried out at the specified bundle site packages directory location.
     """
     credentials = dependency.connection.get_credentials()
     env_vars = {

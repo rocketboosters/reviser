@@ -1,3 +1,4 @@
+"""Build and optionally push the reviser container images to dockerhub."""
 import argparse
 import os
 import pathlib
@@ -15,7 +16,7 @@ BUILDS = {
 
 
 def build(python_version: str, spec: dict, args: argparse.Namespace) -> dict:
-    """Builds the container from the specified docker file path"""
+    """Build the container from the specified docker file path."""
     path = MY_DIRECTORY.joinpath("Dockerfile")
 
     version = "{}{}".format(
@@ -55,7 +56,7 @@ def build(python_version: str, spec: dict, args: argparse.Namespace) -> dict:
 
 
 def publish(build_entry: dict, args: argparse.Namespace):
-    """Publishes the specified build entry to docker hub"""
+    """Publish the specified build entry to docker hub."""
     for tag in build_entry["tags"]:
         if args.dry_run:
             print("[DRY-RUN]: Skipped pushing {}".format(tag))
@@ -65,7 +66,7 @@ def publish(build_entry: dict, args: argparse.Namespace):
 
 
 def parse() -> argparse.Namespace:
-    """Parse command line arguments"""
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-p",
@@ -118,7 +119,7 @@ def parse() -> argparse.Namespace:
 
 
 def run():
-    """Execute the build process"""
+    """Execute the build process."""
     args = parse()
 
     build_results = [

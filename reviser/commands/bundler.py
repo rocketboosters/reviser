@@ -1,7 +1,8 @@
 """
-Installs dependencies and copies includes into a zipped file that
-is structured correctly to be deployed to the lambda function/layer
-target.
+Install dependencies and copies includes into a zipped file ready for deployment.
+
+The resulting zip file is structured correctly to be deployed to the lambda
+function/layer target via an S3 upload and subsequent publish command.
 """
 import argparse
 import typing
@@ -13,7 +14,7 @@ from reviser import interactivity
 def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
-    """Shell auto-completes for this command."""
+    """Get shell auto-completes for this command."""
     return ["--reinstall"]
 
 

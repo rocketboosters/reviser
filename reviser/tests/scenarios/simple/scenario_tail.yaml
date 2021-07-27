@@ -3,7 +3,7 @@ commands:
   expected:
     status: MATCH
     info:
-      functions: [ foo-function ]
+      functions: [foo-function]
       layers: None
 
 - command: tail
@@ -33,7 +33,7 @@ lobotomy:
       get_log_events:
         events:
         - timestamp: 1627345064000
-          message: "I'm not JSON."
+          message: I'm not JSON.
         - timestamp: 1627345063000
           message: '{"look": "JSON!"}'
         nextForwardToken: token_token

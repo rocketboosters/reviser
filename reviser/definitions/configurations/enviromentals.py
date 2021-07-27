@@ -1,6 +1,7 @@
+"""Data structure and IO module for environment variables definitions."""
 import dataclasses
-import typing
 import fnmatch
+import typing
 
 from reviser.definitions import abstracts
 from reviser.definitions import configurations
@@ -14,7 +15,7 @@ class EnvironmentVariable(abstracts.Specification):
 
     @property
     def name(self) -> str:
-        """Name for the environment variable."""
+        """Get the name for the environment variable."""
         if (name := self.get("name")) is not None:
             return name
 
@@ -26,16 +27,16 @@ class EnvironmentVariable(abstracts.Specification):
     @property
     def preserve(self) -> bool:
         """
-        Specifies whether or not the environment variable should be
-        preserved, such that changes or settings here will not be
-        updated. Useful for variables that are managed or assigned by
-        other systems.
+        Specify whether or not the environment variable should be preserved.
+
+        Preserved environment variables will not be changed during updates. Useful for
+        variables that are managed or assigned by other systems.
         """
         return self.get("preserve", default=False)
 
     @property
     def restrictions(self) -> typing.List[str]:
-        """Only attach to functions matching values in this list."""
+        """List lambda functions to attach this environment variable to."""
         value = self.get("only", default=[])
         if isinstance(value, str):
             return [value]
@@ -43,17 +44,14 @@ class EnvironmentVariable(abstracts.Specification):
 
     @property
     def exclusions(self) -> typing.List[str]:
-        """Don't attach to functions matching values in this list."""
+        """List lambda functions not to attach this environment variable to."""
         value = self.get("except", default=[])
         if isinstance(value, str):
             return [value]
         return value
 
-    def get_value(self, function_name: str) -> typing.Optional[str]:
-        """
-        Retrieves the value of the environment variable for the given
-        function name.
-        """
+    def _get_raw_value_for_function(self, function_name: str) -> typing.Optional[str]:
+        """Get raw environment variable for the specified function name."""
         if not self.has("value") and (arg := self.get("arg")):
             value = arg.split("=", 1)[1]
         else:
@@ -67,18 +65,39 @@ class EnvironmentVariable(abstracts.Specification):
             )
             value = next(selector, None)
 
+        return value
+
+    def _get_is_included(self, function_name: str) -> bool:
+        """
+        Determine if the env var is included in the specified function.
+
+        This will return true for cases where no inclusion restrictions have been
+        applied. Otherwise, it will return True only if the function name matches one
+        of the inclusion restriction patterns.
+        """
         includer = (
             True
             for pattern in self.restrictions
             if fnmatch.fnmatch(function_name, pattern)
         )
-        if not next(includer, not self.restrictions):
-            return None
+        return next(includer, not self.restrictions)
 
-        excluder = (value for e in self.exclusions if fnmatch.fnmatch(function_name, e))
-        return next(excluder, value)
+    def _get_is_excluded(self, function_name: str) -> bool:
+        """Determine if the env var is excluded from the specified function."""
+        excluder = (True for e in self.exclusions if fnmatch.fnmatch(function_name, e))
+        return next(excluder, False)
+
+    def get_value(self, function_name: str) -> typing.Optional[str]:
+        """Retrieve the environment variable value for the given function name."""
+        is_applicable = self._get_is_included(
+            function_name
+        ) and not self._get_is_excluded(function_name)
+        if is_applicable:
+            return self._get_raw_value_for_function(function_name)
+        return None
 
     def serialize(self) -> dict:
+        """Serialize for logging and debugging purposes."""
         if self.preserve:
             kwargs = {}
         else:

@@ -2,7 +2,10 @@
 name = "reviser"
 version = "0.2.7"
 description = "AWS Lambda function/layer version deployment manager."
-authors = ["Scott Ernst <swernst@gmail.com>"]
+authors = [
+  "Scott Ernst <swernst@gmail.com>",
+  "Kevin Schiroo"
+]
 license = "MIT"
 readme = "README.md"
 homepage = "https://gitlab.com/rocket-boosters/reviser"
@@ -32,29 +35,38 @@ colorama = { version = ">=0.4.4", optional = true }
 Jinja2 = { version = ">=2.11.2", optional = true }
 prompt-toolkit = { version = ">=3.0.8", optional = true }
 PyYAML = { version = ">=5.3.0", optional = true }
-pipper = { version = ">=0.7.0", optional = true }
+pipper = { version = ">=0.10.0", optional = true }
 toml = { version = ">=0.10.0", optional = true }
-poetry = { version = ">=1.1.0", optional = true }
 
 [tool.poetry.dev-dependencies]
 pytest = "yes"
 black = "yes"
 coverage = "yes"
 pytest-cov = "yes"
-lobotomy = ">=0.1.13"
+lobotomy = ">=0.3.0"
 flake8 = "yes"
 flake8-black = "yes"
 mypy = "yes"
+pydocstyle = "^6.1.1"
+radon = "^5.0.1"
+yamllint = "^1.26.1"
 taskipy = ">=1.4.0"
 
 [tool.taskipy.tasks]
 # https://github.com/illBeRoy/taskipy
 black = "black ."
-mypy = "poetry run mypy ./reviser/ --ignore-missing-imports"
+black_lint = "black . --check"
+mypy = "mypy . --install-types --non-interactive --ignore-missing-imports"
 flake8 = "flake8 ."
+pydocstyle = "pydocstyle ."
+yamllint = "yamllint ."
+# https://github.com/hadolint/hadolint/releases
+hadolint = "hadolint Dockerfile"
+radon = "radon cc . && radon mi ."
 test = "pytest . --cov-report=term-missing --cov=."
-lint = "task black && task flake8 && task mypy"
-check = "task black && task flake8 && task mypy && task test"
+format = "task black"
+lint = "task black_lint && task flake8 && task mypy && task pydocstyle && task radon && task yamllint"
+check = "task format && task lint && task test"
 docs = "python docs_builder.py"
 images = "python image_builder.py --publish"
 
@@ -66,7 +78,6 @@ shell = [
   "boto3",
   "PyYAML",
   "pipper",
-  "poetry",
   "toml"
 ]
 

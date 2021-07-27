@@ -1,3 +1,6 @@
+"""Lambda entrypoint for the complex scenario test."""
+
+
 def run(event: dict, context):
-    """Executes the lambda function"""
+    """Execute the lambda function."""
     print(event, context)
