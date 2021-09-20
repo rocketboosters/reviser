@@ -19,7 +19,7 @@ def test_bundle_file_matching():
     bundle = configurations.Bundle(
         directory=directory,
         data={
-            "includes": ["commands", "definitions/aws.py"],
+            "includes": ["commands", "definitions/aws.py", "**/__init__.py"],
             "excludes": ["**/__init__.py"],
         },
         connection=MagicMock(),

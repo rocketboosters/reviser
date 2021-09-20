@@ -11,6 +11,7 @@ from .configurations import PipperDependency  # noqa: F401
 from .configurations import PoetryDependency  # noqa: F401
 from .configurations import Target  # noqa: F401
 from .contexts import Context  # noqa: F401
+from .contexts import SelectedTargets  # noqa: F401
 from .enumerations import DefaultFile  # noqa: F401
 from .enumerations import DependencyType  # noqa: F401
 from .enumerations import RUNTIME_VERSION  # noqa: F401

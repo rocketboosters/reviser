@@ -1,4 +1,4 @@
-# Reviser (v0.2.7)
+# Reviser (v0.2.8)
 
 [![PyPI version](https://badge.fury.io/py/reviser.svg)](https://pypi.org/project/reviser/)
 [![build status](https://gitlab.com/rocket-boosters/reviser/badges/main/pipeline.svg)](https://gitlab.com/rocket-boosters/reviser/commits/main)
@@ -52,6 +52,7 @@ or scripted shell of commands.
       - [targets[N].bundle](#targetsnbundle)
          - [targets[N].bundle.include(s)](#targetsnbundleincludes)
          - [targets[N].bundle.exclude(s)](#targetsnbundleexcludes)
+         - [targets[N].bundle.exclude_package(s)](#targetsnbundleexclude_packages)
          - [targets[N].bundle.omit_package(s)](#targetsnbundleomit_packages)
          - [targets[N].bundle.handler](#targetsnbundlehandler)
    - [function targets](#function-targets)
@@ -666,6 +667,41 @@ from the files copied into the bundle for deployment.
 All `__pycache__`, `*.pyc` and `.DS_Store` files/directories are
 excluded from the copying process in all cases and do not need to be 
 specified explicitly.
+
+
+#### targets[N].bundle.exclude_package(s)
+
+The `package_exclude(s)` key is an optional one that is also a string or list of
+Python glob-styled paths. However, these are for paths to exclude when adding
+site-packages to the bundle. Building on the example from above:
+
+```yaml
+targets:
+- kind: function
+  name: foo
+  bundle:
+    includes:
+    # This is shorthand for "foo_library/**/*"
+    - foo_library
+    # All Python files in the "bin/" folder recursively.
+    - bin/**/*.py
+    # All Jinja2 files in the root directory that begin "template_".
+    - template_*.jinja2
+    exclues:
+    - template_local.jinja2
+    - template_testing.jinja2
+    package_excludes:
+    - foo/foo_windows.py
+  dependencies:
+  - kind: pip
+```
+
+This example would not include the `site-packages/foo/foo_windows.py` from the
+bundled zip file for the lambda function. In this case, the reason for omitting
+this file is that "Windows" code isn't needed in a linux runtime, so you want to
+save some space. This is more likely useful for large packages that include
+unneeded components, and it is desirable to save the space. This should be used
+very carefully as it can cause external libraries to fail.
 
 #### targets[N].bundle.omit_package(s)
 

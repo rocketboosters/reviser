@@ -17,6 +17,8 @@ targets:
     excludes:
     - requirements.txt
     omit_packages: [ham]
+    package_excludes:
+    - foo/bar.py
   dependencies:
   - kind: pip
     packages: [spam]

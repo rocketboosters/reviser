@@ -154,6 +154,31 @@ class Bundle(abstracts.Specification):
 
         return set([self.directory.joinpath(item).absolute() for item in excludes])
 
+    @property
+    def file_package_exclude_patterns(self) -> typing.Set[pathlib.Path]:
+        """
+        List file matching patterns that will be skipped when bundling dependencies.
+
+        These should be defined relative the site packages directory in which the
+        dependencies are resolved. This is used to remove portions of a site package
+        if they are not needed. This could be because they are already installed in
+        a layer and do not need to be duplicated. Or they could be bloated elements
+        of a package to remove and save on the bundle size. Either way, use with
+        care as these could cause corruption in the site packages.
+        """
+        excludes = self.get(
+            "package_excludes", default=self.get("package_exclude") or []
+        )
+        if isinstance(excludes, str):
+            excludes = [excludes]
+
+        return set(
+            [
+                self.target.site_packages_directory.joinpath(item).resolve()
+                for item in excludes
+            ]
+        )
+
     def get_include_paths(
         self,
         relative: bool = False,
@@ -205,7 +230,7 @@ class Bundle(abstracts.Specification):
         List paths in the target bundle site packages directory to include in bundles.
 
         Omitted packages will be excluded from this list if any are specified in
-        the bundle.
+        the bundle. Also, user-defined package_excludes paths will also be omitted.
         """
         directory = self.target.site_packages_directory
         exclusions = []
@@ -216,7 +241,9 @@ class Bundle(abstracts.Specification):
                 directory.joinpath(f"{package}-*"),
                 directory.joinpath(f"{package}-*", "**", "*"),
             ]
-        omitted_paths = _get_paths(set(exclusions))
+        omitted_paths = _get_paths(
+            set(exclusions).union(self.file_package_exclude_patterns)
+        )
 
         paths = _get_paths({directory.joinpath("**", "*")})
         return paths - omitted_paths
