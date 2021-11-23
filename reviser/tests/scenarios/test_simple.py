@@ -64,8 +64,8 @@ def test_simple_scenario_prune_relative():
             """
 
 
-@patch("reviser.deploying.publisher._wait_for_function_to_be_ready")
-def test_simple_scenario_push(wait_for_function_to_be_ready: MagicMock):
+@patch("reviser.deploying.publisher._wait_for_existing_updates_to_complete")
+def test_simple_scenario_push(_wait_for_existing_updates_to_complete: MagicMock):
     """Should execute the scenario as expected."""
     with supports.ScenarioRunner("simple/scenario_push.yaml") as sr:
         sr.check_success()

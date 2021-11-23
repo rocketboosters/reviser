@@ -24,12 +24,12 @@ def test_update_function_configuration():
     )
 
 
-def test_wait_for_function_to_be_ready():
+def test_wait_for_existing_updates_to_complete():
     """Should call client wait for function foo"""
     client = mock.MagicMock()
     wait_mock = mock.MagicMock()
     wait_mock.wait = mock.MagicMock()
     client.get_waiter.return_value = wait_mock
     lambda_name = "foo"
-    publisher._wait_for_function_to_be_ready(client, lambda_name)
+    publisher._wait_for_existing_updates_to_complete(client, lambda_name)
     assert wait_mock.wait.call_count == 1

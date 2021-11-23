@@ -7,11 +7,9 @@ from reviser import definitions
 from ..deploying import updater
 
 
-def _wait_for_function_to_be_ready(
-    client: BaseClient, function_name: str, waiter_type: str = "function_active"
-):
+def _wait_for_existing_updates_to_complete(client: BaseClient, function_name: str):
     """
-    Wait for the lambda function to be active or updated based on the waiter_type.
+    Wait for any existing updates to complete on the lambda function.
 
     This is used to make sure the function is ready to be updated.
 
@@ -22,7 +20,7 @@ def _wait_for_function_to_be_ready(
     :param waiter_type:
         The client.get_waiter type.
     """
-    waiter = client.get_waiter(waiter_type)
+    waiter = client.get_waiter("function_updated")
     waiter.wait(FunctionName=function_name)
 
 
@@ -50,7 +48,7 @@ def _update_function_configuration(
     :param published_layers:
         The definitions.PublishedLayer
     """
-    _wait_for_function_to_be_ready(client, function_name)
+    _wait_for_existing_updates_to_complete(client, function_name)
     updater.update_function_configuration(
         function_name=function_name,
         target=target,
@@ -81,7 +79,7 @@ def _publish_function_version(
     :return:
         The client.publish_version response
     """
-    _wait_for_function_to_be_ready(client, function_name, "function_updated")
+    _wait_for_existing_updates_to_complete(client, function_name)
     return client.publish_version(
         FunctionName=function_name,
         CodeSha256=code_sha_256,
