@@ -1,3 +1,4 @@
+"""_installer functionality module."""
 import copy
 import os
 import pathlib

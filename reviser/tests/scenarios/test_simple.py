@@ -1,8 +1,9 @@
 from unittest import mock
-
-from ..scenarios import supports
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 from reviser import definitions
+from ..scenarios import supports
 
 
 def test_simple_scenario_alias():
@@ -63,7 +64,8 @@ def test_simple_scenario_prune_relative():
             """
 
 
-def test_simple_scenario_push():
+@patch("reviser.deploying.publisher._wait_for_function_to_be_ready")
+def test_simple_scenario_push(wait_for_function_to_be_ready: MagicMock):
     """Should execute the scenario as expected."""
     with supports.ScenarioRunner("simple/scenario_push.yaml") as sr:
         sr.check_success()
@@ -123,9 +125,7 @@ def test_simple_scenario_status():
 
 @mock.patch("time.time", new=lambda: 1627345070)
 @mock.patch("reviser.commands.tailer._escape_hook")
-def test_simple_scenario_tail(
-    escape_hook: mock.MagicMock,
-):
+def test_simple_scenario_tail(escape_hook: mock.MagicMock):
     """Should carry out tail operations as expected without error."""
     escape_hook.side_effect = KeyboardInterrupt
 

@@ -1,8 +1,92 @@
 """Publisher functionality module."""
 import typing
 
+from botocore.client import BaseClient
+
 from reviser import definitions
 from ..deploying import updater
+
+
+def _wait_for_function_to_be_ready(
+    client: BaseClient, function_name: str, waiter_type: str = "function_active"
+):
+    """
+    Wait for the lambda function to be active or updated based on the waiter_type.
+
+    This is used to make sure the function is ready to be updated.
+
+    :param client:
+        Lambda boto3 client
+    :param function_name:
+        Lambda function name
+    :param waiter_type:
+        The client.get_waiter type.
+    """
+    waiter = client.get_waiter(waiter_type)
+    waiter.wait(FunctionName=function_name)
+
+
+def _update_function_configuration(
+    client: BaseClient,
+    function_name: str,
+    target: "definitions.Target",
+    published_layers: typing.List["definitions.PublishedLayer"],
+    dry_run: bool,
+):
+    """
+    Update the function configuration.
+
+    Functions can only be updated if they are ready to be updated, so we will
+    have to wait for the function State to be Active, and LastUpdateStatus to be
+    Successful. It will exponentially increment the sleep time for every
+    status check.
+
+    :param client:
+        Lambda boto3 client
+    :param function_name:
+        Lambda function name
+    :param target:
+        The definitions.Target.
+    :param published_layers:
+        The definitions.PublishedLayer
+    """
+    _wait_for_function_to_be_ready(client, function_name)
+    updater.update_function_configuration(
+        function_name=function_name,
+        target=target,
+        published_layers=published_layers,
+        dry_run=dry_run,
+    )
+
+
+def _publish_function_version(
+    client: BaseClient, function_name: str, code_sha_256: str, description: str
+):
+    """
+    Publish function new version.
+
+    Functions can only be updated if they are ready to be updated, so we will
+    have to wait for the function State to be Active, and LastUpdateStatus to be
+    Successful. It will exponentially increment the sleep time for every status
+    check.
+
+    :param client:
+        Lambda boto3 client
+    :param function_name:
+        Lambda function name
+    :param code_sha_256:
+        The CodeSha256 from the client.update_function_cod response.
+    :param description:
+        The publish description
+    :return:
+        The client.publish_version response
+    """
+    _wait_for_function_to_be_ready(client, function_name, "function_updated")
+    return client.publish_version(
+        FunctionName=function_name,
+        CodeSha256=code_sha_256,
+        Description=description or "",
+    )
 
 
 def publish_function(
@@ -26,7 +110,8 @@ def publish_function(
                 Publish=False,
             )
 
-        updater.update_function_configuration(
+        _update_function_configuration(
+            client=client,
             function_name=name,
             target=target,
             published_layers=published_layers,
@@ -35,10 +120,11 @@ def publish_function(
 
         print("[PUBLISHING]: Publishing new version from bundle")
         if response and not dry_run:
-            response = client.publish_version(
-                FunctionName=response["FunctionName"],
-                CodeSha256=response["CodeSha256"],
-                Description=description or "",
+            response = _publish_function_version(
+                client=client,
+                function_name=response["FunctionName"],
+                code_sha_256=response["CodeSha256"],
+                description=description or "",
             )
             print(
                 "[PUBLISHED]: Function {} ({})".format(

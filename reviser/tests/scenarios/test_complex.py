@@ -1,7 +1,10 @@
 from ..scenarios import supports
+from unittest.mock import patch
+from unittest.mock import MagicMock
 
 
-def test_complex_scenario_push():
+@patch("reviser.deploying.publisher._wait_for_function_to_be_ready")
+def test_complex_scenario_push(wait_for_function_to_be_ready: MagicMock):
     """Should execute the push command as expected."""
     with supports.ScenarioRunner("complex/scenario_push.yaml") as sr:
         sr.check_success()
