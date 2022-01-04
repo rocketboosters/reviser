@@ -13,6 +13,7 @@ PROJECT_DATA = toml.loads(MY_DIRECTORY.joinpath("pyproject.toml").read_text())
 VERSION = PROJECT_DATA["tool"]["poetry"]["version"]
 BUILDS = {
     "3.8": {"build_args": {"PYTHON_VERSION": "3.8"}},
+    "3.9": {"build_args": {"PYTHON_VERSION": "3.9"}},
 }
 
 
@@ -46,10 +47,10 @@ def _get_tags(args: argparse.Namespace, python_version: str) -> typing.List[str]
 
 def build(
     python_version: str,
-    spec: dict,
+    spec: typing.Dict[str, typing.Any],
     args: argparse.Namespace,
     script_path: pathlib.Path = None,
-) -> dict:
+) -> typing.Dict[str, typing.Any]:
     """Build the container from the specified docker file path."""
     path = "./Dockerfile"
     tags = _get_tags(args, python_version)

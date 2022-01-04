@@ -35,7 +35,7 @@ class DefaultFile(enum.Enum):
         dependency_type: typing.Union["DependencyType", str],
     ) -> "DefaultFile":
         """Lookup default file from a dependency type."""
-        key = getattr(dependency_type, "value", dependency_type)
+        key = typing.cast(str, getattr(dependency_type, "value", dependency_type))
         return {
             DependencyType.PIP.value: DefaultFile.PIP,
             DependencyType.PIPPER.value: DefaultFile.PIPPER,

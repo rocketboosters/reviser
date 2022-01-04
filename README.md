@@ -1,4 +1,4 @@
-# Reviser (v0.2.8)
+# Reviser (v0.2.11)
 
 [![PyPI version](https://badge.fury.io/py/reviser.svg)](https://pypi.org/project/reviser/)
 [![build status](https://gitlab.com/rocket-boosters/reviser/badges/main/pipeline.svg)](https://gitlab.com/rocket-boosters/reviser/commits/main)
@@ -127,7 +127,7 @@ positional arguments:
                        $LATEST. To see what versions are available for a given
                        function use the list command.
 
-optional arguments:
+options:
   --function FUNCTION  The alias command only acts on one function. This can
                        be achieved either by selecting the function target via
                        the select command, or specifying the function name to
@@ -163,7 +163,7 @@ deployment.
 ```
 usage: bundle [--reinstall]
 
-optional arguments:
+options:
   --reinstall  Add this flag to reinstall dependencies on a repeated bundle
                operation. By default, dependencies will remain cached for the
                lifetime of the shell to speed up the bundling process. This
@@ -195,7 +195,7 @@ version.
 ```
 usage: deploy [--description DESCRIPTION] [--dry-run]
 
-optional arguments:
+options:
   --description DESCRIPTION
                         Specify a message to assign to the version published
                         by the deploy command.
@@ -247,7 +247,7 @@ Remove old function and/or layer versions for the selected targets.
 ```
 usage: prune [--start START] [--end END] [--dry-run] [-y]
 
-optional arguments:
+options:
   --start START  Keep versions lower (earlier/before) this one. A negative
                  value can be specified for relative indexing in the same
                  fashion as Python lists.
@@ -266,7 +266,7 @@ Combined single command for bundling and deploying the selected targets.
 ```
 usage: push [--reinstall] [--description DESCRIPTION] [--dry-run]
 
-optional arguments:
+options:
   --reinstall           Add this flag to reinstall dependencies on a repeated
                         bundle operation. By default, dependencies will remain
                         cached for the lifetime of the shell to speed up the
@@ -311,7 +311,7 @@ usage: reload
 Allow for selecting subsets of the targets within the loaded configuration.
 
 ```
-usage: select [--functions] [--layers] [--exact] [name [name ...]]
+usage: select [--functions] [--layers] [--exact] [name ...]
 
 positional arguments:
   name                  Specifies the value to match against the function and
@@ -322,7 +322,7 @@ positional arguments:
                         targets instead of the default fuzzy matching
                         behavior.
 
-optional arguments:
+options:
   --functions, --function, --func, -f
                         When specified, functions will be selected. This will
                         default to true if neither of --functions or --layers

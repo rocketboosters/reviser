@@ -86,7 +86,10 @@ def _get_command_completions(completer: ShellCompleter):
     configs.COMMAND_COMPLETES dictionary.
     """
     command_module = commands.get_module(completer.action)
-    get_completions = getattr(command_module, "get_completions", lambda x: [])
+    get_completions = typing.cast(
+        typing.Callable[[ShellCompleter], typing.List[str]],
+        getattr(command_module, "get_completions", lambda x: []),
+    )
     options = get_completions(completer)
     index = len(completer.last)
     return [
