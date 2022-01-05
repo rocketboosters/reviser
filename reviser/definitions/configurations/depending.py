@@ -119,6 +119,7 @@ class PipperDependency(Dependency):
 def _find_poetry_executable() -> str:
     """Find the poetry executable path, or raise an error if not found."""
     directories = [
+        pathlib.Path("~/.local/bin").expanduser(),
         pathlib.Path(sys.prefix).joinpath("bin"),
         pathlib.Path(sys.executable).parent,
     ]
