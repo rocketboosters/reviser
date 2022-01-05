@@ -49,8 +49,8 @@ def main(arguments: typing.List[str] = None) -> bool:
     print(f"\n[DIRECTORY]: {os.path.realpath(os.curdir)}")
     args = parsing.create_parser(False).parse_args(args=arguments)
 
-    credentials_directory = pathlib.Path(args.aws_directory).absolute()
-    deploy_directory = pathlib.Path(args.root_directory).absolute()
+    credentials_directory = pathlib.Path(args.aws_directory).resolve()
+    deploy_directory = pathlib.Path(args.root_directory).resolve()
     folder_name = deploy_directory.name
     version = args.image_tag_version
 
