@@ -27,6 +27,7 @@ def _merge_target_uuids(
     """Match UUIDs from the before to the after targets/children for continuity."""
     after.data["_uuid"] = before.uuid
     after.bundle.data["_uuid"] = before.bundle.uuid
+    after.image.data["_uuid"] = before.image.uuid
 
     mapping = {
         f"{d.kind}:{p}": d for d in before.dependencies for p in d.get_package_names()

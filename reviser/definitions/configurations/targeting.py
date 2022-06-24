@@ -86,6 +86,16 @@ class Target(abstracts.Specification):
         )
 
     @property
+    def image(self) -> "configurations.Image":
+        """Get the image object associated with this target configuration."""
+        return configurations.Image(
+            directory=self.directory,
+            data=self.get("image", default={}),
+            connection=self.connection,
+            target=self,
+        )
+
+    @property
     def layer_attachments(self) -> typing.List["configurations.AttachedLayer"]:
         """
         List layers that should be attached to functions in this target.
@@ -268,6 +278,7 @@ class Target(abstracts.Specification):
             "bundle_zip_path": str(self.bundle_zip_path),
             "site_packages_directory": str(self.site_packages_directory),
             "bundle": self.bundle.serialize(),
+            "image": self.image.serialize(),
             "dependencies": [d.serialize() for d in self.dependencies],
             **values,
         }
