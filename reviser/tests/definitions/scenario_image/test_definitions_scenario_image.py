@@ -21,7 +21,10 @@ def test_scenario():
     target = c.function_targets[0]
     assert target.kind.value == "function"
     assert len(target.names) == 1
-    assert target.image.uri == "123456789012.dkr.ecr.us-west-2.amazonaws.com/repo:tag"
+    assert (
+        target.image.get_region_uri("us-west-2")
+        == "123456789012.dkr.ecr.us-west-2.amazonaws.com/repo:tag"
+    )
     assert target.image.entrypoint == ["/my/entrypoint"]
     assert target.image.cmd == ["params", "to", "entrypoint"]
     assert target.image.workingdir == "/the/working/dir"

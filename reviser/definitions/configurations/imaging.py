@@ -14,13 +14,19 @@ class Image(abstracts.Specification):
     target: "configurations.Target"
 
     @property
-    def uri(self) -> typing.Optional[str]:
-        """Get the uri of the image to use in the lambda."""
+    def _has_uri(self) -> bool:
+        """Determine if URIs are configured."""
         return (
-            self.get("uri")
-            if self.target.kind == enumerations.TargetType.FUNCTION
-            else None
+            bool(self.get("uri"))
+            and self.target.kind == enumerations.TargetType.FUNCTION
         )
+
+    def get_region_uri(self, region: str) -> typing.Optional[str]:
+        """Get the uri of the image to use in the lambda."""
+        uri = self.get("uri")
+        if isinstance(uri, dict):
+            return uri.get(region)
+        return uri
 
     @property
     def entrypoint(self) -> typing.Optional[typing.List[str]]:
@@ -32,7 +38,7 @@ class Image(abstracts.Specification):
         custom_entrypoint = self.get("entrypoint")
         if isinstance(custom_entrypoint, str):
             custom_entrypoint = [custom_entrypoint]
-        return custom_entrypoint if self.uri is not None else None
+        return custom_entrypoint if self._has_uri is not None else None
 
     @property
     def cmd(self) -> typing.Optional[typing.List[str]]:
@@ -44,7 +50,7 @@ class Image(abstracts.Specification):
         custom_cmd = self.get("cmd")
         if isinstance(custom_cmd, str):
             custom_cmd = [custom_cmd]
-        return custom_cmd if self.uri is not None else None
+        return custom_cmd if self._has_uri is not None else None
 
     @property
     def workingdir(self) -> typing.Optional[str]:
@@ -53,12 +59,12 @@ class Image(abstracts.Specification):
 
         If not specified the default of the image will be used.
         """
-        return self.get("workingdir") if self.uri is not None else None
+        return self.get("workingdir") if self._has_uri is not None else None
 
     def serialize(self) -> dict:
         """Serialize the object for output representation."""
         return {
-            "uri": self.uri,
+            "uri_map": self.get("uri"),
             "entrypoint": self.entrypoint,
             "cmd": self.cmd,
             "workingdir": self.workingdir,
