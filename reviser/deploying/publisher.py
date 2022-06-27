@@ -61,7 +61,7 @@ def _publish_function_version(
     client: BaseClient, function_name: str, code_sha_256: str, description: str
 ):
     """
-    Publish function new version.
+    Publish function new version, waiting for existing updates to complete.
 
     Functions can only be updated if they are ready to be updated, so we will
     have to wait for the function State to be Active, and LastUpdateStatus to be
@@ -89,23 +89,47 @@ def _publish_function_version(
 
 def publish_function(
     target: "definitions.Target",
-    s3_keys: typing.List[str],
-    published_layers: typing.List["definitions.PublishedLayer"],
+    s3_keys: typing.Optional[typing.List[str]] = None,
+    published_layers: typing.Optional[typing.List["definitions.PublishedLayer"]] = None,
     description: str = None,
     dry_run: bool = False,
 ):
-    """Publish updated versions of the functions after upload."""
+    """
+    Publish an updated version of the lambda function.
+
+    :param target:
+        The lambda function to publish.
+    :param s3_keys:
+        If the lambda function is not image based, the S3 keys of the code
+        artifacts to deploy. If the lambda function is image based this will
+        be ignored. This is expected to be an ordered list aligning with the
+        target's names.
+    :param published_layers:
+        The published lambda layers to connect to the lambda function.
+    :param description:
+        A description of the lambda function version.
+    :param dry_run:
+        Whether to actually perform the action.
+    """
+    s3_keys = s3_keys or []
+    published_layers = published_layers or []
     client = target.client("lambda")
-    for name, key in zip(target.names, s3_keys):
-        print(f"[PUBLISHING]: Deploying code bundle to {name} $LATEST")
+    for i, name in enumerate(target.names):
+        print(f"[PUBLISHING]: Deploying update to {name} $LATEST")
         response = None
+        s3_key = s3_keys[i] if len(s3_keys) > i else None
+        image = target.image.get_region_uri(target.aws_region)
 
         if not dry_run:
+            code_args = (
+                typing.cast(typing.Dict[str, str], {"ImageUri": image})
+                if image
+                else typing.cast(
+                    typing.Dict[str, str], {"S3Bucket": target.bucket, "S3Key": s3_key}
+                )
+            )
             response = client.update_function_code(
-                FunctionName=name,
-                S3Bucket=target.bucket,
-                S3Key=key,
-                Publish=False,
+                FunctionName=name, Publish=False, **code_args
             )
 
         _update_function_configuration(
@@ -116,7 +140,7 @@ def publish_function(
             dry_run=dry_run,
         )
 
-        print("[PUBLISHING]: Publishing new version from bundle")
+        print("[PUBLISHING]: Publishing new version")
         if response and not dry_run:
             response = _publish_function_version(
                 client=client,
@@ -131,7 +155,6 @@ def publish_function(
                 )
             )
             print("  - Version:", response["FunctionArn"])
-            print("  - Runtime:", response["Runtime"])
 
     print("[DEPLOYED]: Lambda function code has been deployed\n")
 

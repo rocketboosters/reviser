@@ -1,0 +1,10 @@
+targets:
+- kind: function
+  names:
+  - foo-function
+  image:
+    uri:
+      us-west-2: 123456789012.dkr.ecr.us-west-2.amazonaws.com/repo:tag
+    entrypoint: /my/entrypoint
+    cmd: the-command
+    workingdir: /the/working/dir

@@ -14,7 +14,7 @@ class Image(abstracts.Specification):
     target: "configurations.Target"
 
     @property
-    def _has_uri(self) -> bool:
+    def configured(self) -> bool:
         """Determine if URIs are configured."""
         return (
             bool(self.get("uri"))
@@ -38,7 +38,7 @@ class Image(abstracts.Specification):
         custom_entrypoint = self.get("entrypoint")
         if isinstance(custom_entrypoint, str):
             custom_entrypoint = [custom_entrypoint]
-        return custom_entrypoint if self._has_uri is not None else None
+        return custom_entrypoint if self.configured is not None else None
 
     @property
     def cmd(self) -> typing.Optional[typing.List[str]]:
@@ -50,7 +50,7 @@ class Image(abstracts.Specification):
         custom_cmd = self.get("cmd")
         if isinstance(custom_cmd, str):
             custom_cmd = [custom_cmd]
-        return custom_cmd if self._has_uri is not None else None
+        return custom_cmd if self.configured is not None else None
 
     @property
     def workingdir(self) -> typing.Optional[str]:
@@ -59,7 +59,7 @@ class Image(abstracts.Specification):
 
         If not specified the default of the image will be used.
         """
-        return self.get("workingdir") if self._has_uri is not None else None
+        return self.get("workingdir") if self.configured is not None else None
 
     def serialize(self) -> dict:
         """Serialize the object for output representation."""

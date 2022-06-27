@@ -29,11 +29,13 @@ def deploy_target(
         Whether or not this is executing as a dry-run command that will echo the results
         without actually carrying out the update.
     """
-    s3_keys = uploader.upload(target, dry_run=dry_run)
+    s3_keys = []
+    if not target.image.configured:
+        s3_keys = uploader.upload(target, dry_run=dry_run)
 
     # Sleep for a few seconds to make sure the S3 upload has finished
     # processing to prevent race conditions during deployment
-    if not dry_run:
+    if not dry_run and not target.image.configured:
         print("[SYNC]: Synchronization block between S3 and lambda")
         time.sleep(2)
 

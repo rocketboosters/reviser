@@ -15,10 +15,12 @@ def test_publish_function_version():
 def test_update_function_configuration():
     """Should update function configuration without errors."""
     client = mock.MagicMock()
+    target = mock.MagicMock()
+    target.image.configured = False
     publisher._update_function_configuration(
         client,
         function_name="fake",
-        target=mock.MagicMock(),
+        target=target,
         published_layers=[],
         dry_run=False,
     )

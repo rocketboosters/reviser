@@ -79,7 +79,7 @@ def _get_handler_update(
     """Specify an updated handler if a change is found."""
     latest = target.bundle.handler
     existing = current_configuration.get("Handler")
-    if target.ignores_any("handler") or latest == existing:
+    if target.image.configured or target.ignores_any("handler") or latest == existing:
         return None
     return latest
 
@@ -91,7 +91,7 @@ def _get_runtime_update(
     """Specify an updated runtime if a change is found."""
     latest = f"python{definitions.RUNTIME_VERSION}"
     existing = current_configuration.get("Runtime")
-    if target.ignores_any("runtime") or latest == existing:
+    if target.image.configured or target.ignores_any("runtime") or latest == existing:
         return None
     return latest
 
@@ -106,6 +106,25 @@ def _get_memory_update(
     if target.ignores_any("memory") or latest == existing:
         return None
     return latest
+
+
+def _get_image_config_update(
+    target: "definitions.Target",
+    current_configuration: dict,
+) -> typing.Optional[dict]:
+    """Specify the image configuration."""
+    config = current_configuration.get("ImageConfigResponse", {}).get("ImageConfig", {})
+    old = {
+        "EntryPoint": config.get("Entrypoint"),
+        "Command": config.get("Command"),
+        "WorkingDirectory": config.get("WorkingDirectory"),
+    }
+    new = {
+        "EntryPoint": target.image.entrypoint,
+        "Command": target.image.cmd,
+        "WorkingDirectory": target.image.workingdir,
+    }
+    return new if old != new and target.image.configured else None
 
 
 def _get_timeout_update(
@@ -166,6 +185,7 @@ def update_function_configuration(
         Timeout=_get_timeout_update(target, current),
         Environment=_get_variable_updates(function_name, target, current),
         Handler=_get_handler_update(target, current),
+        ImageConfig=_get_image_config_update(target, current),
     )
 
     modifications = {k: v for k, v in changes.items() if v is not None}
