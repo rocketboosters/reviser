@@ -1,4 +1,4 @@
-# Reviser (v0.2.12)
+# Reviser
 
 [![PyPI version](https://badge.fury.io/py/reviser.svg)](https://pypi.org/project/reviser/)
 [![build status](https://gitlab.com/rocket-boosters/reviser/badges/main/pipeline.svg)](https://gitlab.com/rocket-boosters/reviser/commits/main)
@@ -16,7 +16,7 @@ already, but their generality and all-encompassing approaches don't integrate
 well with certain workflows and can be overly complex for many needs.
 
 Reviser is scoped to facilitate the deployment and updating of AWS Lambda
-Python functions and layers for all of the version-specific configurations,
+Python functions and layers for all version-specific configurations,
 e.g. code bundles, environment variables, memory size, and timeout lengths.
 The expectation is that functions are created by other means and then
 configuration for versions is managed with the reviser through an interactive
@@ -47,6 +47,7 @@ or scripted shell of commands.
       - [targets[N].name(s)](#targetsnnames)
       - [targets[N].region](#targetsnregion)
       - [targets[N].dependencies](#targetsndependencies)
+      - [targets[N].dependencies.skip](#targetsndependenciesskip)
       - [targets[N].dependencies(kind="pipper")](#targetsndependencieskindpipper)
       - [targets[N].dependencies(kind="poetry")](#targetsndependencieskindpoetry)
       - [targets[N].bundle](#targetsnbundle)
@@ -56,11 +57,11 @@ or scripted shell of commands.
          - [targets[N].bundle.omit_package(s)](#targetsnbundleomit_packages)
          - [targets[N].bundle.handler](#targetsnbundlehandler)
    - [function targets](#function-targets)
-        - [(function) targets[N].image](function-#targetsnimage)
-         - [(function) targets[N].image.uri](function-#targetsnimageuri)
-         - [(function) targets[N].image.entrypoint](function-#targetsnimageentrypoint)
-         - [(function) targets[N].image.cmd](function-#targetsnimageentrypoint)
-         - [(function) targets[N].image.workingdir](function-#targetsnimageworkingdir)
+      - [(function) targets[N].image](#function-targetsnimage)
+         - [(function) targets[N].image.uri](#function-targetsnimageuri)
+         - [(function) targets[N].image.entrypoint](#function-targetsnimageentrypoint)
+         - [(function) targets[N].image.cmd](#function-targetsnimagecmd)
+         - [(function) targets[N].image.workingdir](#function-targetsnimageworkingdir)
       - [(function) targets[N].layer(s)](#function-targetsnlayers)
       - [(function) targets[N].memory](#function-targetsnmemory)
       - [(function) targets[N].timeout](#function-targetsntimeout)
@@ -71,7 +72,7 @@ or scripted shell of commands.
 
 # Basic Usage
 
-A project defines one or more lambda function configuration targets in a
+A project defines one or more lambda function configuration targets in a 
 `lambda.yaml` file in the root project directory. The most basic configuration
 looks like this:
 
@@ -92,7 +93,7 @@ By default the package will include no external, e.g. pip, package
 dependencies. It will search for the first folder in the directory where the
 `lambda.yaml` file is located that contains an `__init__.py` file, identifying
 that folder as a Python source package for the function. It will also look for
-a `lambda_function.py` alongside the `lambda.yaml` file to serve as the
+a `lambda_function.py` alongside the `lambda.yaml` file to serve as the 
 entrypoint. These will be included in the uploaded and deployed code bundle
 when a `push` or a `deploy` command is executed. These default settings can
 all be configured along with many more as will be outlined below.
@@ -108,7 +109,7 @@ a new version of the `foo-function` lambda function with the uploaded results.
 
 # Shell commands
 
-The reviser command starts an interactive shell within a Docker container
+The reviser command starts an interactive shell within a Docker container 
 compatible with the AWS Python Lambda runtime. This shell contains various
 commands for deploying and managing deployments of lambda functions and layers
 defined in a project's `lambda.yaml` configuration file, the format of which
@@ -132,7 +133,7 @@ positional arguments:
                        $LATEST. To see what versions are available for a given
                        function use the list command.
 
-options:
+optional arguments:
   --function FUNCTION  The alias command only acts on one function. This can
                        be achieved either by selecting the function target via
                        the select command, or specifying the function name to
@@ -166,14 +167,17 @@ Install dependencies and copies includes into a zipped file ready for
 deployment.
 
 ```
-usage: bundle [--reinstall]
+usage: bundle [--reinstall] [--output OUTPUT]
 
-options:
-  --reinstall  Add this flag to reinstall dependencies on a repeated bundle
-               operation. By default, dependencies will remain cached for the
-               lifetime of the shell to speed up the bundling process. This
-               will force dependencies to be installed even if they had been
-               installed previously.
+optional arguments:
+  --reinstall           Add this flag to reinstall dependencies on a repeated
+                        bundle operation. By default, dependencies will remain
+                        cached for the lifetime of the shell to speed up the
+                        bundling process. This will force dependencies to be
+                        installed even if they had been installed previously.
+  --output OUTPUT, -o OUTPUT
+                        Output the bundled artifacts into the specified output
+                        path.
 
 ```
 
@@ -200,7 +204,7 @@ version.
 ```
 usage: deploy [--description DESCRIPTION] [--dry-run]
 
-options:
+optional arguments:
   --description DESCRIPTION
                         Specify a message to assign to the version published
                         by the deploy command.
@@ -252,7 +256,7 @@ Remove old function and/or layer versions for the selected targets.
 ```
 usage: prune [--start START] [--end END] [--dry-run] [-y]
 
-options:
+optional arguments:
   --start START  Keep versions lower (earlier/before) this one. A negative
                  value can be specified for relative indexing in the same
                  fashion as Python lists.
@@ -269,14 +273,18 @@ options:
 Combined single command for bundling and deploying the selected targets.
 
 ```
-usage: push [--reinstall] [--description DESCRIPTION] [--dry-run]
+usage: push [--reinstall] [--output OUTPUT] [--description DESCRIPTION]
+            [--dry-run]
 
-options:
+optional arguments:
   --reinstall           Add this flag to reinstall dependencies on a repeated
                         bundle operation. By default, dependencies will remain
                         cached for the lifetime of the shell to speed up the
                         bundling process. This will force dependencies to be
                         installed even if they had been installed previously.
+  --output OUTPUT, -o OUTPUT
+                        Output the bundled artifacts into the specified output
+                        path.
   --description DESCRIPTION
                         Specify a message to assign to the version published
                         by the deploy command.
@@ -327,7 +335,7 @@ positional arguments:
                         targets instead of the default fuzzy matching
                         behavior.
 
-options:
+optional arguments:
   --functions, --function, --func, -f
                         When specified, functions will be selected. This will
                         default to true if neither of --functions or --layers
@@ -384,12 +392,12 @@ Tail the logs for the selected lambda functions.
 usage: tail
 
 ```
-
+    
 More detail on any of these commands can be found from within the shell by
 executing them with the `--help` flag.
 
 The reviser application also supports non-interactive batch command
-execution via `run` macros that behave similarly to how `npm run <command>`
+execution via `run` macros that behave similarly to how `npm run <command>` 
 commands are defined. For more details see the `run` attribute section of the
 configuration file definitions below.
 
@@ -562,6 +570,28 @@ manager will be used by default (e.g. `requirements.txt` for pip,
 
 It is also possible to specify the same kind of package manager multiple
 times in this list to aggregate dependencies from multiple locations.
+
+### targets[N].dependencies.skip
+
+It is possible to specify inline dependencies to skip during the bundling installation
+process. This can be useful, for example, when a particular dependency is specific to
+platforms other than the lambda environment. Or perhaps a package like boto3 that is
+already available in the lambda function should be skipped to save bundling space while
+still wanting to include it in the packages dependencies for beyond-lambda deployment
+purposes.
+
+As shown below, specify the packages to skip within the dependency as part of the
+dependency definition:
+
+```yaml
+targets:
+- kind: function
+  name: foo
+  dependencies:
+  - kind: pip
+    skip:
+    - boto3
+```
 
 ### targets[N].dependencies(kind="pipper")
 

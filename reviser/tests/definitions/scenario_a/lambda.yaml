@@ -21,7 +21,8 @@ targets:
     - foo/bar.py
   dependencies:
   - kind: pip
-    packages: [spam]
+    packages: [spam, foo_bar]
+    skip: foo_bar
 
 # A layer with default values for everything.
 - kind: layer

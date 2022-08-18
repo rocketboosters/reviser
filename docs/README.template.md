@@ -1,4 +1,4 @@
-# Reviser (v{{ version }})
+# Reviser
 
 [![PyPI version](https://badge.fury.io/py/reviser.svg)](https://pypi.org/project/reviser/)
 [![build status](https://gitlab.com/rocket-boosters/reviser/badges/main/pipeline.svg)](https://gitlab.com/rocket-boosters/reviser/commits/main)
@@ -16,7 +16,7 @@ already, but their generality and all-encompassing approaches don't integrate
 well with certain workflows and can be overly complex for many needs.
 
 Reviser is scoped to facilitate the deployment and updating of AWS Lambda
-Python functions and layers for all of the version-specific configurations,
+Python functions and layers for all version-specific configurations,
 e.g. code bundles, environment variables, memory size, and timeout lengths.
 The expectation is that functions are created by other means and then
 configuration for versions is managed with the reviser through an interactive

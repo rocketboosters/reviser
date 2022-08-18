@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "reviser"
-version = "0.2.15"
+version = "0.2.16"
 description = "AWS Lambda function/layer version deployment manager."
 authors = [
   "Scott Ernst <swernst@gmail.com>",
@@ -38,6 +38,7 @@ prompt-toolkit = { version = ">=3.0.8", optional = true }
 PyYAML = { version = ">=5.3.0", optional = true }
 pipper = { version = ">=0.10.0", optional = true }
 toml = { version = ">=0.10.0", optional = true }
+wheel = { version = ">=0.37.1", optional = true }
 
 [tool.poetry.dev-dependencies]
 pytest = "yes"
@@ -79,7 +80,8 @@ shell = [
   "boto3",
   "PyYAML",
   "pipper",
-  "toml"
+  "toml",
+  "wheel",
 ]
 
 [build-system]

@@ -26,7 +26,8 @@ def test_scenario_a():
     assert len(target.dependencies) == 1
     deps = target.dependencies[0]
     assert deps.kind.value == "pip"
-    assert deps.packages == ["spam"]
+    assert deps.packages == ["spam", "foo_bar"]
+    assert deps.get_package_names() == ["spam"]
     assert deps.file is None
 
     target = c.layer_targets[0]

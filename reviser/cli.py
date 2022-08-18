@@ -49,12 +49,18 @@ def main(arguments: typing.List[str] = None) -> bool:
     print(f"\n[DIRECTORY]: {os.path.realpath(os.curdir)}")
     args = parsing.create_parser(False).parse_args(args=arguments)
 
-    credentials_directory = pathlib.Path(args.aws_directory).resolve()
-    deploy_directory = pathlib.Path(args.root_directory).resolve()
+    credentials_directory = (
+        pathlib.Path(os.path.expandvars(args.aws_directory)).expanduser().resolve()
+    )
+    deploy_directory = (
+        pathlib.Path(os.path.expandvars(args.root_directory)).expanduser().resolve()
+    )
     folder_name = deploy_directory.name
     version = args.image_tag_version
 
-    container_args = [a.replace("\\", "/") for a in (arguments or sys.argv[1:])]
+    container_args = [
+        os.path.expandvars(a.replace("\\", "/")) for a in (arguments or sys.argv[1:])
+    ]
     container_args = _remove_arg(container_args, "-d", True)
     container_args = _remove_arg(container_args, "--directory", True)
     container_args = _remove_arg(container_args, "--tag-version", True)

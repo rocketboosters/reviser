@@ -1,5 +1,9 @@
 """Shared utility function module."""
+import re
 import typing
+
+
+PACKAGE_NAME_REGEX = re.compile(r"^(?P<name>[^><=]+)")
 
 
 def to_human_readable_size(
@@ -57,3 +61,9 @@ def get_matching_bucket(
 
     # Allow for settings buckets by aws region name.
     return account_buckets.get(aws_region, default_bucket)
+
+
+def extract_package_name(package_identifier: str) -> str:
+    """Extract the name from a package specification, which can include a version."""
+    match = PACKAGE_NAME_REGEX.search(package_identifier or "")
+    return match.group("name") if match else ""

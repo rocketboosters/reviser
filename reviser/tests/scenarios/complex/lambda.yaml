@@ -30,7 +30,8 @@ targets:
     omit_packages: [ham]
   dependencies:
   - kind: pip
-    packages: [spam, ham]
+    packages: [spam, ham, ram]
+    skip: ram
   - kind: pipper
     bucket: some-pipper-bucket
     packages: [baz, qux]

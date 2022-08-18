@@ -47,6 +47,11 @@ class Dependency(abstracts.Specification):
         """Get the explicitly defined packages."""
         return self.get_first_as_list(["packages"], ["package"], default=[])
 
+    @property
+    def skip_packages(self) -> typing.List[str]:
+        """Get packages that should be skipped during the installation process."""
+        return self.get_first_as_list(["skips"], ["skip"], default=[])
+
     def get_package_names(self) -> typing.List[str]:
         """List package names to install from the various package sources."""
         return []
@@ -65,7 +70,11 @@ class PipDependency(Dependency):
                 for line in (self.file.read_text() or "").split("\n")
                 if (item := line.strip())
             ]
-        return packages
+        return [
+            p
+            for p in packages
+            if utils.extract_package_name(p) not in self.skip_packages
+        ]
 
     def serialize(self) -> dict:
         """Serialize the object for output representation."""
@@ -104,7 +113,11 @@ class PipperDependency(Dependency):
         packages = self.packages.copy()
         if data := self.get_package_data():
             packages += data.get("dependencies") or []
-        return packages
+        return [
+            p
+            for p in packages
+            if utils.extract_package_name(p) not in self.skip_packages
+        ]
 
     def serialize(self) -> dict:
         """Serialize the object for output representation."""
@@ -155,6 +168,11 @@ class PoetryDependency(Dependency):
             return packages
 
         executable = _find_poetry_executable()
+
+        # Ensure that a lock file exists and is up-to-date before proceeding.
+        command = [executable, "lock"]
+        subprocess.run(command, stdout=subprocess.PIPE, check=True)
+
         command = [
             executable,
             "export",
@@ -173,7 +191,11 @@ class PoetryDependency(Dependency):
             if (item := line.split(";")[0].strip())
         ]
 
-        return packages
+        return [
+            p
+            for p in packages
+            if utils.extract_package_name(p) not in self.skip_packages
+        ]
 
     def serialize(self) -> dict:
         """Serialize the object for output representation."""
