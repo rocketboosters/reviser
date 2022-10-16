@@ -4,19 +4,114 @@ import json
 import pathlib
 import subprocess
 import sys
+import tempfile
 import typing
 
 from reviser import utils
 from reviser.definitions import abstracts
+from reviser.definitions import aws
 from reviser.definitions import configurations
 from reviser.definitions import enumerations
+
+
+def parse_dependencies(
+    directory: pathlib.Path,
+    connection: "aws.AwsConnection",
+    dependency_data: typing.List[typing.Dict[str, typing.Any]],
+    is_shared: bool = False,
+):
+    """Parse configuration dependency data into a tuple of Dependency objects."""
+    output = []
+
+    dependency: Dependency
+    dependency_types = enumerations.DependencyType
+    mappings = typing.cast(
+        typing.Dict[str, typing.Any],
+        {
+            dependency_types.PIP.value: PipDependency,
+            dependency_types.PIPPER.value: PipperDependency,
+            dependency_types.POETRY.value: PoetryDependency,
+        },
+    )
+    for data in dependency_data:
+        kind = data.get("kind", dependency_types.PIP.value)
+        constructor = typing.cast(
+            typing.Any,
+            mappings.get(kind, configurations.PipDependency),
+        )
+        output.append(
+            constructor(
+                directory=directory,
+                data=data,
+                connection=connection,
+                is_shared=is_shared,
+            )
+        )
+
+    return tuple(output)
+
+
+@dataclasses.dataclass(frozen=True)
+class DependencyGroup(abstracts.Specification):
+    """Group of package dependencies."""
+
+    configuration: "configurations.Configuration"
+    target: typing.Optional["configurations.Target"] = None
+    name: typing.Optional[str] = None
+
+    @property
+    def is_shared(self) -> bool:
+        """Whether the dependency group is shared, or specific to a target."""
+        return self.target is None
+
+    @property
+    def site_packages_directory(self) -> pathlib.Path:
+        """Get the temporary location where site packages will be installed."""
+        if self.target:
+            return self.target.site_packages_directory
+        return pathlib.Path(tempfile.gettempdir()).joinpath(self.uuid)
+
+    @property
+    def sources(self) -> typing.Tuple["Dependency", ...]:
+        """Parse configuration dependency data into a tuple of Dependency objects."""
+        output = []
+
+        dependency: Dependency
+        dependency_types = enumerations.DependencyType
+        mappings = typing.cast(
+            typing.Dict[str, typing.Any],
+            {
+                dependency_types.PIP.value: PipDependency,
+                dependency_types.PIPPER.value: PipperDependency,
+                dependency_types.POETRY.value: PoetryDependency,
+            },
+        )
+        for data in self.get_as_list("sources") or []:
+            kind = data.get("kind", dependency_types.PIP.value)
+            constructor = typing.cast(
+                typing.Any, mappings.get(kind, configurations.PipDependency)
+            )
+            output.append(
+                constructor(
+                    directory=self.directory,
+                    data=data,
+                    connection=self.connection,
+                    group=self,
+                )
+            )
+
+        return tuple(output)
+
+    def serialize(self) -> dict:
+        """Serialize the object for output representation."""
+        return {"sources": [d.serialize() for d in self.sources]}
 
 
 @dataclasses.dataclass(frozen=True)
 class Dependency(abstracts.Specification):
     """Package dependency data structure."""
 
-    target: "configurations.Target"
+    group: "DependencyGroup"
 
     @property
     def kind(self) -> "enumerations.DependencyType":
@@ -98,7 +193,7 @@ class PipperDependency(Dependency):
         """Get the S3 bucket where the pipper repository resides."""
         return utils.get_matching_bucket(
             buckets=self.get_first(["buckets"], ["bucket"]),
-            aws_region=self.target.aws_region,
+            aws_region=self.group.configuration.aws_region,
             aws_account_id=self.connection.aws_account_id,
         )
 

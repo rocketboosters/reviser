@@ -68,16 +68,41 @@ def create(
     """
     selected = context.get_selected_targets(selection)
 
+    installed_shared_dependencies = set([])
+
     for target in selected.targets:
         target.bundle_directory.mkdir(exist_ok=True, parents=True)
 
-        skip_installs = (
-            not reinstall
-            and target.site_packages_directory.exists()
-            and os.listdir(str(target.site_packages_directory))
+        # Force an installation if reinstall is set and either the dependency is not
+        # shared or the dependency is shared but has not been added yet.
+        force_install = reinstall and (
+            not target.dependencies.is_shared
+            or target.dependencies.name not in installed_shared_dependencies
         )
-        if not skip_installs:
+
+        # Install if forced or the dependencies do net yet exist.
+        do_install = (
+            force_install
+            or not target.dependencies.site_packages_directory.exists()
+            or not os.listdir(str(target.dependencies.site_packages_directory))
+        )
+
+        # Copy if shared and a previous installation updated the shared dependencies.
+        do_copy = (
+            target.dependencies.is_shared
+            and target.dependencies.name in installed_shared_dependencies
+        )
+
+        if do_install:
             _installer.install_dependencies(target)
+            if target.dependencies.is_shared:
+                # List the shared dependency as having been installed to prevent
+                # multiple installations in the same operation.
+                installed_shared_dependencies.add(target.dependencies.name)
+        elif do_copy:
+            # Handle copying shared site packages that have already been installed by
+            # a previous target.
+            _installer.copy_shared_dependencies(target)
         else:
             print("[DEPENDENCIES]: Using existing installation cache.")
 

@@ -23,8 +23,8 @@ def test_scenario_a():
     assert target.kind.value == "function"
     assert len(target.names) == 2
     assert target.bundle.omitted_packages == ["ham"]
-    assert len(target.dependencies) == 1
-    deps = target.dependencies[0]
+    assert len(target.dependencies.sources) == 1
+    deps = target.dependencies.sources[0]
     assert deps.kind.value == "pip"
     assert deps.packages == ["spam", "foo_bar"]
     assert deps.get_package_names() == ["spam"]
@@ -34,12 +34,12 @@ def test_scenario_a():
     assert target.kind.value == "layer"
     assert len(target.names) == 1
     assert target.bundle.omitted_packages == []
-    assert len(target.dependencies) == 2
-    deps = target.dependencies[0]
+    assert len(target.dependencies.sources) == 2
+    deps = target.dependencies.sources[0]
     assert deps.kind.value == "pip"
     assert deps.packages == []
     assert deps.file == directory.joinpath("requirements.txt")
-    deps = target.dependencies[1]
+    deps = target.dependencies.sources[1]
     assert deps.kind.value == "pipper"
     assert deps.packages == []
     assert deps.file == directory.joinpath("pipper.json")

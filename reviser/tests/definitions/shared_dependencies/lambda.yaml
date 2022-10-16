@@ -1,0 +1,35 @@
+python: "3.8"
+buckets:
+  "123": bucket-123
+  "234": bucket-234
+
+dependencies:
+  all:
+  - kind: pip
+
+targets:
+- kind: function
+  names:
+  - foo-function
+  bundle:
+    handler: lambda_function.run
+  dependencies: all
+
+- kind: function
+  names:
+  - bar-function
+  bundle:
+    handler: lambda_function.run
+  dependencies: all
+
+- kind: function
+  names:
+  - baz-function
+  bundle:
+    handler: lambda_function.run
+  dependencies: all
+
+# A layer with default values for everything.
+- kind: layer
+  name: foo-layer
+  dependencies: all

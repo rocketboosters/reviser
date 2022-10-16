@@ -6,12 +6,13 @@ from reviser import utils
 from reviser.definitions import abstracts
 from reviser.definitions import enumerations
 from .bundling import Bundle  # noqa: F401
-from .imaging import Image  # noqa: F401
 from .depending import Dependency  # noqa: F401
+from .depending import DependencyGroup  # noqa: F401
 from .depending import PipDependency  # noqa: F401
 from .depending import PipperDependency  # noqa: F401
 from .depending import PoetryDependency  # noqa: F401
 from .enviromentals import EnvironmentVariable  # noqa: F401
+from .imaging import Image  # noqa: F401
 from .layering import AttachedLayer  # noqa: F401
 from .targeting import Target  # noqa: F401
 
@@ -22,7 +23,7 @@ class Configuration(abstracts.Specification):
 
     @property
     def targets(self) -> typing.List["Target"]:
-        """Get the duild and deploy targets."""
+        """Get the build and deploy targets."""
         return [
             Target(
                 directory=self.directory,
@@ -51,6 +52,25 @@ class Configuration(abstracts.Specification):
             aws_region=self.aws_region,
             aws_account_id=self.connection.aws_account_id,
         )
+
+    @property
+    def shared_dependencies(self) -> typing.Dict[str, "DependencyGroup"]:
+        """Retrieve shared dependency definitions used across multiple targets."""
+        output = {}
+        spec = self.get_first(["shared_dependencies"], ["dependencies"]) or {}
+        for k, v in spec.items():
+            if not isinstance(v, dict):
+                v = {"sources": v}
+                spec[k] = v
+            output[k] = DependencyGroup(
+                directory=self.directory,
+                connection=self.connection,
+                data=v,
+                configuration=self,
+                target=None,
+                name=k,
+            )
+        return output
 
     @property
     def aws_region(self) -> str:

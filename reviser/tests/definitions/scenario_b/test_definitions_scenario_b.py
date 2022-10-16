@@ -21,11 +21,11 @@ def test_scenario_b():
     target = c.layer_targets[0]
     assert target.kind.value == "layer"
     assert len(target.names) == 1
-    deps = target.dependencies[0]
+    deps = target.dependencies.sources[0]
     assert deps.kind.value == "pip"
     assert deps.packages == []
     assert deps.file is None
-    deps = target.dependencies[1]
+    deps = target.dependencies.sources[1]
     assert deps.kind.value == "pipper"
     assert deps.packages == []
     assert deps.file is None

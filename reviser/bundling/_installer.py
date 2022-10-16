@@ -51,7 +51,7 @@ def _install_poetry(dependency: "definitions.PoetryDependency"):
         print(f'\n[INSTALLING]: "{package}" poetry package')
         _install_pip_package(
             package,
-            dependency.target.site_packages_directory,
+            dependency.group.site_packages_directory,
         )
         print(f'\n[INSTALLED]: "{package}" poetry package')
 
@@ -62,7 +62,7 @@ def _install_pip(dependency: "definitions.PipDependency"):
         print(f'\n[INSTALLING]: "{package}" pip package')
         _install_pip_package(
             package,
-            dependency.target.site_packages_directory,
+            dependency.group.site_packages_directory,
         )
         print(f'\n[INSTALLED]: "{package}" pip package')
 
@@ -96,23 +96,38 @@ def _install_pipper(dependency: "definitions.PipperDependency"):
 
         _install_pipper_package(
             package,
-            dependency.target.site_packages_directory,
+            dependency.group.site_packages_directory,
             typing.cast(dict, env),
             arguments,
         )
         print(f'\n[INSTALLED]: "{package}" pipper package')
 
 
+def copy_shared_dependencies(target: "definitions.Target"):
+    """Copy installed shared dependencies into the target site packages folder."""
+    if not target.dependencies.is_shared:
+        return
+
+    if target.site_packages_directory.exists():
+        print("\n[REPLACING] Site packages directory with latest shared version.")
+        shutil.rmtree(target.site_packages_directory)
+    print("\n[COPYING] Shared site packages directory to target.")
+    shutil.copytree(
+        src=target.dependencies.site_packages_directory,
+        dst=target.site_packages_directory,
+    )
+
+
 def install_dependencies(target: "definitions.Target"):
     """Install the dependencies for the specified target."""
-    if target.site_packages_directory.exists():
-        print("\n[RESET]: Site packages directory exists and is being reset.")
+    if target.dependencies.site_packages_directory.exists():
+        print("\n[RESET] Site packages directory exists and is being reset.")
         shutil.rmtree(
             str(target.site_packages_directory),
             ignore_errors=True,
         )
 
-    target.site_packages_directory.mkdir(exist_ok=True, parents=True)
+    target.dependencies.site_packages_directory.mkdir(exist_ok=True, parents=True)
 
     callers: typing.Any = {
         definitions.DependencyType.PIPPER: _install_pipper,
@@ -120,6 +135,8 @@ def install_dependencies(target: "definitions.Target"):
         definitions.DependencyType.POETRY: _install_poetry,
     }
 
-    for dependency in target.dependencies:
+    for dependency in target.dependencies.sources:
         # noinspection PyTypeChecker
         callers[dependency.kind](dependency)
+
+    copy_shared_dependencies(target)

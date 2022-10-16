@@ -68,6 +68,7 @@ or scripted shell of commands.
       - [(function) targets[N].variable(s)](#function-targetsnvariables)
       - [(function) targets[N].ignore(s)](#function-targetsnignores)
    - [run](#run)
+   - [Shared Dependencies](#shared-dependencies)
 - [Local Execution](#local-execution)
 
 # Basic Usage
@@ -133,7 +134,7 @@ positional arguments:
                        $LATEST. To see what versions are available for a given
                        function use the list command.
 
-optional arguments:
+options:
   --function FUNCTION  The alias command only acts on one function. This can
                        be achieved either by selecting the function target via
                        the select command, or specifying the function name to
@@ -169,7 +170,7 @@ deployment.
 ```
 usage: bundle [--reinstall] [--output OUTPUT]
 
-optional arguments:
+options:
   --reinstall           Add this flag to reinstall dependencies on a repeated
                         bundle operation. By default, dependencies will remain
                         cached for the lifetime of the shell to speed up the
@@ -204,7 +205,7 @@ version.
 ```
 usage: deploy [--description DESCRIPTION] [--dry-run]
 
-optional arguments:
+options:
   --description DESCRIPTION
                         Specify a message to assign to the version published
                         by the deploy command.
@@ -256,7 +257,7 @@ Remove old function and/or layer versions for the selected targets.
 ```
 usage: prune [--start START] [--end END] [--dry-run] [-y]
 
-optional arguments:
+options:
   --start START  Keep versions lower (earlier/before) this one. A negative
                  value can be specified for relative indexing in the same
                  fashion as Python lists.
@@ -276,7 +277,7 @@ Combined single command for bundling and deploying the selected targets.
 usage: push [--reinstall] [--output OUTPUT] [--description DESCRIPTION]
             [--dry-run]
 
-optional arguments:
+options:
   --reinstall           Add this flag to reinstall dependencies on a repeated
                         bundle operation. By default, dependencies will remain
                         cached for the lifetime of the shell to speed up the
@@ -335,7 +336,7 @@ positional arguments:
                         targets instead of the default fuzzy matching
                         behavior.
 
-optional arguments:
+options:
   --functions, --function, --func, -f
                         When specified, functions will be selected. This will
                         default to true if neither of --functions or --layers
@@ -1208,6 +1209,60 @@ input. The benefit of this particular run command macro/group is to select
 the development targets and pre-build them to cache the dependencies for the
 shell user while they continue to develop and deploy the source code to the
 function.
+
+## Shared Dependencies
+
+It is possible to share dependencies across targets. This is useful if the dependencies
+are the same but other configurations differ. The configuration will look something
+like this:
+
+```yaml
+
+dependencies:
+  # Each shared dependency must be named, but the name can be any valid yaml key that
+  # you want.
+  shared_by_my_foo_and_bar:
+  - kind: pip
+    file: requirements.functions.txt
+  shared_by_others:
+  - kind: pip
+    file: requirements.layer.txt
+    
+targets:
+- kind: function
+  names:
+  - foo-prod
+  - foo-devel
+  timeout: 30s
+  memory: 256
+  dependencies: shared_by_my_foo_and_bar
+
+- kind: function
+  names:
+  - bar-prod
+  - bar-devel
+  timeout: 500s
+  memory: 2048
+  dependencies: shared_by_my_foo_and_bar
+
+- kind: function
+  names:
+  - baz-prod
+  - baz-devel
+  timeout: 10s
+  memory: 128
+  dependencies: shared_by_others
+
+- kind: layer
+  names:
+  - spam-prod
+  - spam-devel
+  dependencies: shared_by_others
+```
+
+Shared dependencies will be installed once reused by each target configured to use
+it. Each name shared dependency has the same structure and available options of a
+regular target dependencies definition.
 
 
 

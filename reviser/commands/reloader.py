@@ -30,10 +30,12 @@ def _merge_target_uuids(
     after.image.data["_uuid"] = before.image.uuid
 
     mapping = {
-        f"{d.kind}:{p}": d for d in before.dependencies for p in d.get_package_names()
+        f"{d.kind}:{p}": d
+        for d in before.dependencies.sources
+        for p in d.get_package_names()
     }
 
-    for dependency in after.dependencies:
+    for dependency in after.dependencies.sources:
         keys = [f"{dependency.kind}:{p}" for p in dependency.get_package_names()]
         match: typing.Optional[definitions.Dependency] = next(
             (d for k, d in mapping.items() if k in keys), None

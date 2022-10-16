@@ -805,3 +805,57 @@ input. The benefit of this particular run command macro/group is to select
 the development targets and pre-build them to cache the dependencies for the
 shell user while they continue to develop and deploy the source code to the
 function.
+
+## Shared Dependencies
+
+It is possible to share dependencies across targets. This is useful if the dependencies
+are the same but other configurations differ. The configuration will look something
+like this:
+
+```yaml
+
+dependencies:
+  # Each shared dependency must be named, but the name can be any valid yaml key that
+  # you want.
+  shared_by_my_foo_and_bar:
+  - kind: pip
+    file: requirements.functions.txt
+  shared_by_others:
+  - kind: pip
+    file: requirements.layer.txt
+    
+targets:
+- kind: function
+  names:
+  - foo-prod
+  - foo-devel
+  timeout: 30s
+  memory: 256
+  dependencies: shared_by_my_foo_and_bar
+
+- kind: function
+  names:
+  - bar-prod
+  - bar-devel
+  timeout: 500s
+  memory: 2048
+  dependencies: shared_by_my_foo_and_bar
+
+- kind: function
+  names:
+  - baz-prod
+  - baz-devel
+  timeout: 10s
+  memory: 128
+  dependencies: shared_by_others
+
+- kind: layer
+  names:
+  - spam-prod
+  - spam-devel
+  dependencies: shared_by_others
+```
+
+Shared dependencies will be installed once reused by each target configured to use
+it. Each name shared dependency has the same structure and available options of a
+regular target dependencies definition.

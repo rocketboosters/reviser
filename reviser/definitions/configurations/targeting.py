@@ -222,30 +222,24 @@ class Target(abstracts.Specification):
             return None
 
     @property
-    def dependencies(self) -> typing.Tuple["configurations.Dependency", ...]:
+    def dependencies(self) -> "configurations.DependencyGroup":
         """Get the dependencies for this function definition."""
-        output = []
+        dependency_data = self.get("dependencies")
+        if isinstance(dependency_data, str):
+            return self.configuration.shared_dependencies[dependency_data]
 
-        dependency: configurations.Dependency
-        dependency_types = enumerations.DependencyType
-        mappings: typing.Dict[str, typing.Callable] = {
-            dependency_types.PIP.value: configurations.PipDependency,
-            dependency_types.PIPPER.value: configurations.PipperDependency,
-            dependency_types.POETRY.value: configurations.PoetryDependency,
-        }
-        for data in self.get("dependencies", default=[]):
-            kind = data.get("kind", dependency_types.PIP.value)
-            constructor = mappings.get(kind, configurations.PipDependency)
-            output.append(
-                constructor(
-                    directory=self.directory,
-                    data=data,
-                    connection=self.connection,
-                    target=self,
-                )
-            )
+        if not isinstance(dependency_data, dict):
+            # Mutate the dependency data into a dictionary if not already done.
+            dependency_data = {"sources": dependency_data or []}
+            self.data["dependencies"] = dependency_data
 
-        return tuple(output)
+        return configurations.DependencyGroup(
+            directory=self.directory,
+            data=dependency_data,
+            connection=self.connection,
+            configuration=self.configuration,
+            target=self,
+        )
 
     def ignores_any(self, *args: str) -> bool:
         """Determine if any of the specified args appear in the ignores list."""
@@ -279,6 +273,6 @@ class Target(abstracts.Specification):
             "site_packages_directory": str(self.site_packages_directory),
             "bundle": self.bundle.serialize(),
             "image": self.image.serialize(),
-            "dependencies": [d.serialize() for d in self.dependencies],
+            "dependencies": self.dependencies.serialize(),
             **values,
         }
