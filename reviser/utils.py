@@ -44,7 +44,7 @@ def get_matching_bucket(
     buckets: typing.Union[None, str, dict],
     aws_account_id: str,
     aws_region: str,
-    default_bucket: str = None,
+    default_bucket: typing.Optional[str] = None,
 ):
     """Fetch a bucket name from the buckets argument."""
     if not buckets:

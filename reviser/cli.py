@@ -44,7 +44,7 @@ def _remove_arg(
     return source.copy()
 
 
-def main(arguments: typing.List[str] = None) -> bool:
+def main(arguments: typing.Optional[typing.List[str]] = None) -> bool:
     """Start the shell container based on the command line arguments."""
     print(f"\n[DIRECTORY]: {os.path.realpath(os.curdir)}")
     args = parsing.create_parser(False).parse_args(args=arguments)

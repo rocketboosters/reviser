@@ -9,8 +9,8 @@ from ..deploying import uploader
 
 def deploy_target(
     target: "definitions.Target",
-    description: str = None,
-    published_layers: typing.List["definitions.PublishedLayer"] = None,
+    description: typing.Optional[str] = None,
+    published_layers: typing.Optional[typing.List["definitions.PublishedLayer"]] = None,
     dry_run: bool = False,
 ) -> typing.List["definitions.PublishedLayer"]:
     """
@@ -60,7 +60,7 @@ def deploy_target(
 def deploy(
     context: "definitions.Context",
     selection: "definitions.Selection",
-    description: str = None,
+    description: typing.Optional[str] = None,
     dry_run: bool = False,
 ) -> typing.List["definitions.Target"]:
     """

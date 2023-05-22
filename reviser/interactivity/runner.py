@@ -10,7 +10,9 @@ from reviser import interactivity
 from reviser import parsing
 
 
-def create_shell(arguments: typing.List[str] = None) -> "interactivity.Shell":
+def create_shell(
+    arguments: typing.Optional[typing.List[str]] = None,
+) -> "interactivity.Shell":
     """
     Create a shell for interactive or queued command execution.
 
@@ -32,8 +34,8 @@ def create_shell(arguments: typing.List[str] = None) -> "interactivity.Shell":
 
 
 def run_shell(
-    arguments: typing.List[str] = None,
-    command_queue: typing.List[str] = None,
+    arguments: typing.Optional[typing.List[str]] = None,
+    command_queue: typing.Optional[typing.List[str]] = None,
 ) -> "interactivity.Shell":
     """
     Start the shell process.

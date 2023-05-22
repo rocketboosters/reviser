@@ -91,7 +91,7 @@ def publish_function(
     target: "definitions.Target",
     s3_keys: typing.Optional[typing.List[str]] = None,
     published_layers: typing.Optional[typing.List["definitions.PublishedLayer"]] = None,
-    description: str = None,
+    description: typing.Optional[str] = None,
     dry_run: bool = False,
 ):
     """
@@ -162,7 +162,7 @@ def publish_function(
 def publish_layer(
     target: "definitions.Target",
     s3_keys: typing.List[str],
-    description: str = None,
+    description: typing.Optional[str] = None,
     dry_run: bool = False,
 ) -> typing.List["definitions.PublishedLayer"]:
     """Publish an updated version of the layer after bundle has been uploaded to S3."""

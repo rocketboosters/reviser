@@ -77,8 +77,8 @@ class Context:
     def load_from_file(
         cls,
         arguments: argparse.Namespace,
-        path: typing.Union[str, pathlib.Path] = None,
-        connection: "aws.AwsConnection" = None,
+        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        connection: typing.Optional["aws.AwsConnection"] = None,
     ) -> "Context":
         """
         Load a context from a configuration path target.

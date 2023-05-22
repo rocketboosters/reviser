@@ -50,9 +50,9 @@ class Execution:
     def finalize(
         self,
         status: str,
-        message: str = None,
-        info: dict = None,
-        data: dict = None,
+        message: typing.Optional[str] = None,
+        info: typing.Optional[dict] = None,
+        data: typing.Optional[dict] = None,
         echo: bool = False,
     ) -> "Execution":
         """Copy this execution and populate it with the result."""
@@ -93,7 +93,7 @@ class Shell:
     def __init__(
         self,
         context: "definitions.Context",
-        selection: "definitions.Selection" = None,
+        selection: typing.Optional["definitions.Selection"] = None,
     ):
         """Create a new shell for queued and/or interactive execution."""
         self.command_history: typing.List[str] = []

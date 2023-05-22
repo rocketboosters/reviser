@@ -29,7 +29,7 @@ def _install_pipper_package(
     name: str,
     site_packages: pathlib.Path,
     env: dict,
-    arguments: typing.List[str] = None,
+    arguments: typing.Optional[typing.List[str]] = None,
 ):
     """Install the specified pipper package."""
     cmd = [

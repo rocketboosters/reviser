@@ -23,7 +23,6 @@ def parse_dependencies(
     """Parse configuration dependency data into a tuple of Dependency objects."""
     output = []
 
-    dependency: Dependency
     dependency_types = enumerations.DependencyType
     mappings = typing.cast(
         typing.Dict[str, typing.Any],
@@ -76,7 +75,6 @@ class DependencyGroup(abstracts.Specification):
         """Parse configuration dependency data into a tuple of Dependency objects."""
         output = []
 
-        dependency: Dependency
         dependency_types = enumerations.DependencyType
         mappings = typing.cast(
             typing.Dict[str, typing.Any],

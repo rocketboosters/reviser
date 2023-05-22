@@ -49,7 +49,7 @@ def build(
     python_version: str,
     spec: typing.Dict[str, typing.Any],
     args: argparse.Namespace,
-    script_path: pathlib.Path = None,
+    script_path: typing.Optional[pathlib.Path] = None,
 ) -> typing.Dict[str, typing.Any]:
     """Build the container from the specified docker file path."""
     path = "./Dockerfile"
@@ -83,7 +83,7 @@ def build(
 def publish(
     build_entry: dict,
     args: argparse.Namespace,
-    script_path: pathlib.Path = None,
+    script_path: typing.Optional[pathlib.Path] = None,
 ):
     """Publish the specified build entry to docker hub."""
     for tag in build_entry["tags"]:

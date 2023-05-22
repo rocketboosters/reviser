@@ -36,7 +36,7 @@ def _single_line_filter(value: str) -> str:
     return regex.sub(" ", (value or "").replace("\n", " ")).strip()
 
 
-def _colorize_filter(value: str, color: str = None) -> str:
+def _colorize_filter(value: str, color: typing.Optional[str] = None) -> str:
     """Apply ansi console coloring to the string."""
     if color_value := _COLOR_MAP.get((color or "").lower()):
         return f'{color_value}{value or ""}{colorama.Style.RESET_ALL}'
@@ -64,7 +64,7 @@ def printer(location: str, **kwargs):
     print(render(location, **kwargs))
 
 
-def print_error(message: str, error: Exception = None):
+def print_error(message: str, error: typing.Optional[Exception] = None):
     """
     Render an exception template to stdout.
 

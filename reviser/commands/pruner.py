@@ -55,7 +55,7 @@ def _resolve_version(
         typing.List[definitions.LambdaLayer],
         typing.List[definitions.LambdaFunction],
     ],
-    value: int = None,
+    value: typing.Optional[int] = None,
 ) -> typing.Optional[int]:
     """
     Normalize specified versions by making them absolute, positive version integers.
@@ -93,8 +93,8 @@ def _is_within_range(
 def _get_function_removal_versions(
     lambda_client: BaseClient,
     function_name: str,
-    start: int = None,
-    end: int = None,
+    start: typing.Optional[int] = None,
+    end: typing.Optional[int] = None,
 ):
     """Get ARNs for the function that should be pruned."""
     versions = servicer.get_function_versions(lambda_client, function_name)
@@ -113,8 +113,8 @@ def _get_function_removal_versions(
 def _prune_function(
     lambda_client: BaseClient,
     function_name: str,
-    start: int = None,
-    end: int = None,
+    start: typing.Optional[int] = None,
+    end: typing.Optional[int] = None,
     dry_run: typing.Optional[bool] = False,
     confirm: typing.Optional[bool] = True,
 ):
@@ -172,8 +172,8 @@ def _prune_function(
 def _get_layer_removal_versions(
     lambda_client: BaseClient,
     layer_name: str,
-    start: int = None,
-    end: int = None,
+    start: typing.Optional[int] = None,
+    end: typing.Optional[int] = None,
 ):
     """Get ARNs for the layer that should be pruned."""
     versions = servicer.get_layer_versions(lambda_client, layer_name)
@@ -191,8 +191,8 @@ def _get_layer_removal_versions(
 def _prune_layer(
     lambda_client: BaseClient,
     layer_name: str,
-    start: int = None,
-    end: int = None,
+    start: typing.Optional[int] = None,
+    end: typing.Optional[int] = None,
     dry_run: typing.Optional[bool] = False,
     confirm: typing.Optional[bool] = True,
 ):
