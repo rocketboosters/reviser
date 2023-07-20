@@ -5,28 +5,28 @@ stages:
 - release
 
 black-lint:
-  image: python:3.9
+  image: python:3.11
   stage: check
   script:
   - pip install black
   - black --check .
 
 flake8-lint:
-  image: python:3.9
+  image: python:3.11
   stage: check
   script:
   - pip install flake8 flake8-black
   - flake8 .
 
 mypy-lint:
-  image: python:3.9
+  image: python:3.11
   stage: check
   script:
   - pip install mypy
   - mypy . --install-types --non-interactive --ignore-missing-imports
 
 radon-cc:
-  image: python:3.9
+  image: python:3.11
   stage: check
   script:
   - pip install radon
@@ -34,7 +34,7 @@ radon-cc:
   - 'radon cc . -j | grep -Eq "\"rank\": \"(C|D|F)\"" && exit 1 || exit 0'
 
 radon-mi:
-  image: python:3.9
+  image: python:3.11
   stage: check
   script:
   - pip install radon
@@ -42,21 +42,21 @@ radon-mi:
   - 'radon mi . -j | grep -Eq "\"rank\": \"(B|C|D|F)\"" && exit 1 || exit 0'
 
 pydocstyle:
-  image: python:3.9
+  image: python:3.11
   stage: check
   script:
   - pip install pydocstyle
   - pydocstyle .
 
 yamllint:
-  image: python:3.9
+  image: python:3.11
   stage: check
   script:
   - pip install yamllint
   - yamllint .
 
 hadolint:
-  image: python:3.9
+  image: python:3.11
   stage: check
   script:
   - >
@@ -87,6 +87,56 @@ pytest-py38:
 pytest-py39:
   image: python:3.9
   stage: check
+  script:
+  - pip install poetry
+  - poetry install -E shell
+  - >
+    poetry run
+    py.test
+    --verbose
+    --cov-report term-missing
+    --cov-report xml
+    --cov=.
+    .
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: junit_coverage_report.xml
+
+    paths:
+    - .coverage
+    - coverage.xml
+    expire_in: 1 day
+
+pytest-py310:
+  image: python:3.10
+  stage: check
+  script:
+  - pip install poetry
+  - poetry install -E shell
+  - >
+    poetry run
+    py.test
+    --verbose
+    --cov-report term-missing
+    --cov-report xml
+    --cov=.
+    .
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: junit_coverage_report.xml
+
+    paths:
+    - .coverage
+    - coverage.xml
+    expire_in: 1 day
+
+pytest-py311:
+  image: python:3.11
+  stage: check
   coverage: /^TOTAL.*\s+\d+\s+\d+\s+(\d+)%/
   script:
   - pip install poetry
@@ -111,7 +161,7 @@ pytest-py39:
     expire_in: 1 day
 
 docker-script:
-  image: python:3.9
+  image: python:3.11
   stage: prepare
   script:
   - pip install toml
@@ -124,7 +174,7 @@ docker-script:
   - if: $CI_PROJECT_NAMESPACE == "rocket-boosters" && $CI_COMMIT_TAG
 
 build-library:
-  image: python:3.9
+  image: python:3.11
   stage: prepare
   script:
   - pip install poetry
@@ -152,7 +202,7 @@ docker-build:
   - if: $CI_PROJECT_NAMESPACE == "rocket-boosters" && $CI_COMMIT_TAG
 
 publish-library:
-  image: python:3.9
+  image: python:3.11
   stage: release
   script:
   - pip install poetry

@@ -14,6 +14,8 @@ VERSION = PROJECT_DATA["tool"]["poetry"]["version"]
 BUILDS = {
     "3.8": {"build_args": {"PYTHON_VERSION": "3.8"}},
     "3.9": {"build_args": {"PYTHON_VERSION": "3.9"}},
+    "3.10": {"build_args": {"PYTHON_VERSION": "3.10"}},
+    "3.11": {"build_args": {"PYTHON_VERSION": "3.11"}},
 }
 
 

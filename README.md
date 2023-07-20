@@ -134,7 +134,7 @@ positional arguments:
                        $LATEST. To see what versions are available for a given
                        function use the list command.
 
-options:
+optional arguments:
   --function FUNCTION  The alias command only acts on one function. This can
                        be achieved either by selecting the function target via
                        the select command, or specifying the function name to
@@ -170,7 +170,7 @@ deployment.
 ```
 usage: bundle [--reinstall] [--output OUTPUT]
 
-options:
+optional arguments:
   --reinstall           Add this flag to reinstall dependencies on a repeated
                         bundle operation. By default, dependencies will remain
                         cached for the lifetime of the shell to speed up the
@@ -205,7 +205,7 @@ version.
 ```
 usage: deploy [--description DESCRIPTION] [--dry-run]
 
-options:
+optional arguments:
   --description DESCRIPTION
                         Specify a message to assign to the version published
                         by the deploy command.
@@ -257,7 +257,7 @@ Remove old function and/or layer versions for the selected targets.
 ```
 usage: prune [--start START] [--end END] [--dry-run] [-y]
 
-options:
+optional arguments:
   --start START  Keep versions lower (earlier/before) this one. A negative
                  value can be specified for relative indexing in the same
                  fashion as Python lists.
@@ -277,7 +277,7 @@ Combined single command for bundling and deploying the selected targets.
 usage: push [--reinstall] [--output OUTPUT] [--description DESCRIPTION]
             [--dry-run]
 
-options:
+optional arguments:
   --reinstall           Add this flag to reinstall dependencies on a repeated
                         bundle operation. By default, dependencies will remain
                         cached for the lifetime of the shell to speed up the
@@ -336,7 +336,7 @@ positional arguments:
                         targets instead of the default fuzzy matching
                         behavior.
 
-options:
+optional arguments:
   --functions, --function, --func, -f
                         When specified, functions will be selected. This will
                         default to true if neither of --functions or --layers

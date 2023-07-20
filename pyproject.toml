@@ -21,6 +21,7 @@ classifiers = [
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
   "Topic :: Utilities",
   "Typing :: Typed"
 ]
@@ -31,7 +32,7 @@ reviser = 'reviser.cli:main'
 reviser-shell = 'reviser:main_shell'
 
 [tool.poetry.dependencies]
-python = ">=3.8.0, <3.11.0"
+python = ">=3.8.0, <3.12.0"
 boto3 = { version = ">=1.16.11", optional = true }
 colorama = { version = ">=0.4.4", optional = true }
 Jinja2 = { version = ">=2.11.2", optional = true }
@@ -40,6 +41,8 @@ PyYAML = { version = ">=5.3.0", optional = true }
 pipper = { version = ">=0.10.0", optional = true }
 toml = { version = ">=0.10.0", optional = true }
 wheel = { version = ">=0.37.1", optional = true }
+# AWS is not currently compatible with 2+
+urllib3 = "<2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
@@ -71,6 +74,7 @@ format = "task black"
 lint = "task black_lint && task flake8 && task mypy && task pydocstyle && task radon && task yamllint"
 check = "task format && task lint && task test"
 docs = "python docs_builder.py"
+build_images = "python image_builder.py"
 images = "python image_builder.py --publish"
 
 [tool.poetry.extras]
