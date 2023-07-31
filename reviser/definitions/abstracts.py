@@ -83,6 +83,48 @@ class DataWrapper:
             return default
         return self.get_as_list(*found_args, default=default)
 
+    def get_as_dict(
+        self,
+        *args: str,
+        default: typing.Any = None,
+    ) -> typing.Dict[typing.Any, typing.Any]:
+        """
+        Fetch the value from the data dictionary as a dict.
+
+        None values will be returned as an empty dict. Values that are
+        not dicts will raise an error. If the nested key does not exist,
+        the default will be returned instead, but if the key is explicitly defined as
+        `null` an empty dict is returned instead fo the default.
+        """
+        if self.has(*args):
+            value = self.get(*args, default=default)
+        else:
+            value = default
+
+        if value is None:
+            return {}
+
+        if not isinstance(value, dict):
+            raise ValueError(f"{value} must bve of type dict")
+        return value
+
+    def get_first_as_dict(
+        self,
+        *args: typing.Iterable[str],
+        default: typing.Any = None,
+    ) -> typing.Any:
+        """
+        Fetch the value from the data dictionary in the key-grouped order.
+
+        The default value will be returned if none of the key-group args
+        exist in the data dictionary. If a match is found it will be returned
+        as a dict in the same fashion as the get_as_dict function.
+        """
+        found_args = next((a for a in args if self.has(*a)), None)
+        if found_args is None:
+            return default
+        return self.get_as_dict(*found_args, default=default)
+
     def has(self, *args: str) -> bool:
         """Determine whether or not the nested key exists."""
         value = self.data or {}

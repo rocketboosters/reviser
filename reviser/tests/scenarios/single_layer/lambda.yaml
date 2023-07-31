@@ -6,4 +6,10 @@ targets:
   - foo-layer
   dependencies:
   - kind: pip
+    arguments:
+      --pip-arg-1: pip-val-1
+      --pip-arg-2: pip-val-2
   - kind: pipper
+    arguments:
+      --pipper-arg-1: pipper-val-1
+      --pipper-arg-2: pipper-val-2

@@ -51,6 +51,15 @@ def test_single_layer_scenario_push():
             file to be installed during the layer build process.
             """
 
+        observed = sr.patches.install_pip_package.call_args_list[0].args[2]
+        assert [
+            "--pip-arg-1=pip-val-1",
+            "--pip-arg-2=pip-val-2",
+        ] == observed, """
+            Expect pip install to be called with the two supplied arguments
+            during the layer build process.
+            """
+
         observed = {
             cargs.args[0] for cargs in sr.patches.install_pipper_package.call_args_list
         }
@@ -60,6 +69,15 @@ def test_single_layer_scenario_push():
         } == observed, """
             Expect the two packages specified in the pipper.json file
             to be installed during the layer build process.
+            """
+
+        observed = sr.patches.install_pipper_package.call_args_list[0].args[3]
+        assert [
+            "--pipper-arg-1=pipper-val-1",
+            "--pipper-arg-2=pipper-val-2",
+        ] == observed, """
+            Expect pipper install to be called with the two supplied
+            arguments during the layer build process.
             """
 
 

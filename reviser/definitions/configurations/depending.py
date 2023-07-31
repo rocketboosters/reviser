@@ -145,6 +145,11 @@ class Dependency(abstracts.Specification):
         """Get packages that should be skipped during the installation process."""
         return self.get_first_as_list(["skips"], ["skip"], default=[])
 
+    @property
+    def arguments(self) -> typing.Dict[str, str]:
+        """Gets arguments that should be passed during the installation process."""
+        return self.get_first_as_dict(["arguments"], default={})
+
     def get_package_names(self) -> typing.List[str]:
         """List package names to install from the various package sources."""
         return []

@@ -76,7 +76,9 @@ class Patches:
         return mock
 
     @classmethod
-    def _mock_pip_install_package(cls, name: str, site_packages: pathlib.Path):
+    def _mock_pip_install_package(
+        cls, name: str, site_packages: pathlib.Path, *args, **kwargs
+    ):
         """Mock function for pipper package installation."""
         site_packages.joinpath(name).write_text("pip-installed-package")
         print(f'[MOCK]: Installed pip package "{name}"')

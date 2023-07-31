@@ -9,7 +9,11 @@ import typing
 from reviser import definitions
 
 
-def _install_pip_package(name: str, site_packages: pathlib.Path):
+def _install_pip_package(
+    name: str,
+    site_packages: pathlib.Path,
+    arguments: typing.Optional[typing.List[str]] = None,
+):
     """Install the specified pip package."""
     cmd = [
         "python",
@@ -20,6 +24,7 @@ def _install_pip_package(name: str, site_packages: pathlib.Path):
         name,
         "-t",
         f'"{site_packages}"',
+        *(arguments or []),
     ]
     print(" ".join(cmd).replace(" -", "\n  -"))
     os.system(" ".join(cmd))
@@ -47,22 +52,22 @@ def _install_pipper_package(
 
 def _install_poetry(dependency: "definitions.PoetryDependency"):
     """Install poetry dependencies in the target's site packages."""
+    arguments = [f"{k}={v}" for k, v in dependency.arguments.items() if v is not None]
     for package in dependency.get_package_names() or []:
         print(f'\n[INSTALLING]: "{package}" poetry package')
         _install_pip_package(
-            package,
-            dependency.group.site_packages_directory,
+            package, dependency.group.site_packages_directory, arguments
         )
         print(f'\n[INSTALLED]: "{package}" poetry package')
 
 
 def _install_pip(dependency: "definitions.PipDependency"):
     """Install poetry dependencies in the target's site packages."""
+    arguments = [f"{k}={v}" for k, v in dependency.arguments.items() if v is not None]
     for package in dependency.get_package_names() or []:
         print(f'\n[INSTALLING]: "{package}" pip package')
         _install_pip_package(
-            package,
-            dependency.group.site_packages_directory,
+            package, dependency.group.site_packages_directory, arguments
         )
         print(f'\n[INSTALLED]: "{package}" pip package')
 
@@ -84,16 +89,18 @@ def _install_pipper(dependency: "definitions.PipperDependency"):
     # these will be None and None values cannot be included in environment
     # variables without raising a TypeError: str expected, not NoneType.
     env.update({k: v for k, v in env_vars.items() if v is not None})
+    additional_kwargs = {
+        "--bucket": dependency.bucket,
+        "--prefix": dependency.prefix,
+    }
+    arguments = [
+        f"{k}={v}"
+        for k, v in {**additional_kwargs, **dependency.arguments}.items()
+        if v is not None
+    ]
 
     for package in dependency.get_package_names():
-        additional_kwargs = {
-            "--bucket": dependency.bucket,
-            "--prefix": dependency.prefix,
-        }
-        arguments = [f"{k}={v}" for k, v in additional_kwargs.items() if v is not None]
-
         print(f'\n[INSTALLING]: "{package}" pipper package')
-
         _install_pipper_package(
             package,
             dependency.group.site_packages_directory,

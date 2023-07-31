@@ -594,6 +594,21 @@ targets:
     - boto3
 ```
 
+### targets[N].dependencies.arguments
+
+The `arguments` is an optional map of arguments which will be passed to the package 
+manager during installation.
+
+```yaml
+targets:
+- kind: function
+  name: foo
+  dependencies:
+  - kind: pip
+    arguments:
+      --arg1: val1
+```
+
 ### targets[N].dependencies(kind="pipper")
 
 Pipper repositories have additional configuration not associated with pip
