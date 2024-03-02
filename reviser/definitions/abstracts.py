@@ -1,4 +1,5 @@
 """Abstract classes utilized elsewhere for parent inheritance."""
+
 import dataclasses
 import pathlib
 import typing

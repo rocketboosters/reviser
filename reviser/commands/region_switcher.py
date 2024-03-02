@@ -1,4 +1,5 @@
 """Switch the target region."""
+
 import argparse
 import typing
 

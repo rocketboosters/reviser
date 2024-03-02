@@ -1,4 +1,5 @@
 """Reload the lambda.yaml configuration file from disk."""
+
 import argparse
 import typing
 

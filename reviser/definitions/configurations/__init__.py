@@ -1,4 +1,5 @@
 """Configurations definitions package containing data structures and IO for configs."""
+
 import dataclasses
 import typing
 

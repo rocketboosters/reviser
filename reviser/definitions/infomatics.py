@@ -1,4 +1,5 @@
 """Status and information data structures module."""
+
 import dataclasses
 import datetime
 import typing

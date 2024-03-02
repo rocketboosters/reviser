@@ -12,6 +12,7 @@ function, the command would be:
 If multiple functions are currently selected, use `--function=<NAME>`
 to identify the function to which the alias change will be applied.
 """
+
 import typing
 from argparse import ArgumentParser
 

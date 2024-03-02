@@ -1,4 +1,5 @@
 """Build and optionally push the reviser container images to dockerhub."""
+
 import argparse
 import os
 import pathlib
@@ -16,6 +17,7 @@ BUILDS = {
     "3.9": {"build_args": {"PYTHON_VERSION": "3.9"}},
     "3.10": {"build_args": {"PYTHON_VERSION": "3.10"}},
     "3.11": {"build_args": {"PYTHON_VERSION": "3.11"}},
+    "3.12": {"build_args": {"PYTHON_VERSION": "3.12"}},
 }
 
 

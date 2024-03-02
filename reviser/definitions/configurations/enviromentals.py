@@ -1,4 +1,5 @@
 """Data structure and IO module for environment variables definitions."""
+
 import dataclasses
 import fnmatch
 import typing

@@ -1,4 +1,5 @@
 """Show the current status information for each of the selected lambda targets."""
+
 import argparse
 import textwrap
 import typing

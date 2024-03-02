@@ -1,4 +1,5 @@
 """Commands subpackage for reviser command invcations."""
+
 from collections import defaultdict as _defaultdict
 
 from ..commands import aliaser

@@ -1,4 +1,5 @@
 """Exit the shell and returns to the parent terminal."""
+
 import argparse
 import typing
 

@@ -10,6 +10,7 @@ executes the shell command. This would updated the selection and then with the s
 command, start the shell in interactive mode. Without specifying the shell command
 here, the run command group/macro would just set a selection and then exit.
 """
+
 import argparse
 import typing
 

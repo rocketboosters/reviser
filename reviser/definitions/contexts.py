@@ -1,4 +1,5 @@
 """Context definitions module."""
+
 import argparse
 import dataclasses
 import pathlib

@@ -1,4 +1,5 @@
 """Auto-completion functionality module for the shell."""
+
 import re
 import shlex
 import typing

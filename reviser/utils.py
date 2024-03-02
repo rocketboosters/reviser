@@ -1,4 +1,5 @@
 """Shared utility function module."""
+
 import re
 import typing
 

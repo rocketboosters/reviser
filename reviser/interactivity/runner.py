@@ -1,4 +1,5 @@
 """Shell execution module."""
+
 import pathlib
 import typing
 import sys

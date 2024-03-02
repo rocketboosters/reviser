@@ -1,4 +1,5 @@
 """Shell data structures and functionality module."""
+
 import argparse
 import dataclasses
 import datetime

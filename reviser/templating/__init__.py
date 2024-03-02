@@ -1,4 +1,5 @@
 """Subpackage for CLI display templating."""
+
 import pathlib
 import re
 import textwrap

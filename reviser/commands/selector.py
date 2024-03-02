@@ -3,6 +3,7 @@ Allow for selecting subsets of the targets within the loaded configuration.
 
 The subsets are fuzzy-matched unless the --exact flag is used.
 """
+
 import argparse
 import dataclasses
 import typing

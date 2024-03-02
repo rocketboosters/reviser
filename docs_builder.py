@@ -1,4 +1,5 @@
 """Build docs into the README.md file from docs and code sources."""
+
 import argparse
 import io
 import os

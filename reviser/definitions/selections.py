@@ -1,4 +1,5 @@
 """Selection data structures module."""
+
 import dataclasses
 import typing
 

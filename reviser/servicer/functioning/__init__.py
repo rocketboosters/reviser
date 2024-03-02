@@ -1,4 +1,5 @@
 """Subpackage for lambda function management and status functionality."""
+
 import dataclasses
 import datetime
 import typing

@@ -1,4 +1,5 @@
 """Parse command line arguments module."""
+
 import argparse
 import os
 import pathlib

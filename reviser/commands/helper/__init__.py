@@ -4,6 +4,7 @@ Display help information on the commands available within the shell.
 Additional help on each command can be found using the --help flag on the command in
 question.
 """
+
 import argparse
 import typing
 import re

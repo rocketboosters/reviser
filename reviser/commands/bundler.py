@@ -4,6 +4,7 @@ Install dependencies and copies includes into a zipped file ready for deployment
 The resulting zip file is structured correctly to be deployed to the lambda
 function/layer target via an S3 upload and subsequent publish command.
 """
+
 import argparse
 import pathlib
 import shutil

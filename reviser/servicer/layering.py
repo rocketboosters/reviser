@@ -1,4 +1,5 @@
 """Lambda layer functionality module."""
+
 import textwrap
 import typing
 from collections import defaultdict

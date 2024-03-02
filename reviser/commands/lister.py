@@ -1,4 +1,5 @@
 """List versions of the specified lambda targets with info about each version."""
+
 import typing
 from argparse import ArgumentParser
 

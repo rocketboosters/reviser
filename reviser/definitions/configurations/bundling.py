@@ -1,4 +1,5 @@
 """Bundle configuration data structures and IO module."""
+
 import dataclasses
 import glob
 import pathlib

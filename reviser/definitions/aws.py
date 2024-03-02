@@ -1,4 +1,5 @@
 """Definitions and IO for AWS connection data."""
+
 import typing
 
 import boto3

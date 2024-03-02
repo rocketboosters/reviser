@@ -1,4 +1,5 @@
 """Shell interactivity subpackge."""
+
 from reviser.interactivity.completions import ShellCompleter  # noqa: F401
 from reviser.interactivity.runner import create_shell  # noqa: F401
 from reviser.interactivity.runner import main_shell  # noqa: F401

@@ -1,4 +1,5 @@
 """Combined single command for bundling and deploying the selected targets."""
+
 import argparse
 import typing
 

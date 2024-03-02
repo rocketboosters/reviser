@@ -1,4 +1,5 @@
 """Reviser lambda management package command-line interface."""
+
 import os
 import pathlib
 import subprocess

@@ -1,4 +1,5 @@
 """Publisher functionality module."""
+
 import typing
 
 from botocore.client import BaseClient

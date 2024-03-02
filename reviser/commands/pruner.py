@@ -1,4 +1,5 @@
 """Remove old function and/or layer versions for the selected targets."""
+
 import argparse
 import textwrap
 import typing

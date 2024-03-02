@@ -1,4 +1,5 @@
 """Test validation supports library."""
+
 from reviser import interactivity
 from reviser import definitions
 

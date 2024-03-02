@@ -1,4 +1,5 @@
 """Invoke the target function."""
+
 import json
 import typing
 from argparse import ArgumentParser

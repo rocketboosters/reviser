@@ -4,6 +4,7 @@ Display the configs merged from its source file, dynamic values and defaults.
 Use this to inspect and validate that the loaded configuration meets expectations when
 parsed into the reviser shell.
 """
+
 import argparse
 import typing
 

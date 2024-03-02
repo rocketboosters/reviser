@@ -1,4 +1,5 @@
 """Update functionality module."""
+
 import typing
 import yaml
 
