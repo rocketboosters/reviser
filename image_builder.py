@@ -13,8 +13,6 @@ MY_DIRECTORY = pathlib.Path(__file__).parent.absolute()
 PROJECT_DATA = toml.loads(MY_DIRECTORY.joinpath("pyproject.toml").read_text())
 VERSION = PROJECT_DATA["tool"]["poetry"]["version"]
 BUILDS = {
-    "3.8": {"build_args": {"PYTHON_VERSION": "3.8"}},
-    "3.9": {"build_args": {"PYTHON_VERSION": "3.9"}},
     "3.10": {"build_args": {"PYTHON_VERSION": "3.10"}},
     "3.11": {"build_args": {"PYTHON_VERSION": "3.11"}},
     "3.12": {"build_args": {"PYTHON_VERSION": "3.12"}},
