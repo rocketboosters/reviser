@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "reviser"
-version = "0.4.4"
+version = "0.4.5"
 description = "AWS Lambda function/layer version deployment manager."
 authors = [
   "Scott Ernst <swernst@gmail.com>",
@@ -90,5 +90,5 @@ shell = [
 ]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"

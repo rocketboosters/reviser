@@ -12,7 +12,8 @@ ENV PATH="/root/.local/bin:/var/lang/pipx/venvs/poetry/bin:${PATH}"
 # hadolint ignore=DL3033
 RUN pip --no-cache-dir install poetry \
  && poetry config virtualenvs.create false \
- && poetry install --extras shell --no-root
+ && poetry install --extras shell --no-root \
+ && poetry run pip install poetry-plugin-export
 
 COPY reviser /application/reviser
 
