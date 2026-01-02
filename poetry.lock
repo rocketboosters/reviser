@@ -1421,5 +1421,5 @@ shell = ["Jinja2", "PyYAML", "boto3", "colorama", "pipper", "prompt-toolkit", "t
 
 [metadata]
 lock-version = "2.1"
-python-versions = ">=3.11, <3.14"
-content-hash = "440b8d235ebc08823d79867b2b07f595bfd8b6f8e256e6d52ce8473af4438116"
+python-versions = ">=3.11, <3.15"
+content-hash = "4eedb99edd31a917c861acf0c0a0fc156ad5e7158a0526acfb7b10825d34a862"
