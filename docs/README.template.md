@@ -1,10 +1,9 @@
 # Reviser
 
 [![PyPI version](https://badge.fury.io/py/reviser.svg)](https://pypi.org/project/reviser/)
-[![build status](https://gitlab.com/rocket-boosters/reviser/badges/main/pipeline.svg)](https://gitlab.com/rocket-boosters/reviser/commits/main)
-[![coverage report](https://gitlab.com/rocket-boosters/reviser/badges/main/coverage.svg)](https://gitlab.com/rocket-boosters/reviser/commits/main)
+[![CI](https://github.com/rocketboosters/reviser/actions/workflows/ci.yml/badge.svg)](https://github.com/rocketboosters/reviser/actions/workflows/ci.yml)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Code style: flake8](https://img.shields.io/badge/code%20style-flake8-white)](https://gitlab.com/pycqa/flake8)
+[![Code style: flake8](https://img.shields.io/badge/code%20style-flake8-white)](https://github.com/PyCQA/flake8)
 [![Code style: mypy](https://img.shields.io/badge/code%20style-mypy-white)](http://mypy-lang.org/)
 [![PyPI - License](https://img.shields.io/pypi/l/reviser)](https://pypi.org/project/reviser/)
 
@@ -30,7 +29,7 @@ or scripted shell of commands.
 
 # Basic Usage
 
-A project defines one or more lambda function configuration targets in a 
+A project defines one or more lambda function configuration targets in a
 `lambda.yaml` file in the root project directory. The most basic configuration
 looks like this:
 
@@ -51,7 +50,7 @@ By default the package will include no external, e.g. pip, package
 dependencies. It will search for the first folder in the directory where the
 `lambda.yaml` file is located that contains an `__init__.py` file, identifying
 that folder as a Python source package for the function. It will also look for
-a `lambda_function.py` alongside the `lambda.yaml` file to serve as the 
+a `lambda_function.py` alongside the `lambda.yaml` file to serve as the
 entrypoint. These will be included in the uploaded and deployed code bundle
 when a `push` or a `deploy` command is executed. These default settings can
 all be configured along with many more as will be outlined below.
@@ -67,19 +66,19 @@ a new version of the `foo-function` lambda function with the uploaded results.
 
 # Shell commands
 
-The reviser command starts an interactive shell within a Docker container 
+The reviser command starts an interactive shell within a Docker container
 compatible with the AWS Python Lambda runtime. This shell contains various
 commands for deploying and managing deployments of lambda functions and layers
 defined in a project's `lambda.yaml` configuration file, the format of which
 is described later in this document. The shell commands are:
 
 {{ shell_commands }}
-    
+
 More detail on any of these commands can be found from within the shell by
 executing them with the `--help` flag.
 
 The reviser application also supports non-interactive batch command
-execution via `run` macros that behave similarly to how `npm run <command>` 
+execution via `run` macros that behave similarly to how `npm run <command>`
 commands are defined. For more details see the `run` attribute section of the
 configuration file definitions below.
 

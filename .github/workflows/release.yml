@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  docker-script:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.14'
+    - name: Install toml
+      run: pip install toml
+    - name: Generate docker build script
+      run: python ./image_builder.py --script=build-images.sh --push
+    - name: Upload build script
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-script
+        path: build-images.sh
+        retention-days: 1
+
+  build-library:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.14'
+    - name: Install poetry
+      run: pip install poetry
+    - name: Install dependencies
+      run: poetry install -E shell
+    - name: Build docs
+      run: poetry run python docs_builder.py
+    - name: Build package
+      run: poetry build
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist
+        path: dist/
+        retention-days: 90
+
+  docker-build:
+    runs-on: ubuntu-latest
+    needs: docker-script
+    steps:
+    - uses: actions/checkout@v4
+    - name: Download build script
+      uses: actions/download-artifact@v4
+      with:
+        name: build-script
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_HUB_USER }}
+        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+    - name: Build and push Docker images
+      run: |
+        chmod +x ./build-images.sh
+        ./build-images.sh
+
+  publish-library:
+    runs-on: ubuntu-latest
+    needs: build-library
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.14'
+    - name: Install poetry
+      run: pip install poetry
+    - name: Configure poetry
+      run: |
+        poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+    - name: Build package
+      run: poetry build
+    - name: Publish to PyPI
+      run: poetry publish

@@ -9,9 +9,9 @@ authors = [
 ]
 license = "MIT"
 readme = "README.md"
-homepage = "https://gitlab.com/rocket-boosters/reviser"
-repository = "https://gitlab.com/rocket-boosters/reviser"
-documentation = "https://gitlab.com/rocket-boosters/reviser"
+homepage = "https://github.com/rocketboosters/reviser"
+repository = "https://github.com/rocketboosters/reviser"
+documentation = "https://github.com/rocketboosters/reviser"
 keywords = ["aws", "lambda"]
 classifiers = [
   "Development Status :: 4 - Beta",
