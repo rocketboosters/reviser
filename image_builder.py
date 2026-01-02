@@ -16,6 +16,7 @@ BUILDS = {
     "3.11": {"build_args": {"PYTHON_VERSION": "3.11"}},
     "3.12": {"build_args": {"PYTHON_VERSION": "3.12"}},
     "3.13": {"build_args": {"PYTHON_VERSION": "3.13"}},
+    "3.14": {"build_args": {"PYTHON_VERSION": "3.14"}},
 }
 
 

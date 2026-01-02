@@ -10,7 +10,6 @@ except ImportError as error:
 
     def main_shell() -> None:
         """Raise an error when import fails due to missing dependencies."""
-        global _stored_error
         raise _stored_error
 
 

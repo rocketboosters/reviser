@@ -40,7 +40,7 @@ class Execution:
 
     executed_at: datetime.datetime = dataclasses.field(
         init=False,
-        default_factory=lambda: datetime.datetime.utcnow(),
+        default_factory=lambda: datetime.datetime.now(datetime.timezone.utc),
     )
 
     @property

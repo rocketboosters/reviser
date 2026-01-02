@@ -47,7 +47,7 @@ def upload(
         "display_progress": -5,
     }
 
-    now = datetime.datetime.utcnow()
+    now = datetime.datetime.now(datetime.timezone.utc)
     timestamp = now.isoformat().replace(":", "-").replace(".", "-")
     s3_keys = [
         f"lambda-deployer/{target.kind.value}/{name}/{timestamp}.zip"
