@@ -1,10 +1,10 @@
 name: CI
 
-on:
+on: # yamllint disable-line
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   black-lint:
@@ -100,9 +100,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Download hadolint
+      # yamllint disable rule:line-length
       run: |
-        wget --quiet --output-document=./hadolint https://github.com/hadolint/hadolint/releases/download/v2.6.0/hadolint-Linux-x86_64
+        wget \
+          --quiet \
+          --output-document=./hadolint \
+          https://github.com/hadolint/hadolint/releases/download/v2.14.0/hadolint-Linux-x86_64
         chmod +x ./hadolint
+      # yamllint enable rule:line-length
     - name: Run hadolint
       run: ./hadolint Dockerfile
 
@@ -122,4 +127,8 @@ jobs:
       run: poetry install -E shell
     - name: Run pytest
       run: |
-        poetry run py.test --verbose --cov-report term-missing --cov-report xml --cov=. .
+        poetry run py.test \
+          -verbose \
+          --cov-report term-missing \
+          --cov-report xml \
+          --cov=. .
