@@ -13,11 +13,11 @@ MY_DIRECTORY = pathlib.Path(__file__).parent.absolute()
 PROJECT_DATA = toml.loads(MY_DIRECTORY.joinpath("pyproject.toml").read_text())
 VERSION = PROJECT_DATA["tool"]["poetry"]["version"]
 BUILDS = {
-    "3.11": {"build_args": {"PYTHON_VERSION": "3.11"}},
-    "3.12": {"build_args": {"PYTHON_VERSION": "3.12"}},
-    "3.13": {"build_args": {"PYTHON_VERSION": "3.13"}},
+    "3.11": {"build_args": {"AWS_LAMBDA_TAG": "3.11"}},
+    "3.12": {"build_args": {"AWS_LAMBDA_TAG": "3.12"}},
+    "3.13": {"build_args": {"AWS_LAMBDA_TAG": "3.13"}},
     # Starting with 3.14 there are no version tags without including the architecture.
-    "3.14": {"build_args": {"PYTHON_VERSION": "3.14-x86_64"}},
+    "3.14": {"build_args": {"AWS_LAMBDA_TAG": "3.14-x86_64"}},
 }
 
 

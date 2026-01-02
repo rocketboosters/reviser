@@ -1,6 +1,6 @@
-ARG PYTHON_VERSION
+ARG AWS_LAMBDA_TAG
 
-FROM amazon/aws-lambda-python:${PYTHON_VERSION}
+FROM amazon/aws-lambda-python:${AWS_LAMBDA_TAG}
 
 COPY pyproject.toml /application/pyproject.toml
 COPY README.md /application/README.md
@@ -11,9 +11,9 @@ ENV PATH="/root/.local/bin:/var/lang/pipx/venvs/poetry/bin:${PATH}"
 
 # hadolint ignore=DL3033
 RUN pip --no-cache-dir install poetry \
+ && poetry run pip install poetry-plugin-export \
  && poetry config virtualenvs.create false \
- && poetry install --extras shell --no-root \
- && poetry run pip install poetry-plugin-export
+ && poetry install --extras shell --no-root
 
 COPY reviser /application/reviser
 
