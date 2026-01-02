@@ -242,3 +242,4 @@ fabric.properties
 .lambda_package_cache/
 *.parquet
 build-images.sh
+MIGRATION.md
