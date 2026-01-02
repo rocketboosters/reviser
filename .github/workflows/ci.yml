@@ -128,7 +128,7 @@ jobs:
     - name: Run pytest
       run: |
         poetry run py.test \
-          -verbose \
+          --verbose \
           --cov-report term-missing \
           --cov-report xml \
           --cov=. .
