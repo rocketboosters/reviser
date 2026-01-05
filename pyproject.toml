@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "reviser"
-version = "0.4.9"
+version = "0.4.10"
 description = "AWS Lambda function/layer version deployment manager."
 authors = [
   "Scott Ernst <swernst@gmail.com>",
