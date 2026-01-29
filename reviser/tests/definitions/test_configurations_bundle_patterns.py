@@ -50,9 +50,7 @@ def test_bundle_default_file_matching():
     )
 
     paths = bundle.get_paths()
-    assert (
-        directory.joinpath("__init__.py") in paths
-    ), """
+    assert directory.joinpath("__init__.py") in paths, """
         Expected the reviser package directory to be
         included by default.
         """

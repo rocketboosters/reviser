@@ -37,9 +37,7 @@ def test_simple_scenario_prune():
         assert result.status == "PRUNED"
 
         expected = ["arn:aws:lambda:us-east-1:123:function:foo-function:2"]
-        assert (
-            result.info.get("foo-function") == expected
-        ), """
+        assert result.info.get("foo-function") == expected, """
             Expect version 2 to be deleted, but not version 1 because
             it has an alias attached to it.
             """
@@ -56,9 +54,7 @@ def test_simple_scenario_prune_relative():
             "arn:aws:lambda:us-east-1:123:function:foo-function:2",
             "arn:aws:lambda:us-east-1:123:function:foo-function:4",
         ]
-        assert (
-            result.info.get("foo-function") == expected
-        ), """
+        assert result.info.get("foo-function") == expected, """
             Expect version 2 and 4 to be deleted, but not version 3 because
             it has an alias attached to it.
             """
@@ -94,9 +90,7 @@ def test_simple_scenario_reload():
         before_target = before.configuration.targets[0]
         after: definitions.Context = result.data["after"]
         after_target = after.configuration.targets[0]
-        assert (
-            before_target.uuid == after_target.uuid
-        ), """
+        assert before_target.uuid == after_target.uuid, """
             Expect target uuids to be preserved during reload because
             no significant changes between target reloads were found.
             """

@@ -3,7 +3,6 @@
 import re
 import typing
 
-
 PACKAGE_NAME_REGEX = re.compile(r"^(?P<name>[^><=]+)")
 
 

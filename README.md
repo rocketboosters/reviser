@@ -49,6 +49,7 @@ or scripted shell of commands.
       - [targets[N].dependencies.skip](#targetsndependenciesskip)
       - [targets[N].dependencies(kind="pipper")](#targetsndependencieskindpipper)
       - [targets[N].dependencies(kind="poetry")](#targetsndependencieskindpoetry)
+      - [targets[N].dependencies(kind="uv")](#targetsndependencieskinduv)
       - [targets[N].bundle](#targetsnbundle)
          - [targets[N].bundle.include(s)](#targetsnbundleincludes)
          - [targets[N].bundle.exclude(s)](#targetsnbundleexcludes)
@@ -644,6 +645,22 @@ targets:
   name: foo
   dependencies:
   - kind: poetry
+    extras:
+    - group
+```
+
+### targets[N].dependencies(kind="uv")
+
+UV repositories have additional `extras` configuration that can be used to
+specify optional dependency groups to install in the lambda. This can be useful
+to separate dependencies by function.
+
+```yaml
+targets:
+- kind: layer
+  name: foo
+  dependencies:
+  - kind: uv
     extras:
     - group
 ```

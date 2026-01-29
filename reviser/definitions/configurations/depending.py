@@ -302,3 +302,86 @@ class PoetryDependency(Dependency):
             "kind": self.kind.value,
             "packages": self.get_package_names(),
         }
+
+
+def _find_uv_executable() -> str:
+    """Find the uv executable path, or raise an error if not found."""
+    result = subprocess.run(
+        ["uv", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    if result.returncode == 0:
+        return "uv"
+
+    directories = [
+        pathlib.Path("~/.local/bin").expanduser(),
+        pathlib.Path(sys.prefix).joinpath("bin"),
+        pathlib.Path(sys.executable).parent,
+    ]
+    directories = [d for d in directories if d.exists()]
+
+    finder = (
+        str(p)
+        for d in directories
+        for p in d.iterdir()
+        if p.name == "uv" or p.name.startswith("uv.")
+    )
+    try:
+        return next(finder)
+    except StopIteration:
+        raise RuntimeError(
+            "Unable to find uv installation in current Python environment."
+        )
+
+
+@dataclasses.dataclass(frozen=True)
+class UvDependency(Dependency):
+    """UV package dependency data structure."""
+
+    @property
+    def extras(self) -> typing.List[str]:
+        """List extra packages to install."""
+        return self.get_as_list("extras", default=self.get_as_list("extra")) or []
+
+    def get_package_names(self) -> typing.List[str]:
+        """List collected package names to install from various definition sources."""
+        packages = self.packages.copy()
+        if not self.file:
+            return packages
+
+        executable = _find_uv_executable()
+
+        # Ensure that a lock file exists and is up-to-date before proceeding.
+        command = [executable, "lock"]
+        subprocess.run(command, stdout=subprocess.PIPE, check=True)
+
+        command = [
+            executable,
+            "pip",
+            "--format=requirements.txt",
+            "--no-hashes",
+            "--no-annotate",
+        ]
+
+        for group in self.extras:
+            command.append(f"--extras={group}")
+
+        result = subprocess.run(command, stdout=subprocess.PIPE, check=True)
+
+        packages += [
+            item
+            for line in result.stdout.decode().strip().split("\n")
+            if (item := line.split(";")[0].strip())
+        ]
+
+        return [
+            p
+            for p in packages
+            if utils.extract_package_name(p) not in self.skip_packages
+        ]
+
+    def serialize(self) -> dict:
+        """Serialize the object for output representation."""
+        return {
+            "kind": self.kind.value,
+            "packages": self.get_package_names(),
+        }

@@ -156,13 +156,11 @@ def parse() -> argparse.Namespace:
     )
     parser.add_argument(
         "--script-path",
-        help=textwrap.dedent(
-            """
+        help=textwrap.dedent("""
             When specified, the commands will be written to a script instead of
             executed. This is used for multi-stage CI where Python execution and
             docker commands cannot be easily colocated.
-            """
-        ),
+            """),
     )
     return parser.parse_args()
 

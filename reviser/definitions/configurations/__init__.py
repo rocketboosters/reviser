@@ -6,12 +6,14 @@ import typing
 from reviser import utils
 from reviser.definitions import abstracts
 from reviser.definitions import enumerations
+
 from .bundling import Bundle  # noqa: F401
 from .depending import Dependency  # noqa: F401
 from .depending import DependencyGroup  # noqa: F401
 from .depending import PipDependency  # noqa: F401
 from .depending import PipperDependency  # noqa: F401
 from .depending import PoetryDependency  # noqa: F401
+from .depending import UvDependency  # noqa: F401
 from .enviromentals import EnvironmentVariable  # noqa: F401
 from .imaging import Image  # noqa: F401
 from .layering import AttachedLayer  # noqa: F401

@@ -1,9 +1,8 @@
 """Shared enumerations module."""
 
 import enum
-import typing
 import sys
-
+import typing
 
 RUNTIME_VERSION = f"{sys.version_info.major}.{sys.version_info.minor}"
 
@@ -21,6 +20,7 @@ class DependencyType(enum.Enum):
     PIP = "pip"
     PIPPER = "pipper"
     POETRY = "poetry"
+    UV = "uv"
 
 
 class DefaultFile(enum.Enum):
@@ -29,6 +29,7 @@ class DefaultFile(enum.Enum):
     PIP = "requirements.txt"
     PIPPER = "pipper.json"
     POETRY = "pyproject.toml"
+    UV = "pyproject.toml"
 
     @classmethod
     def from_dependency_type(
@@ -41,4 +42,5 @@ class DefaultFile(enum.Enum):
             DependencyType.PIP.value: DefaultFile.PIP,
             DependencyType.PIPPER.value: DefaultFile.PIPPER,
             DependencyType.POETRY.value: DefaultFile.POETRY,
+            DependencyType.UV.value: DefaultFile.UV,
         }.get(key, DefaultFile.PIP)

@@ -20,9 +20,7 @@ def test_single_layer_scenario_prune():
             "arn:aws:lambda:us-east-1:123:layer:foo-layer:1",
             "arn:aws:lambda:us-east-1:123:layer:foo-layer:2",
         ]
-        assert (
-            result.info.get("foo-layer") == expected
-        ), """
+        assert result.info.get("foo-layer") == expected, """
             Expect versions 1 and 2 to be deleted.
             """
 
