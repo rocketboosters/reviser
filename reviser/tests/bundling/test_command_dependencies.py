@@ -112,7 +112,7 @@ class TestPoetryCommandDependency:
             # Verify subprocess.run was called with correct command
             expected_command = ["/usr/local/bin/poetry", "install", "--no-dev"]
             mock_subprocess_run.assert_called_once_with(
-                expected_command, stdout=ANY, check=True
+                expected_command, stdout=ANY, check=True, cwd=directory
             )
 
     @patch("reviser.definitions.configurations.depending._find_poetry_executable")
@@ -219,7 +219,7 @@ class TestUvCommandDependency:
                 "requirements.txt",
             ]
             mock_subprocess_run.assert_called_once_with(
-                expected_command, stdout=ANY, check=True
+                expected_command, stdout=ANY, check=True, cwd=directory
             )
 
     @patch("reviser.definitions.configurations.depending._find_uv_executable")
@@ -494,3 +494,210 @@ class TestInstallDependenciesRouting:
         command_args = mock_subprocess_run.call_args[0][0]
         assert command_args[0] == "/usr/local/bin/uv"
         assert "sync" in command_args
+
+
+class TestVenvCopyFunctionality:
+    """Tests for copying packages from .venv to bundle site-packages."""
+
+    @patch("reviser.definitions.configurations.depending._find_uv_executable")
+    @patch("subprocess.run")
+    def test_install_command_copies_from_venv(
+        self, mock_subprocess_run, mock_find_uv, mock_connection
+    ):
+        """Should copy packages from .venv/lib/python*/site-packages to target."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            directory = pathlib.Path(tmpdir)
+            mock_find_uv.return_value = "/usr/local/bin/uv"
+
+            # Create .venv structure
+            venv_site_packages = (
+                directory / ".venv" / "lib" / "python3.11" / "site-packages"
+            )
+            venv_site_packages.mkdir(parents=True)
+
+            # Create some mock packages in .venv
+            (venv_site_packages / "requests").mkdir()
+            (venv_site_packages / "requests" / "__init__.py").write_text("# requests")
+            (venv_site_packages / "pytest.py").write_text("# pytest")
+
+            # Set up dependency group
+            dep_group = MagicMock()
+            target_site_packages = directory / "target_site_packages"
+            target_site_packages.mkdir(parents=True)
+            dep_group.site_packages_directory = target_site_packages
+
+            uv_cmd_dep = definitions.UvCommandDependency(
+                directory=directory,
+                data={"kind": "uv_command", "args": ["sync"]},
+                connection=mock_connection,
+                group=dep_group,
+            )
+
+            # Install dependencies
+            _installer._install_command(uv_cmd_dep)
+
+            # Verify packages were copied
+            assert (target_site_packages / "requests").exists()
+            assert (target_site_packages / "requests" / "__init__.py").exists()
+            assert (target_site_packages / "pytest.py").exists()
+
+    @patch("reviser.definitions.configurations.depending._find_uv_executable")
+    @patch("subprocess.run")
+    def test_install_command_handles_missing_venv(
+        self, mock_subprocess_run, mock_find_uv, mock_connection, capsys
+    ):
+        """Should handle missing .venv directory gracefully."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            directory = pathlib.Path(tmpdir)
+            mock_find_uv.return_value = "/usr/local/bin/uv"
+
+            # No .venv directory created
+
+            dep_group = MagicMock()
+            target_site_packages = directory / "target_site_packages"
+            target_site_packages.mkdir(parents=True)
+            dep_group.site_packages_directory = target_site_packages
+
+            uv_cmd_dep = definitions.UvCommandDependency(
+                directory=directory,
+                data={"kind": "uv_command", "args": ["sync"]},
+                connection=mock_connection,
+                group=dep_group,
+            )
+
+            # Install dependencies
+            _installer._install_command(uv_cmd_dep)
+
+            # Verify warning was printed
+            captured = capsys.readouterr()
+            assert "[WARNING]" in captured.out
+            assert ".venv directory not found" in captured.out
+
+    @patch("reviser.definitions.configurations.depending._find_uv_executable")
+    @patch("subprocess.run")
+    def test_install_command_handles_missing_site_packages(
+        self, mock_subprocess_run, mock_find_uv, mock_connection, capsys
+    ):
+        """Should handle missing site-packages directory gracefully."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            directory = pathlib.Path(tmpdir)
+            mock_find_uv.return_value = "/usr/local/bin/uv"
+
+            # Create .venv but no lib directory
+            (directory / ".venv").mkdir()
+
+            dep_group = MagicMock()
+            target_site_packages = directory / "target_site_packages"
+            target_site_packages.mkdir(parents=True)
+            dep_group.site_packages_directory = target_site_packages
+
+            uv_cmd_dep = definitions.UvCommandDependency(
+                directory=directory,
+                data={"kind": "uv_command", "args": ["sync"]},
+                connection=mock_connection,
+                group=dep_group,
+            )
+
+            # Install dependencies
+            _installer._install_command(uv_cmd_dep)
+
+            # Verify warning was printed
+            captured = capsys.readouterr()
+            assert "[WARNING]" in captured.out
+            assert "lib directory not found" in captured.out
+
+    @patch("reviser.definitions.configurations.depending._find_uv_executable")
+    @patch("subprocess.run")
+    def test_execute_command_runs_in_correct_directory(
+        self, mock_subprocess_run, mock_find_uv, mock_connection
+    ):
+        """Should execute command with cwd set to dependency directory."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            directory = pathlib.Path(tmpdir)
+            mock_find_uv.return_value = "/usr/local/bin/uv"
+
+            dep_group = MagicMock()
+            dep_group.site_packages_directory = directory / "site_packages"
+
+            uv_cmd_dep = definitions.UvCommandDependency(
+                directory=directory,
+                data={"kind": "uv_command", "args": ["sync"]},
+                connection=mock_connection,
+                group=dep_group,
+            )
+
+            # Execute command
+            uv_cmd_dep.execute_command()
+
+            # Verify subprocess.run was called with correct cwd
+            mock_subprocess_run.assert_called_once()
+            call_kwargs = mock_subprocess_run.call_args[1]
+            assert call_kwargs.get("cwd") == directory
+
+    @patch("reviser.definitions.configurations.depending._find_poetry_executable")
+    @patch("subprocess.run")
+    def test_poetry_execute_command_runs_in_correct_directory(
+        self, mock_subprocess_run, mock_find_poetry, mock_connection
+    ):
+        """Should execute poetry command with cwd set to dependency directory."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            directory = pathlib.Path(tmpdir)
+            mock_find_poetry.return_value = "/usr/local/bin/poetry"
+
+            dep_group = MagicMock()
+            dep_group.site_packages_directory = directory / "site_packages"
+
+            poetry_cmd_dep = definitions.PoetryCommandDependency(
+                directory=directory,
+                data={"kind": "poetry_command", "args": ["install"]},
+                connection=mock_connection,
+                group=dep_group,
+            )
+
+            # Execute command
+            poetry_cmd_dep.execute_command()
+
+            # Verify subprocess.run was called with correct cwd
+            mock_subprocess_run.assert_called_once()
+            call_kwargs = mock_subprocess_run.call_args[1]
+            assert call_kwargs.get("cwd") == directory
+
+    @patch("reviser.definitions.configurations.depending._find_poetry_executable")
+    @patch("subprocess.run")
+    def test_poetry_command_copies_from_venv(
+        self, mock_subprocess_run, mock_find_poetry, mock_connection
+    ):
+        """Should copy packages from .venv for poetry_command too."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            directory = pathlib.Path(tmpdir)
+            mock_find_poetry.return_value = "/usr/local/bin/poetry"
+
+            # Create .venv structure
+            venv_site_packages = (
+                directory / ".venv" / "lib" / "python3.11" / "site-packages"
+            )
+            venv_site_packages.mkdir(parents=True)
+
+            # Create some mock packages in .venv
+            (venv_site_packages / "django").mkdir()
+            (venv_site_packages / "django" / "__init__.py").write_text("# django")
+
+            # Set up dependency group
+            dep_group = MagicMock()
+            target_site_packages = directory / "target_site_packages"
+            target_site_packages.mkdir(parents=True)
+            dep_group.site_packages_directory = target_site_packages
+
+            poetry_cmd_dep = definitions.PoetryCommandDependency(
+                directory=directory,
+                data={"kind": "poetry_command", "args": ["install"]},
+                connection=mock_connection,
+                group=dep_group,
+            )
+
+            # Install dependencies
+            _installer._install_command(poetry_cmd_dep)
+
+            # Verify packages were copied
+            assert (target_site_packages / "django").exists()
+            assert (target_site_packages / "django" / "__init__.py").exists()

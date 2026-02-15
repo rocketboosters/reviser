@@ -75,7 +75,60 @@ def _install_uv(dependency: "definitions.UvDependency"):
 def _install_command(
     dependency: "definitions.UvCommandDependency | definitions.PoetryCommandDependency",
 ):
+    """Install dependencies via command and copy from .venv to target site packages."""
     dependency.execute_command()
+
+    # Find the .venv site-packages directory
+    venv_dir = dependency.directory.joinpath(".venv")
+    if not venv_dir.exists():
+        print(
+            f"\n[WARNING] .venv directory not found at {venv_dir}. "
+            "Skipping package copy."
+        )
+        return
+
+    # Find the site-packages directory within .venv
+    # Structure is typically .venv/lib/python3.X/site-packages
+    lib_dir = venv_dir.joinpath("lib")
+    if not lib_dir.exists():
+        print(
+            f"\n[WARNING] lib directory not found in .venv at {lib_dir}. "
+            "Skipping package copy."
+        )
+        return
+
+    site_packages_dirs = list(lib_dir.glob("python*/site-packages"))
+    if not site_packages_dirs:
+        print(
+            f"\n[WARNING] No site-packages directory found in {lib_dir}. "
+            "Skipping package copy."
+        )
+        return
+
+    source_site_packages = site_packages_dirs[0]
+    target_site_packages = dependency.group.site_packages_directory
+
+    print(
+        f"\n[COPYING] Packages from {source_site_packages} "
+        f"to {target_site_packages}"
+    )
+
+    # Ensure target directory exists
+    target_site_packages.mkdir(parents=True, exist_ok=True)
+
+    # Copy all packages from .venv site-packages to target site-packages
+    for item in source_site_packages.iterdir():
+        source_item = source_site_packages.joinpath(item.name)
+        target_item = target_site_packages.joinpath(item.name)
+
+        if source_item.is_dir():
+            if target_item.exists():
+                shutil.rmtree(target_item)
+            shutil.copytree(source_item, target_item)
+        else:
+            shutil.copy2(source_item, target_item)
+
+    print("\n[COPIED] Successfully copied packages from .venv to bundle directory")
 
 
 def _install_pip(dependency: "definitions.PipDependency"):

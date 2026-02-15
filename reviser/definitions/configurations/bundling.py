@@ -151,7 +151,16 @@ class Bundle(abstracts.Specification):
             excludes = [excludes]
 
         # Exclude Python and OS cache files by default.
-        excludes += ["**/__pycache__", "**/*.pyc", "**/.DS_Store"]
+        # Also exclude virtual environment directories to prevent bloating bundles.
+        excludes += [
+            "**/__pycache__",
+            "**/*.pyc",
+            "**/.DS_Store",
+            ".venv",
+            ".venv/**",
+            "venv",
+            "venv/**",
+        ]
 
         return set([self.directory.joinpath(item).absolute() for item in excludes])
 

@@ -419,7 +419,7 @@ class UvCommandDependency(Dependency):
         """Execute installation command specified in the configuration."""
         executable = _find_uv_executable()
         command = [executable, *self.command_args]
-        subprocess.run(command, stdout=subprocess.PIPE, check=True)
+        subprocess.run(command, stdout=subprocess.PIPE, check=True, cwd=self.directory)
 
     def serialize(self) -> dict:
         """Serialize the object for output representation."""
@@ -445,7 +445,7 @@ class PoetryCommandDependency(Dependency):
         """Execute installation command specified in the configuration."""
         executable = _find_poetry_executable()
         command = [executable, *self.command_args]
-        subprocess.run(command, stdout=subprocess.PIPE, check=True)
+        subprocess.run(command, stdout=subprocess.PIPE, check=True, cwd=self.directory)
 
     def serialize(self) -> dict:
         """Serialize the object for output representation."""
