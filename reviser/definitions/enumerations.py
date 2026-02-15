@@ -20,7 +20,9 @@ class DependencyType(enum.Enum):
     PIP = "pip"
     PIPPER = "pipper"
     POETRY = "poetry"
+    POETRY_COMMAND = "poetry_command"
     UV = "uv"
+    UV_COMMAND = "uv_command"
 
 
 class DefaultFile(enum.Enum):

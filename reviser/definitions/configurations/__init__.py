@@ -12,7 +12,9 @@ from .depending import Dependency  # noqa: F401
 from .depending import DependencyGroup  # noqa: F401
 from .depending import PipDependency  # noqa: F401
 from .depending import PipperDependency  # noqa: F401
+from .depending import PoetryCommandDependency  # noqa: F401
 from .depending import PoetryDependency  # noqa: F401
+from .depending import UvCommandDependency  # noqa: F401
 from .depending import UvDependency  # noqa: F401
 from .enviromentals import EnvironmentVariable  # noqa: F401
 from .imaging import Image  # noqa: F401

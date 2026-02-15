@@ -72,6 +72,12 @@ def _install_uv(dependency: "definitions.UvDependency"):
         print(f'\n[INSTALLED]: "{package}" uv package')
 
 
+def _install_command(
+    dependency: "definitions.UvCommandDependency | definitions.PoetryCommandDependency",
+):
+    dependency.execute_command()
+
+
 def _install_pip(dependency: "definitions.PipDependency"):
     """Install poetry dependencies in the target's site packages."""
     arguments = [f"{k}={v}" for k, v in dependency.arguments.items() if v is not None]
@@ -151,7 +157,9 @@ def install_dependencies(target: "definitions.Target"):
         definitions.DependencyType.PIPPER: _install_pipper,
         definitions.DependencyType.PIP: _install_pip,
         definitions.DependencyType.POETRY: _install_poetry,
+        definitions.DependencyType.POETRY_COMMAND: _install_command,
         definitions.DependencyType.UV: _install_uv,
+        definitions.DependencyType.UV_COMMAND: _install_command,
     }
 
     for dependency in target.dependencies.sources:

@@ -31,6 +31,9 @@ def parse_dependencies(
             dependency_types.PIP.value: PipDependency,
             dependency_types.PIPPER.value: PipperDependency,
             dependency_types.POETRY.value: PoetryDependency,
+            dependency_types.POETRY_COMMAND.value: PoetryCommandDependency,
+            dependency_types.UV.value: UvDependency,
+            dependency_types.UV_COMMAND.value: UvCommandDependency,
         },
     )
     for data in dependency_data:
@@ -83,6 +86,9 @@ class DependencyGroup(abstracts.Specification):
                 dependency_types.PIP.value: PipDependency,
                 dependency_types.PIPPER.value: PipperDependency,
                 dependency_types.POETRY.value: PoetryDependency,
+                dependency_types.POETRY_COMMAND.value: PoetryCommandDependency,
+                dependency_types.UV.value: UvDependency,
+                dependency_types.UV_COMMAND.value: UvCommandDependency,
             },
         )
         for data in self.get_as_list("sources") or []:
@@ -151,9 +157,18 @@ class Dependency(abstracts.Specification):
         """Gets arguments that should be passed during the installation process."""
         return self.get_first_as_dict(["arguments"], default={})
 
+    @property
+    def command_args(self) -> typing.List[str]:
+        """List command arguments for a command-based execution."""
+        return self.get_as_list("args") or []
+
     def get_package_names(self) -> typing.List[str]:
         """List package names to install from the various package sources."""
         return []
+
+    def execute_command(self):
+        """Execute installation command specified in the configuration."""
+        pass
 
 
 @dataclasses.dataclass(frozen=True)
@@ -384,4 +399,56 @@ class UvDependency(Dependency):
         return {
             "kind": self.kind.value,
             "packages": self.get_package_names(),
+        }
+
+
+@dataclasses.dataclass(frozen=True)
+class UvCommandDependency(Dependency):
+    """UV command-based package dependency data structure."""
+
+    @property
+    def extras(self) -> typing.List[str]:
+        """List extra packages to install."""
+        return []
+
+    def get_package_names(self) -> typing.List[str]:
+        """List collected package names to install from various definition sources."""
+        return []
+
+    def execute_command(self):
+        """Execute installation command specified in the configuration."""
+        executable = _find_uv_executable()
+        command = [executable, *self.command_args]
+        subprocess.run(command, stdout=subprocess.PIPE, check=True)
+
+    def serialize(self) -> dict:
+        """Serialize the object for output representation."""
+        return {
+            "kind": self.kind.value,
+        }
+
+
+@dataclasses.dataclass(frozen=True)
+class PoetryCommandDependency(Dependency):
+    """Poetry command-based package dependency data structure."""
+
+    @property
+    def extras(self) -> typing.List[str]:
+        """List extra packages to install."""
+        return []
+
+    def get_package_names(self) -> typing.List[str]:
+        """List collected package names to install from various definition sources."""
+        return []
+
+    def execute_command(self):
+        """Execute installation command specified in the configuration."""
+        executable = _find_poetry_executable()
+        command = [executable, *self.command_args]
+        subprocess.run(command, stdout=subprocess.PIPE, check=True)
+
+    def serialize(self) -> dict:
+        """Serialize the object for output representation."""
+        return {
+            "kind": self.kind.value,
         }

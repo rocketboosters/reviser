@@ -9,8 +9,10 @@ from .configurations import Dependency
 from .configurations import EnvironmentVariable
 from .configurations import PipDependency
 from .configurations import PipperDependency
+from .configurations import PoetryCommandDependency
 from .configurations import PoetryDependency
 from .configurations import Target
+from .configurations import UvCommandDependency
 from .configurations import UvDependency
 from .contexts import Context
 from .contexts import SelectedTargets
@@ -39,6 +41,7 @@ __all__ = [
     "LambdaLayerReference",
     "PipDependency",
     "PipperDependency",
+    "PoetryCommandDependency",
     "PoetryDependency",
     "PublishedLayer",
     "RUNTIME_VERSION",
@@ -47,5 +50,6 @@ __all__ = [
     "Specification",
     "Target",
     "TargetType",
+    "UvCommandDependency",
     "UvDependency",
 ]
