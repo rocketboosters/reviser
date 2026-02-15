@@ -323,9 +323,15 @@ class TestCommandDependenciesVsTraditional:
             # Should call subprocess.run instead
             mock_subprocess_run.assert_called_once()
 
+    @patch("reviser.definitions.configurations.depending._find_poetry_executable")
+    @patch("subprocess.run")
     @patch("reviser.bundling._installer._install_pip_package")
     def test_traditional_poetry_installs_packages_individually(
-        self, mock_install_pip_package, mock_connection
+        self,
+        mock_install_pip_package,
+        mock_subprocess_run,
+        mock_find_poetry,
+        mock_connection,
     ):
         """
         Should iterate over packages for traditional poetry type.
@@ -334,6 +340,7 @@ class TestCommandDependenciesVsTraditional:
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             directory = pathlib.Path(tmpdir)
+            mock_find_poetry.return_value = "/usr/local/bin/poetry"
 
             # Create a pyproject.toml file for poetry to read
             pyproject_toml = directory / "pyproject.toml"
@@ -367,10 +374,15 @@ class TestCommandDependenciesVsTraditional:
                 mock_install_pip_package.called or poetry_dep.get_package_names() == []
             )
 
+    @patch("reviser.definitions.configurations.depending._find_uv_executable")
     @patch("subprocess.run")
     @patch("reviser.bundling._installer._install_pip_package")
     def test_traditional_uv_installs_packages_individually(
-        self, mock_install_pip_package, mock_subprocess_run, mock_connection
+        self,
+        mock_install_pip_package,
+        mock_subprocess_run,
+        mock_find_uv,
+        mock_connection,
     ):
         """
         Should iterate over packages for traditional uv type.
@@ -379,6 +391,7 @@ class TestCommandDependenciesVsTraditional:
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             directory = pathlib.Path(tmpdir)
+            mock_find_uv.return_value = "/usr/local/bin/uv"
 
             # Create a pyproject.toml file for uv to read
             pyproject_toml = directory / "pyproject.toml"
