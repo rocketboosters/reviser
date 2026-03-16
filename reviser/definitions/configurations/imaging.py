@@ -6,6 +6,7 @@ import typing
 from reviser.definitions import abstracts
 from reviser.definitions import configurations
 from reviser.definitions import enumerations
+from reviser.definitions.configurations import versioning
 
 
 @dataclasses.dataclass(frozen=True)
@@ -26,7 +27,12 @@ class Image(abstracts.Specification):
         """Get the uri of the image to use in the lambda."""
         uri = self.get("uri")
         if isinstance(uri, dict):
-            return uri.get(region)
+            uri = uri.get(region)
+        if isinstance(uri, str):
+            package_version = versioning.get_package_version(
+                self.target.configuration.directory
+            )
+            return uri.format_map({"PACKAGE_VERSION": package_version})
         return uri
 
     @property

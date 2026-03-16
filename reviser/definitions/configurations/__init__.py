@@ -20,6 +20,7 @@ from .enviromentals import EnvironmentVariable  # noqa: F401
 from .imaging import Image  # noqa: F401
 from .layering import AttachedLayer  # noqa: F401
 from .targeting import Target  # noqa: F401
+from .versioning import get_package_version  # noqa: F401
 
 
 @dataclasses.dataclass(frozen=True)
