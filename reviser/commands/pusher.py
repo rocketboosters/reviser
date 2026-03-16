@@ -4,6 +4,7 @@ import argparse
 import typing
 
 from reviser import interactivity
+
 from ..commands import bundler
 from ..commands import deployer
 
@@ -23,6 +24,10 @@ def populate_subparser(parser: argparse.ArgumentParser):
 
 def run(ex: "interactivity.Execution") -> "interactivity.Execution":
     """Execute a bundle operation on the selected function/layer targets."""
+    selected = ex.shell.context.get_selected_targets(ex.shell.selection)
+    if all(t.image.configured for t in selected.targets):
+        print("[SKIPPED]: Bundling skipped; all selected targets are image-based.")
+        return deployer.run(ex)
     out = bundler.run(ex)
     if out.result.status != "BUNDLED":
         return out

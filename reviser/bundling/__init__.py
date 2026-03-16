@@ -8,6 +8,13 @@ from reviser import definitions
 from reviser.bundling import _installer
 
 
+class BundlingResult(typing.NamedTuple):
+    """Result returned by the create() function describing what was processed."""
+
+    bundled: typing.List["definitions.Target"]
+    skipped: typing.List["definitions.Target"]
+
+
 def _create_zip(target: "definitions.Target"):
     """
     Bundle together all source files into a single zip file.
@@ -104,8 +111,19 @@ def create(
     selected = context.get_selected_targets(selection)
 
     installed_shared_dependencies: typing.Set[str] = set([])
+    bundled: typing.List["definitions.Target"] = []
+    skipped: typing.List["definitions.Target"] = []
 
     for target in selected.targets:
+        if target.image.configured:
+            for name in target.names:
+                print(
+                    f"[SKIPPED]: {name} uses an image-based configuration;"
+                    " bundling is not required."
+                )
+            skipped.append(target)
+            continue
+
         target.bundle_directory.mkdir(exist_ok=True, parents=True)
 
         if _check_do_install(target, reinstall, installed_shared_dependencies):
@@ -126,5 +144,6 @@ def create(
             print(f"[COPIED]: {copy_path.source.relative_to(target.directory)}")
 
         _create_zip(target)
+        bundled.append(target)
 
-    return selected
+    return BundlingResult(bundled=bundled, skipped=skipped)

@@ -60,18 +60,23 @@ def _copy_to_output(
 
 def run(ex: "interactivity.Execution"):
     """Execute a bundle operation on the selected function/layer targets."""
-    bundled_targets = bundling.create(
+    result = bundling.create(
         context=ex.shell.context,
         selection=ex.shell.selection,
         reinstall=ex.args.get("reinstall", False),
     )
-    _copy_to_output(bundled_targets.targets, ex.args.get("output"))
+    _copy_to_output(result.bundled, ex.args.get("output"))
     print("\n\n")
     return ex.finalize(
         status="BUNDLED",
         message="Selected items have been bundled.",
         info={
-            "items": [n for t in bundled_targets.targets for n in t.names],
+            "items": [n for t in result.bundled for n in t.names],
+            **(
+                {"skipped": [n for t in result.skipped for n in t.names]}
+                if result.skipped
+                else {}
+            ),
         },
         echo=True,
     )
