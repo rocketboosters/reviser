@@ -20,7 +20,7 @@ def get_completions(
     completer: "interactivity.ShellCompleter",
 ) -> typing.List[str]:
     """Get shell auto-completes for this command."""
-    return ["--description", "--dry-run"]
+    return ["--description", "--dry-run", "--var"]
 
 
 def populate_subparser(parser: argparse.ArgumentParser):
@@ -41,6 +41,31 @@ def populate_subparser(parser: argparse.ArgumentParser):
         validate the deploy process without side effects.
         """,
     )
+    parser.add_argument(
+        "--var",
+        action="append",
+        dest="var",
+        metavar="KEY=VALUE",
+        help="""
+        Specify a KEY=VALUE substitution variable to be applied to
+        the image URI template at deploy time. For example,
+        --var=ENV=prod will replace {ENV} in the image URI with
+        'prod'. May be specified multiple times for multiple
+        variables. Custom variables override built-in ones such
+        as PACKAGE_VERSION.
+        """,
+    )
+
+
+def _parse_image_vars(
+    raw_vars: typing.Optional[typing.List[str]],
+) -> typing.Dict[str, str]:
+    """Parse a list of KEY=VALUE strings into a substitution dictionary."""
+    result = {}
+    for item in raw_vars or []:
+        key, _, value = item.partition("=")
+        result[key.strip()] = value
+    return result
 
 
 def run(ex: "interactivity.Execution"):
@@ -48,12 +73,14 @@ def run(ex: "interactivity.Execution"):
     description = string.Template(ex.args.get("description") or "").substitute(
         os.environ
     )
+    image_vars = _parse_image_vars(ex.args.get("var"))
     print("\n\n")
     deployed_targets = deploying.deploy(
         context=ex.shell.context,
         selection=ex.shell.selection,
         description=description,
         dry_run=ex.args.get("dry_run") or False,
+        image_vars=image_vars,
     )
     print("\n")
     return ex.finalize(
@@ -63,6 +90,7 @@ def run(ex: "interactivity.Execution"):
             "dry_run": ex.args.get("dry_run"),
             "items": [n for t in deployed_targets for n in t.names],
             "description": description,
+            "image_vars": image_vars,
         },
         echo=True,
     )

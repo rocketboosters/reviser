@@ -23,7 +23,11 @@ class Image(abstracts.Specification):
             and self.target.kind == enumerations.TargetType.FUNCTION
         )
 
-    def get_region_uri(self, region: str) -> typing.Optional[str]:
+    def get_region_uri(
+        self,
+        region: str,
+        image_vars: typing.Optional[typing.Dict[str, str]] = None,
+    ) -> typing.Optional[str]:
         """Get the uri of the image to use in the lambda."""
         uri = self.get("uri")
         if isinstance(uri, dict):
@@ -32,7 +36,15 @@ class Image(abstracts.Specification):
             package_version = versioning.get_package_version(
                 self.target.configuration.directory
             )
-            return uri.format_map({"PACKAGE_VERSION": package_version})
+            vars_map = {"PACKAGE_VERSION": package_version, **(image_vars or {})}
+            try:
+                return uri.format_map(vars_map)
+            except KeyError as error:
+                key = error.args[0]
+                raise ValueError(
+                    f"Image URI contains an unresolved placeholder {{{key}}};"
+                    f" supply it with --var={key}=<value>"
+                ) from error
         return uri
 
     @property

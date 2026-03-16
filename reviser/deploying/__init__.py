@@ -4,6 +4,7 @@ import time
 import typing
 
 from reviser import definitions
+
 from ..deploying import publisher
 from ..deploying import uploader
 
@@ -13,6 +14,7 @@ def deploy_target(
     description: typing.Optional[str] = None,
     published_layers: typing.Optional[typing.List["definitions.PublishedLayer"]] = None,
     dry_run: bool = False,
+    image_vars: typing.Optional[typing.Dict[str, str]] = None,
 ) -> typing.List["definitions.PublishedLayer"]:
     """
     Deploy the bundled ZIP file to S3 for access by Lambda functions.
@@ -29,6 +31,8 @@ def deploy_target(
     :param dry_run:
         Whether or not this is executing as a dry-run command that will echo the results
         without actually carrying out the update.
+    :param image_vars:
+        Optional dictionary of substitution variables to apply to image URI templates.
     """
     s3_keys = []
     if not target.image.configured:
@@ -54,6 +58,7 @@ def deploy_target(
         published_layers=published_layers or [],
         description=description,
         dry_run=dry_run,
+        image_vars=image_vars or {},
     )
     return []
 
@@ -63,11 +68,15 @@ def deploy(
     selection: "definitions.Selection",
     description: typing.Optional[str] = None,
     dry_run: bool = False,
+    image_vars: typing.Optional[typing.Dict[str, str]] = None,
 ) -> typing.List["definitions.Target"]:
     """
     Execute the deploy operation on the context's configuration.
 
     This execution is filtered to targets by the specified selection argument value.
+
+    :param image_vars:
+        Optional dictionary of substitution variables to apply to image URI templates.
     """
     selected = context.get_selected_targets(selection)
 
@@ -80,6 +89,7 @@ def deploy(
             description=description,
             published_layers=None,
             dry_run=dry_run,
+            image_vars=image_vars,
         )
 
     for target in selected.function_targets:
@@ -88,6 +98,7 @@ def deploy(
             description=description,
             published_layers=published_layers,
             dry_run=dry_run,
+            image_vars=image_vars,
         )
 
     return selected.targets

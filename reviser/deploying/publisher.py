@@ -5,6 +5,7 @@ import typing
 from botocore.client import BaseClient
 
 from reviser import definitions
+
 from ..deploying import updater
 
 
@@ -88,12 +89,58 @@ def _publish_function_version(
     )
 
 
+def _publish_function_name(
+    client: BaseClient,
+    name: str,
+    s3_key: typing.Optional[str],
+    image: typing.Optional[str],
+    target: "definitions.Target",
+    published_layers: typing.List["definitions.PublishedLayer"],
+    description: str,
+    dry_run: bool,
+):
+    """Publish one named function within a target."""
+    print(f"[PUBLISHING]: Deploying update to {name} $LATEST")
+    response = None
+    if not dry_run:
+        code_args = (
+            typing.cast(typing.Dict[str, str], {"ImageUri": image})
+            if image
+            else typing.cast(
+                typing.Dict[str, str], {"S3Bucket": target.bucket, "S3Key": s3_key}
+            )
+        )
+        response = client.update_function_code(
+            FunctionName=name, Publish=False, **code_args
+        )
+
+    _update_function_configuration(
+        client=client,
+        function_name=name,
+        target=target,
+        published_layers=published_layers,
+        dry_run=dry_run,
+    )
+
+    print("[PUBLISHING]: Publishing new version")
+    if response and not dry_run:
+        response = _publish_function_version(
+            client=client,
+            function_name=response["FunctionName"],
+            code_sha_256=response["CodeSha256"],
+            description=description,
+        )
+        print("[PUBLISHED]: Function {} ({})".format(name, response["Version"]))
+        print("  - Version:", response["FunctionArn"])
+
+
 def publish_function(
     target: "definitions.Target",
     s3_keys: typing.Optional[typing.List[str]] = None,
     published_layers: typing.Optional[typing.List["definitions.PublishedLayer"]] = None,
     description: typing.Optional[str] = None,
     dry_run: bool = False,
+    image_vars: typing.Optional[typing.Dict[str, str]] = None,
 ):
     """
     Publish an updated version of the lambda function.
@@ -111,51 +158,24 @@ def publish_function(
         A description of the lambda function version.
     :param dry_run:
         Whether to actually perform the action.
+    :param image_vars:
+        Optional dictionary of substitution variables to apply to image URI templates.
     """
     s3_keys = s3_keys or []
     published_layers = published_layers or []
     client = target.client("lambda")
+    image = target.image.get_region_uri(target.aws_region, image_vars or {})
     for i, name in enumerate(target.names):
-        print(f"[PUBLISHING]: Deploying update to {name} $LATEST")
-        response = None
-        s3_key = s3_keys[i] if len(s3_keys) > i else None
-        image = target.image.get_region_uri(target.aws_region)
-
-        if not dry_run:
-            code_args = (
-                typing.cast(typing.Dict[str, str], {"ImageUri": image})
-                if image
-                else typing.cast(
-                    typing.Dict[str, str], {"S3Bucket": target.bucket, "S3Key": s3_key}
-                )
-            )
-            response = client.update_function_code(
-                FunctionName=name, Publish=False, **code_args
-            )
-
-        _update_function_configuration(
+        _publish_function_name(
             client=client,
-            function_name=name,
+            name=name,
+            s3_key=s3_keys[i] if len(s3_keys) > i else None,
+            image=image,
             target=target,
             published_layers=published_layers,
+            description=description or "",
             dry_run=dry_run,
         )
-
-        print("[PUBLISHING]: Publishing new version")
-        if response and not dry_run:
-            response = _publish_function_version(
-                client=client,
-                function_name=response["FunctionName"],
-                code_sha_256=response["CodeSha256"],
-                description=description or "",
-            )
-            print(
-                "[PUBLISHED]: Function {} ({})".format(
-                    name,
-                    response["Version"],
-                )
-            )
-            print("  - Version:", response["FunctionArn"])
 
     print("[DEPLOYED]: Lambda function code has been deployed\n")
 

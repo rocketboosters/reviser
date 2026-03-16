@@ -109,3 +109,59 @@ def test_version_substitution_region_dict(tmp_path: pathlib.Path):
         image.get_region_uri("us-west-2")
         == "222.dkr.ecr.us-west-2.amazonaws.com/repo:3.1.4"
     )
+
+
+def test_custom_var_substitution(tmp_path: pathlib.Path):
+    """Custom --var variables should be substituted into the URI."""
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nversion = "1.0.0"\n', encoding="utf-8"
+    )
+    image = _make_image(
+        tmp_path,
+        "123456.dkr.ecr.us-east-1.amazonaws.com/foo:bar-{ENV}-{PACKAGE_VERSION}",
+    )
+    result = image.get_region_uri("us-east-1", {"ENV": "test"})
+    assert result == "123456.dkr.ecr.us-east-1.amazonaws.com/foo:bar-test-1.0.0"
+
+
+def test_custom_var_overrides_package_version(tmp_path: pathlib.Path):
+    """A custom --var=PACKAGE_VERSION value should override the auto-detected one."""
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nversion = "1.0.0"\n', encoding="utf-8"
+    )
+    image = _make_image(
+        tmp_path,
+        "123456.dkr.ecr.us-east-1.amazonaws.com/repo:{PACKAGE_VERSION}",
+    )
+    result = image.get_region_uri("us-east-1", {"PACKAGE_VERSION": "2.0.0"})
+    assert result == "123456.dkr.ecr.us-east-1.amazonaws.com/repo:2.0.0"
+
+
+def test_missing_var_raises_value_error(tmp_path: pathlib.Path):
+    """A URI placeholder with no matching var should raise a descriptive ValueError."""
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nversion = "1.0.0"\n', encoding="utf-8"
+    )
+    image = _make_image(
+        tmp_path,
+        "123456.dkr.ecr.us-east-1.amazonaws.com/foo:{ENV}-{PACKAGE_VERSION}",
+    )
+    try:
+        image.get_region_uri("us-east-1")
+        assert False, "Expected ValueError"
+    except ValueError as error:
+        assert "ENV" in str(error)
+        assert "--var=ENV=<value>" in str(error)
+
+
+def test_multiple_custom_vars(tmp_path: pathlib.Path):
+    """Multiple custom vars should all be substituted."""
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nversion = "3.0.0"\n', encoding="utf-8"
+    )
+    image = _make_image(
+        tmp_path,
+        "123456.dkr.ecr.us-east-1.amazonaws.com/{REPO}:{ENV}-{PACKAGE_VERSION}",
+    )
+    result = image.get_region_uri("us-east-1", {"REPO": "myapp", "ENV": "prod"})
+    assert result == "123456.dkr.ecr.us-east-1.amazonaws.com/myapp:prod-3.0.0"
